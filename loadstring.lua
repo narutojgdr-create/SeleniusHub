@@ -361,6 +361,23 @@ local function destroyOldInstance(inst)
 	end)
 end
 
+-- Se o Hub já estiver ativo, não recria (evita abrir/loading duplicado quando o loadstring roda 2x).
+do
+	local existing = gvGet("SeleniusHubInstance") or rawget(_G, "SeleniusHubInstance")
+	if existing ~= nil then
+		local okVisible = pcall(function()
+			if type(existing.SetVisible) == "function" then
+				existing:SetVisible(true, true)
+			end
+		end)
+		gvSet("SeleniusHubInstance", existing)
+		rawset(_G, "SeleniusHubInstance", existing)
+		if okVisible then
+			return existing
+		end
+	end
+end
+
 -- Alguns executores podem divergir entre _G e getgenv(); destruímos em ambos.
 destroyOldInstance(gvGet("SeleniusHubInstance"))
 destroyOldInstance(rawget(_G, "SeleniusHubInstance"))
