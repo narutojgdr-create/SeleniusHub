@@ -32,6 +32,13 @@ function Lifecycle.CreateLoadingScreen(hub)
 	local Theme = hub.ThemeManager:GetTheme()
 	local secureParent = Assets.GetSecureParent()
 
+	-- Hub deve ficar escondido enquanto o loading está na tela.
+	pcall(function()
+		if hub and type(hub.SetVisible) == "function" then
+			hub:SetVisible(false, false)
+		end
+	end)
+
 	-- Evita loading duplicado
 	if hub and hub.__SeleniusLoadingGui then
 		destroyGuiSafe(hub.__SeleniusLoadingGui)
@@ -120,7 +127,7 @@ function Lifecycle.CreateLoadingScreen(hub)
 	percentLabel.Parent = main
 
 	local openBtn = Instance.new("TextButton")
-	openBtn.BackgroundColor3 = Theme.Button
+	openBtn.BackgroundColor3 = Theme.ButtonHover
 	openBtn.Size = UDim2.new(0, 130, 0, 32)
 	openBtn.Position = UDim2.new(1, -150, 1, -50)
 	openBtn.Font = Enum.Font.GothamMedium
@@ -132,10 +139,11 @@ function Lifecycle.CreateLoadingScreen(hub)
 	openBtn.Parent = main
 	openBtn.BorderSizePixel = 0
 	InstanceUtil.AddCorner(openBtn, 6)
+	InstanceUtil.AddStroke(openBtn, Theme.Stroke, 1, 0.4)
 
 	InstanceUtil.Tween(mainScale, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1 })
 
-	-- Loading agora roda DEPOIS do hub abrir, enquanto o hub finaliza a inicialização.
+	-- Loading roda ANTES do hub aparecer; hub só aparece quando o usuário clicar no botão.
 	local done = false
 	task.spawn(function()
 		local ok = pcall(function()
@@ -173,26 +181,26 @@ function Lifecycle.CreateLoadingScreen(hub)
 		-- Finaliza 100%
 		barFill.Size = UDim2.new(1, 0, 1, 0)
 		percentLabel.Text = "100%"
-		task.wait(0.12)
-
-		openBtn.Visible = false
-		InstanceUtil.Tween(mainScale, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.In), { Scale = 0 })
-		task.wait(0.35)
-		if gui and gui.Parent then
-			gui:Destroy()
-		end
+		openBtn.Visible = true
 	end)
 
 	openBtn.MouseEnter:Connect(function()
 		InstanceUtil.Tween(openBtn, Defaults.Tween.AnimConfig, { BackgroundColor3 = Theme.ButtonHover })
 	end)
 	openBtn.MouseLeave:Connect(function()
-		InstanceUtil.Tween(openBtn, Defaults.Tween.AnimConfig, { BackgroundColor3 = Theme.Button })
+		InstanceUtil.Tween(openBtn, Defaults.Tween.AnimConfig, { BackgroundColor3 = Theme.ButtonHover })
 	end)
 	openBtn.MouseButton1Click:Connect(function()
+		pcall(function()
+			if hub and type(hub.IsVisible) == "function" and type(hub.SetVisible) == "function" then
+				if not hub:IsVisible() then
+					hub:SetVisible(true, true)
+				end
+			end
+		end)
 		InstanceUtil.Tween(mainScale, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.In), { Scale = 0 })
 		task.wait(0.4)
-		gui:Destroy()
+		destroyGuiSafe(gui)
 	end)
 end
 
@@ -354,10 +362,12 @@ function Lifecycle.CreateKeySystem(hub)
 			closeTween.Completed:Wait()
 			gui:Destroy()
 
-			-- Mostra o hub IMEDIATAMENTE e faz o carregamento pesado no Loading.
-			if hub and type(hub.IsVisible) == "function" and (not hub:IsVisible()) then
-				hub:SetVisible(true, true)
-			end
+			-- Hub deve aparecer APENAS depois do botão no Loading.
+			pcall(function()
+				if hub and type(hub.SetVisible) == "function" then
+					hub:SetVisible(false, false)
+				end
+			end)
 			Lifecycle.CreateLoadingScreen(hub)
 		else
 			statusText.TextColor3 = Theme.Error
