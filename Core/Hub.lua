@@ -39,8 +39,26 @@ local Components = {
 local Hub = {}
 Hub.__index = Hub
 
+-- [V2.0] Version identifier
+Hub.Version = "2.0"
+
 function Hub.new()
+	-- [V2.0] Single Instance Protection
+	if getgenv().SeleniusHubInstance then
+		local old = getgenv().SeleniusHubInstance
+		if old and old.ShowWarning then
+			task.spawn(function()
+				old:ShowWarning("Hub already opened!", "warn")
+			end)
+		end
+		if old and old.UI and old.UI.MainFrame then
+			old.UI.MainFrame.Visible = true
+		end
+		return old
+	end
+
 	local self = setmetatable({}, Hub)
+	getgenv().SeleniusHubInstance = self
 
 	self.Connections = {}
 	self.Pages = {}

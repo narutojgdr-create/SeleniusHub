@@ -53,27 +53,27 @@ function Slider.Create(ctx, parent, position, localeKey, minValue, maxValue, def
 
 	local barBg = ctx.instanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.IndicatorOff,
-		Position = UDim2.new(0, 8, 0, 30),
-		Size = UDim2.new(1, -16, 0, 8),
+		Position = UDim2.new(0, 10, 0, 34),
+		Size = UDim2.new(1, -20, 0, 6), -- [V2.0] Thinner
 		Parent = frame,
 	})
-	ctx.instanceUtil.AddCorner(barBg, 4)
+	ctx.instanceUtil.AddCorner(barBg, 3)
 
 	local barFill = ctx.instanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Accent,
 		Size = UDim2.new(0, 0, 1, 0),
 		Parent = barBg,
 	})
-	ctx.instanceUtil.AddCorner(barFill, 4)
+	ctx.instanceUtil.AddCorner(barFill, 3)
 
 	local knob = ctx.instanceUtil.Create("Frame", {
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		Size = UDim2.new(0, 14, 0, 14),
+		Size = UDim2.new(0, 16, 0, 16), -- [V2.0] Slightly larger
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.new(0, 0, 0.5, 0),
 		Parent = barBg,
 	})
-	ctx.instanceUtil.AddCorner(knob, 7)
+	ctx.instanceUtil.AddCorner(knob, 8)
 
 	local changed = Signal.new()
 	local dragging = false

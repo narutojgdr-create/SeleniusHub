@@ -16,13 +16,14 @@ function Button.Create(ctx, parent, position, localeKey)
 		Parent = parent,
 	})
 	ctx.instanceUtil.AddCorner(frame, 6)
+	ctx.instanceUtil.AddStroke(frame, Theme.Stroke, 1, 0.5) -- [V2.0]
 
 	local title = ctx.instanceUtil.Create("TextLabel", {
 		BackgroundTransparency = 1,
 		Position = UDim2.new(0, 0, 0, 0),
 		Size = UDim2.new(1, 0, 1, 0),
-		Font = Enum.Font.GothamMedium,
-		TextSize = 18,
+		Font = Enum.Font.GothamBold,
+		TextSize = 14,
 		TextColor3 = Theme.TextPrimary,
 		Text = ctx.localeManager:GetText(localeKey),
 		Parent = frame,

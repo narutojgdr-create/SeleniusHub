@@ -42,15 +42,16 @@ function Toggle.Create(ctx, parent, position, localeKey, default, size)
 	local indicatorBg = ctx.instanceUtil.Create("Frame", {
 		AnchorPoint = Vector2.new(1, 0.5),
 		Position = UDim2.new(1, -10, 0.5, 0),
-		Size = UDim2.new(0, 40, 0, 18),
+		Size = UDim2.new(0, 44, 0, 22), -- [V2.0] Slightly larger
 		BackgroundColor3 = Theme.IndicatorOff,
 		Parent = frame,
 	})
-	ctx.instanceUtil.AddCorner(indicatorBg, 9)
+	ctx.instanceUtil.AddCorner(indicatorBg, 11)
 
 	local knob = ctx.instanceUtil.Create("Frame", {
+		AnchorPoint = Vector2.new(0, 0.5),
 		Size = UDim2.new(0, 18, 0, 18),
-		Position = UDim2.new(0, 0, 0, 0),
+		Position = UDim2.new(0, 2, 0.5, 0), -- [V2.0] Centered vertically
 		BackgroundColor3 = Color3.new(1, 1, 1),
 		Parent = indicatorBg,
 	})
@@ -63,10 +64,10 @@ function Toggle.Create(ctx, parent, position, localeKey, default, size)
 		Theme = ctx.themeManager:GetTheme()
 		if state then
 			ctx.instanceUtil.Tween(indicatorBg, AnimConfig, { BackgroundColor3 = Theme.Accent })
-			ctx.instanceUtil.Tween(knob, AnimConfig, { Position = UDim2.new(1, -18, 0, 0), BackgroundColor3 = Color3.new(1, 1, 1) })
+			ctx.instanceUtil.Tween(knob, AnimConfig, { Position = UDim2.new(1, -20, 0.5, 0) }) -- [V2.0]
 		else
 			ctx.instanceUtil.Tween(indicatorBg, AnimConfig, { BackgroundColor3 = Theme.IndicatorOff })
-			ctx.instanceUtil.Tween(knob, AnimConfig, { Position = UDim2.new(0, 0, 0, 0), BackgroundColor3 = Color3.new(1, 1, 1) })
+			ctx.instanceUtil.Tween(knob, AnimConfig, { Position = UDim2.new(0, 2, 0.5, 0) }) -- [V2.0]
 		end
 		frame.BackgroundColor3 = Theme.Button
 		title.TextColor3 = Theme.TextPrimary

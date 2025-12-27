@@ -50,16 +50,28 @@ function Window.Create(ctx)
 	})
 
 	UI.TitleLabel = ctx.instanceUtil.Create("TextLabel", {
-		Text = "Selenius Hub",
+		Text = "SELENIUS HUB",
 		Font = Enum.Font.GothamBold,
-		TextSize = 20,
+		TextSize = 18,
 		TextColor3 = Theme.TextPrimary,
 		BackgroundTransparency = 1,
 		Position = UDim2.new(0, 40, 0, 0),
-		Size = UDim2.new(0, 350, 1, 0),
+		Size = UDim2.new(0, 120, 1, 0),
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Parent = UI.TitleBar,
-		ClipsDescendants = true,
+	})
+
+	-- [V2.0] Version Badge
+	UI.VersionBadge = ctx.instanceUtil.Create("TextLabel", {
+		Text = "2.0",
+		Font = Enum.Font.GothamBold,
+		TextSize = 11,
+		TextColor3 = Theme.Accent,
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, 155, 0, 4),
+		Size = UDim2.new(0, 30, 0, 16),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Parent = UI.TitleBar,
 	})
 
 	local titleGradient = Instance.new("UIGradient")
