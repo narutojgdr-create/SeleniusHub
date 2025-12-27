@@ -90,7 +90,8 @@ local function GetConfigList()
             for _, path in pairs(result) do
                 local name = path:match("([^/\\]+)%.json$") or path:match("([^/\\]+)$")
                 if name then
-                    table.insert(files, name:gsub("%.json", ""))
+					local clean = name:gsub("%.json$", "")
+					table.insert(files, clean)
                 end
             end
         end

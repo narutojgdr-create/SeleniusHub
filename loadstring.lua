@@ -2,10 +2,10 @@
 SeleniusHub Loadstring Loader
 
 Uso (exemplo):
-loadstring(game:HttpGet("https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/SeleniusHub/loadstring.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/narutojgdr-create/SeleniusHub/main/loadstring.lua"))()
 
 Config:
-getgenv().SELENIUS_BASE_URL = "https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/SeleniusHub/"
+getgenv().SELENIUS_BASE_URL = "https://raw.githubusercontent.com/narutojgdr-create/SeleniusHub/main/"
 getgenv().SELENIUS_LOCAL_ROOT = "SeleniusHub" -- (opcional) se você tiver os arquivos localmente e quiser usar readfile
 
 Este loader mantém compatibilidade com módulos que usam `script.Parent.Parent...`.
@@ -123,6 +123,16 @@ local function httpGet(url)
 	error("Nenhuma API HTTP disponível (game:HttpGet/request/http_request)")
 end
 
+local function tryHttpGet(url)
+	local ok, body = pcall(function()
+		return httpGet(url)
+	end)
+	if ok then
+		return body
+	end
+	return nil
+end
+
 local function tryReadFile(path)
 	if type(readfile) ~= "function" then
 		return nil
@@ -146,24 +156,39 @@ local function getSourceFor(path)
 		end
 	end
 
-	local base = rawget(_getgenv(), "SELENIUS_BASE_URL")
-	if type(base) ~= "string" or base == "" then
-		base = "https://raw.githubusercontent.com/dsajdiajifdwa85/SeleniusHub/main/"
-	end
-	base = normalizePath(base)
-	if not base:match("^https?://") then
-		base = "https://" .. base
-	end
-	if not base:match("/$") then
-		base = base .. "/"
+	local userBase = rawget(_getgenv(), "SELENIUS_BASE_URL")
+	local bases
+	if type(userBase) == "string" and userBase ~= "" then
+		bases = { userBase }
+	else
+		bases = {
+			"https://raw.githubusercontent.com/narutojgdr-create/SeleniusHub/main/",
+			"https://raw.githubusercontent.com/narutojgdr-create/SeleniusHub/master/",
+		}
 	end
 
-	local url = base .. path
 	local buster = gvGet("SELENIUS_CACHE_BUSTER")
-	if type(buster) == "string" and buster ~= "" then
-		url = url .. "?v=" .. buster
+	for _, base in ipairs(bases) do
+		base = normalizePath(base)
+		if not base:match("^https?://") then
+			base = "https://" .. base
+		end
+		if not base:match("/$") then
+			base = base .. "/"
+		end
+
+		local url = base .. path
+		if type(buster) == "string" and buster ~= "" then
+			url = url .. "?v=" .. buster
+		end
+
+		local body = tryHttpGet(url)
+		if type(body) == "string" then
+			return body
+		end
 	end
-	return httpGet(url)
+
+	error("Falha ao baixar '" .. path .. "'. Defina getgenv().SELENIUS_BASE_URL para a URL raw correta (main/master).")
 end
 
 -- =====================

@@ -19,12 +19,34 @@ if shouldRedirectToLoader() then
 	local gv = _getgenv()
 	local base = rawget(gv, "SELENIUS_BASE_URL")
 	if type(base) ~= "string" or base == "" then
-		base = "https://raw.githubusercontent.com/dsajdiajifdwa85/SeleniusHub/main/"
+		-- Default (pode ser sobrescrito via getgenv().SELENIUS_BASE_URL)
+		base = "https://raw.githubusercontent.com/narutojgdr-create/SeleniusHub/main/"
 	end
 	if not base:match("/$") then
 		base = base .. "/"
 	end
-	return loadstring(game:HttpGet(base .. "loadstring.lua"))()
+
+	local function tryHttpGet(url)
+		local ok, body = pcall(function()
+			return game:HttpGet(url)
+		end)
+		if ok then
+			return body
+		end
+		return nil
+	end
+
+	-- Se o usuário não definiu SELENIUS_BASE_URL, tentamos um fallback para 'master'
+	-- porque alguns repositórios usam esse branch como padrão.
+	local loaderBody = tryHttpGet(base .. "loadstring.lua")
+	if (not loaderBody) and (base:find("/main/", 1, true) ~= nil) and (type(rawget(gv, "SELENIUS_BASE_URL")) ~= "string") then
+		local fallbackBase = base:gsub("/main/$", "/master/")
+		loaderBody = tryHttpGet(fallbackBase .. "loadstring.lua")
+	end
+	if not loaderBody then
+		error("Falha ao baixar loadstring.lua. Configure getgenv().SELENIUS_BASE_URL com a URL raw correta (main/master).")
+	end
+	return loadstring(loaderBody)()
 end
 
 local Hub = require(script.Parent.Core.Hub)
