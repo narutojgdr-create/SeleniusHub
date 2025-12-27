@@ -21,8 +21,12 @@ function Tab:AddToggle(def)
 	local widget = self.Hub.Components.Toggle.Create(self.Hub:_ComponentContext(), self.Page, option.Position, option.LocaleKey, option.Default, option.Size)
 	widget.Changed:Connect(function(value)
 		self.Hub.Registry:Set(option.Id, value)
+		local label = self.Hub:GetText(option.LocaleKey)
+		local status = value and self.Hub:GetText("msg_on") or self.Hub:GetText("msg_off")
+		self.Hub:ShowWarning(label .. ": " .. status, "info")
 	end)
 	self.Hub.Registry:Register(option, widget)
+	self.Hub.OptionToggles[option.Id] = widget
 	return widget
 end
 
@@ -32,8 +36,12 @@ function Tab:AddCheckbox(def)
 	local widget = self.Hub.Components.Checkbox.Create(self.Hub:_ComponentContext(), self.Page, option.Position, option.LocaleKey, option.Default)
 	widget.Changed:Connect(function(value)
 		self.Hub.Registry:Set(option.Id, value)
+		local label = self.Hub:GetText(option.LocaleKey)
+		local status = value and self.Hub:GetText("msg_on") or self.Hub:GetText("msg_off")
+		self.Hub:ShowWarning(label .. ": " .. status, "info")
 	end)
 	self.Hub.Registry:Register(option, widget)
+	self.Hub.OptionToggles[option.Id] = widget
 	return widget
 end
 
@@ -116,6 +124,23 @@ function Tab:AddButton(def)
 	local widget = self.Hub.Components.Button.Create(self.Hub:_ComponentContext(), self.Page, option.Position, option.LocaleKey)
 	widget.Clicked:Connect(function()
 		self.Hub.Registry:Set(option.Id)
+	end)
+	self.Hub.Registry:Register(option, widget)
+	return widget
+end
+
+function Tab:AddKeybind(def)
+	local option = Option.new(def)
+	option.Type = "Keybind"
+	local widget = self.Hub.Components.Keybind.Create(
+		self.Hub:_ComponentContext(),
+		self.Page,
+		option.Position,
+		option.LocaleKey,
+		option.Default
+	)
+	widget.Changed:Connect(function(keyCode)
+		self.Hub.Registry:Set(option.Id, keyCode)
 	end)
 	self.Hub.Registry:Register(option, widget)
 	return widget

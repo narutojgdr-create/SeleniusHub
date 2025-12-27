@@ -33,6 +33,7 @@ local Components = {
 	MultiDropdown = require(script.Parent.Parent.Components.MultiDropdown),
 	ColorPicker = require(script.Parent.Parent.Components.ColorPicker),
 	Button = require(script.Parent.Parent.Components.Button),
+	Keybind = require(script.Parent.Parent.Components.Keybind),
 }
 
 local Hub = {}
@@ -150,6 +151,25 @@ function Hub:LoadTabs()
 		local tab = TabClass.new(self, "Player", player)
 		require(script.Parent.Parent.Tabs.Player.init)(tab)
 	end
+
+	local settings = self.Pages.Settings
+	if settings then
+		local tab = TabClass.new(self, "Settings", settings)
+		require(script.Parent.Parent.Tabs.Settings.init)(tab)
+	end
+end
+
+function Hub:RegisterKeybind(id, keyCode, callback)
+	if not id then
+		return
+	end
+	self.CustomKeybinds[id] = keyCode
+	self.KeybindCallbacks[id] = callback
+end
+
+function Hub:UnregisterKeybind(id)
+	self.CustomKeybinds[id] = nil
+	self.KeybindCallbacks[id] = nil
 end
 
 function Hub:StartLogicLoops()
@@ -407,6 +427,180 @@ function Hub:ShowWarning(text, kind)
 			frame:Destroy()
 		end
 	end)
+end
+
+function Hub:ShowConfirmation(text, onConfirm)
+	local Theme = self.ThemeManager:GetTheme()
+	local gui = self.UI and self.UI.ScreenGui
+	if not gui then
+		return
+	end
+
+	local overlay = Instance.new("Frame")
+	overlay.BackgroundColor3 = Color3.new(0, 0, 0)
+	overlay.BackgroundTransparency = 1
+	overlay.Size = UDim2.new(1, 0, 1, 0)
+	overlay.Parent = gui
+	overlay.ZIndex = 100
+
+	local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+	local box = Instance.new("Frame")
+	box.Size = UDim2.new(0, 320, 0, 160)
+	box.AnchorPoint = Vector2.new(0.5, 0.5)
+	box.Position = UDim2.new(0.5, 0, 0.5, 50)
+	box.BackgroundColor3 = Theme.Secondary
+	box.Parent = overlay
+	box.ZIndex = 101
+	InstanceUtil.AddCorner(box, 8)
+
+	box.BackgroundTransparency = 1
+	TweenService:Create(box, tweenInfo, {
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		BackgroundTransparency = 0,
+	}):Play()
+
+	local lbl = Instance.new("TextLabel")
+	lbl.BackgroundTransparency = 1
+	lbl.Position = UDim2.new(0, 10, 0, 10)
+	lbl.Size = UDim2.new(1, -20, 0, 60)
+	lbl.Font = Enum.Font.GothamBold
+	lbl.TextSize = 18
+	lbl.Text = text
+	lbl.TextWrapped = true
+	lbl.TextColor3 = Theme.TextPrimary
+	lbl.TextTransparency = 1
+	lbl.Parent = box
+	lbl.ZIndex = 102
+	TweenService:Create(lbl, tweenInfo, { TextTransparency = 0 }):Play()
+
+	local yesBtn = Instance.new("TextButton")
+	yesBtn.Text = self:GetText("label_apply")
+	yesBtn.Size = UDim2.new(0.4, -10, 0, 32)
+	yesBtn.Position = UDim2.new(0.1, 0, 1, -50)
+	yesBtn.BackgroundColor3 = Theme.Button
+	yesBtn.BackgroundTransparency = 1
+	yesBtn.TextColor3 = Theme.TextPrimary
+	yesBtn.TextTransparency = 1
+	yesBtn.Parent = box
+	yesBtn.ZIndex = 102
+	yesBtn.AutoButtonColor = false
+	InstanceUtil.AddCorner(yesBtn, 6)
+	TweenService:Create(yesBtn, tweenInfo, { BackgroundTransparency = 0, TextTransparency = 0 }):Play()
+
+	local noBtn = Instance.new("TextButton")
+	noBtn.Text = self:GetText("label_cancel")
+	noBtn.Size = UDim2.new(0.4, -10, 0, 32)
+	noBtn.Position = UDim2.new(0.5, 10, 1, -50)
+	noBtn.BackgroundColor3 = Theme.Button
+	noBtn.BackgroundTransparency = 1
+	noBtn.TextColor3 = Theme.TextPrimary
+	noBtn.TextTransparency = 1
+	noBtn.Parent = box
+	noBtn.ZIndex = 102
+	noBtn.AutoButtonColor = false
+	InstanceUtil.AddCorner(noBtn, 6)
+	TweenService:Create(noBtn, tweenInfo, { BackgroundTransparency = 0, TextTransparency = 0 }):Play()
+
+	local function Close()
+		TweenService:Create(box, tweenInfo, { Position = UDim2.new(0.5, 0, 0.5, 50), BackgroundTransparency = 1 }):Play()
+		TweenService:Create(lbl, tweenInfo, { TextTransparency = 1 }):Play()
+		TweenService:Create(yesBtn, tweenInfo, { BackgroundTransparency = 1, TextTransparency = 1 }):Play()
+		TweenService:Create(noBtn, tweenInfo, { BackgroundTransparency = 1, TextTransparency = 1 }):Play()
+		task.wait(0.3)
+		if overlay then
+			overlay:Destroy()
+		end
+	end
+
+	yesBtn.MouseButton1Click:Connect(function()
+		Close()
+		if onConfirm then
+			onConfirm()
+		end
+	end)
+	noBtn.MouseButton1Click:Connect(function()
+		Close()
+	end)
+end
+
+function Hub:CreateKeybindControl(parent, position)
+	local Theme = self.ThemeManager:GetTheme()
+	local AnimConfig = Defaults.Tween.AnimConfig
+	local PopTween = Defaults.Tween.PopTween
+	local PopReturnTween = Defaults.Tween.PopReturnTween
+
+	local frame = InstanceUtil.Create("Frame", {
+		BackgroundColor3 = Theme.Button,
+		Size = UDim2.new(0, 260, 0, 40),
+		Position = position,
+		Parent = parent,
+	})
+	InstanceUtil.AddCorner(frame, 6)
+	InstanceUtil.AddStroke(frame, Theme.Stroke, 1, 0.5)
+
+	local title = InstanceUtil.Create("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, 8, 0, 0),
+		Size = UDim2.new(0, 150, 1, 0),
+		Font = Enum.Font.GothamMedium,
+		TextSize = 18,
+		TextColor3 = Theme.TextPrimary,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Text = self:GetText("label_keybind"),
+		Parent = frame,
+	})
+	self:RegisterLocale(title, "label_keybind")
+	self:RegisterTheme(title, "TextColor3", "TextPrimary")
+
+	local btn = InstanceUtil.Create("TextButton", {
+		BackgroundColor3 = Theme.ButtonHover,
+		Size = UDim2.new(0, 110, 0, 26),
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -10, 0.5, 0),
+		Font = Enum.Font.GothamBold,
+		TextSize = 18,
+		TextColor3 = Theme.TextPrimary,
+		Text = "[" .. self:GetKeybindName() .. "]",
+		AutoButtonColor = false,
+		Parent = frame,
+	})
+	InstanceUtil.AddCorner(btn, 13)
+	self:RegisterTheme(btn, "TextColor3", "TextPrimary")
+
+	local btnScale = Instance.new("UIScale")
+	btnScale.Scale = 1
+	btnScale.Parent = btn
+
+	self.KeybindButtonLabel = btn
+
+	self:AddConnection(btn.MouseButton1Click, function()
+		self.CapturingKeybind = true
+		btn.Text = "..."
+		TweenService:Create(btnScale, PopTween, { Scale = 1.15 }):Play()
+		task.delay(PopTween.Time, function()
+			TweenService:Create(btnScale, PopReturnTween, { Scale = 1 }):Play()
+		end)
+	end)
+
+	self:AddConnection(btn.MouseEnter, function()
+		Theme = self.ThemeManager:GetTheme()
+		InstanceUtil.Tween(btn, AnimConfig, { BackgroundColor3 = Theme.AccentDark })
+	end)
+	self:AddConnection(btn.MouseLeave, function()
+		Theme = self.ThemeManager:GetTheme()
+		InstanceUtil.Tween(btn, AnimConfig, { BackgroundColor3 = Theme.ButtonHover })
+	end)
+
+	self.ThemeManager:AddCallback(function()
+		Theme = self.ThemeManager:GetTheme()
+		frame.BackgroundColor3 = Theme.Button
+		btn.BackgroundColor3 = Theme.ButtonHover
+		title.TextColor3 = Theme.TextPrimary
+		btn.TextColor3 = Theme.TextPrimary
+	end)
+
+	return frame
 end
 
 function Hub:_CreateSectionTitle(parent, localeKey, text, position)
@@ -805,6 +999,15 @@ function Hub:SetupKeybindSystem()
 		if self.Keybind and input.KeyCode == self.Keybind then
 			self:SetVisible(not self:IsVisible(), true)
 			return
+		end
+
+		for id, keyCode in pairs(self.CustomKeybinds) do
+			if keyCode and input.KeyCode == keyCode then
+				local cb = self.KeybindCallbacks[id]
+				if cb then
+					cb()
+				end
+			end
 		end
 	end)
 end

@@ -105,8 +105,8 @@ function Lifecycle.CreateLoadingScreen(hub)
 
 	InstanceUtil.Tween(mainScale, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1 })
 
-	local duration = 0.8
-	local steps = 40
+	local duration = 0.35
+	local steps = 20
 	task.spawn(function()
 		for i = 1, steps do
 			local progress = i / steps
@@ -114,7 +114,15 @@ function Lifecycle.CreateLoadingScreen(hub)
 			percentLabel.Text = tostring(math.floor(progress * 100)) .. "%"
 			task.wait(duration / steps)
 		end
-		openBtn.Visible = true
+
+		-- Abre automaticamente (sem exigir clique)
+		openBtn.Visible = false
+		InstanceUtil.Tween(mainScale, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.In), { Scale = 0 })
+		task.wait(0.4)
+		if gui and gui.Parent then
+			gui:Destroy()
+		end
+		hub:SetVisible(true, true)
 	end)
 
 	openBtn.MouseEnter:Connect(function()
