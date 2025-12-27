@@ -84,10 +84,13 @@ function Window.Create(ctx)
 	titleGradient.Parent = UI.TitleLabel
 
 	task.spawn(function()
-		while true do
+		while UI.TitleLabel and UI.TitleLabel.Parent do
 			for i = 0, 360, 2 do
+				if not (UI.TitleLabel and UI.TitleLabel.Parent) then
+					break
+				end
 				titleGradient.Rotation = i
-				task.wait(0.02)
+				task.wait(0.05)
 			end
 		end
 	end)

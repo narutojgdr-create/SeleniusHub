@@ -99,6 +99,7 @@ function Hub.new()
 	self.DropdownZCounter = 2000
 
 	self.Components = Components
+	self._DidFinishInit = false
 
 	Assets.EnsureFolders()
 	self:LoadConfig("default")
@@ -123,15 +124,24 @@ function Hub.new()
 	self:OnKeybindChanged()
 	self:SetupSearch()
 
-	self:LoadTabs()
-
+	-- IMPORTANTE: não carregar Tabs/loops aqui.
+	-- Isso reduz o tempo até o KeySystem aparecer e deixa o Loading cuidar do resto.
 	if self.UI and self.UI.MainFrame then
 		self.UI.MainFrame.Visible = false
 	end
 
-	self:StartLogicLoops()
-
 	return self
+end
+
+function Hub:FinishInit()
+	if self._DidFinishInit then
+		return
+	end
+	self._DidFinishInit = true
+
+	-- Carrega conteúdo pesado só depois (após Key/Loading)
+	self:LoadTabs()
+	self:StartLogicLoops()
 end
 
 function Hub:_NextDropdownZ()

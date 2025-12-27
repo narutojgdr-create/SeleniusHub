@@ -105,24 +105,52 @@ function Lifecycle.CreateLoadingScreen(hub)
 
 	InstanceUtil.Tween(mainScale, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1 })
 
-	local duration = 0.35
-	local steps = 20
+	-- Loading agora roda DEPOIS do hub abrir, enquanto o hub finaliza a inicialização.
+	local done = false
 	task.spawn(function()
+		local ok = pcall(function()
+			if hub and type(hub.FinishInit) == "function" then
+				hub:FinishInit()
+			end
+		end)
+		-- Mesmo se der erro, não travar na tela.
+		done = true
+		if not ok then
+			-- sem spam; só garante que sai do loading
+		end
+	end)
+
+	local duration = 0.25
+	local steps = 24
+	task.spawn(function()
+		-- Sobe até 90% enquanto o init pesado roda
 		for i = 1, steps do
-			local progress = i / steps
+			local progress = (i / steps) * 0.9
 			barFill.Size = UDim2.new(progress, 0, 1, 0)
 			percentLabel.Text = tostring(math.floor(progress * 100)) .. "%"
 			task.wait(duration / steps)
+			if done then
+				break
+			end
 		end
 
-		-- Abre automaticamente (sem exigir clique)
+		-- Espera terminar (curto)
+		local t0 = tick()
+		while not done and (tick() - t0) < 8 do
+			task.wait(0.05)
+		end
+
+		-- Finaliza 100%
+		barFill.Size = UDim2.new(1, 0, 1, 0)
+		percentLabel.Text = "100%"
+		task.wait(0.12)
+
 		openBtn.Visible = false
-		InstanceUtil.Tween(mainScale, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.In), { Scale = 0 })
-		task.wait(0.4)
+		InstanceUtil.Tween(mainScale, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.In), { Scale = 0 })
+		task.wait(0.35)
 		if gui and gui.Parent then
 			gui:Destroy()
 		end
-		hub:SetVisible(true, true)
 	end)
 
 	openBtn.MouseEnter:Connect(function()
@@ -135,7 +163,6 @@ function Lifecycle.CreateLoadingScreen(hub)
 		InstanceUtil.Tween(mainScale, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.In), { Scale = 0 })
 		task.wait(0.4)
 		gui:Destroy()
-		hub:SetVisible(true, true)
 	end)
 end
 
@@ -280,11 +307,14 @@ function Lifecycle.CreateKeySystem(hub)
 			task.wait(0.6)
 			content.Visible = false
 
-			local closeTween = InstanceUtil.Tween(mainScale, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+			local closeTween = InstanceUtil.Tween(mainScale, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
 				Scale = 0,
 			})
 			closeTween.Completed:Wait()
 			gui:Destroy()
+
+			-- Mostra o hub IMEDIATAMENTE e faz o carregamento pesado no Loading.
+			hub:SetVisible(true, true)
 			Lifecycle.CreateLoadingScreen(hub)
 		else
 			statusText.TextColor3 = Theme.Error
