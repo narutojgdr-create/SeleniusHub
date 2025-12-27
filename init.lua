@@ -1,5 +1,5 @@
-local Hub = require(script.Core.Hub)
-local Lifecycle = require(script.Core.Lifecycle)
+local Hub = require(script.Parent.Core.Hub)
+local Lifecycle = require(script.Parent.Core.Lifecycle)
 
 local Library = {}
 Library.__index = Library
