@@ -39,8 +39,8 @@ local Components = {
 local Hub = {}
 Hub.__index = Hub
 
--- [V2.0] Version identifier
-Hub.Version = "2.0"
+-- Version identifier
+Hub.Version = "Stable"
 
 function Hub.new()
 	-- [V2.0] Single Instance Protection

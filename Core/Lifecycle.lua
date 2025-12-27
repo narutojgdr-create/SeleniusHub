@@ -9,14 +9,44 @@ local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
 
 local Lifecycle = {}
 
+local function destroyGuiSafe(gui)
+	pcall(function()
+		if gui and gui.Parent then
+			gui:Destroy()
+		end
+	end)
+end
+
+local function destroyExistingByName(parent, name)
+	pcall(function()
+		if parent and name then
+			local existing = parent:FindFirstChild(name)
+			if existing and existing:IsA("ScreenGui") then
+				existing:Destroy()
+			end
+		end
+	end)
+end
+
 function Lifecycle.CreateLoadingScreen(hub)
 	local Theme = hub.ThemeManager:GetTheme()
+	local secureParent = Assets.GetSecureParent()
+
+	-- Evita loading duplicado
+	if hub and hub.__SeleniusLoadingGui then
+		destroyGuiSafe(hub.__SeleniusLoadingGui)
+		hub.__SeleniusLoadingGui = nil
+	end
+	destroyExistingByName(secureParent, "SeleniusHub_Loading")
 
 	local gui = Instance.new("ScreenGui")
-	gui.Name = Assets.RandomString(20)
+	gui.Name = "SeleniusHub_Loading"
 	gui.ResetOnSpawn = false
-	gui.Parent = Assets.GetSecureParent()
+	gui.Parent = secureParent
 	gui.DisplayOrder = 100
+	if hub then
+		hub.__SeleniusLoadingGui = gui
+	end
 
 	local main = Instance.new("Frame")
 	main.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -169,12 +199,23 @@ end
 function Lifecycle.CreateKeySystem(hub)
 	local Theme = hub.ThemeManager:GetTheme()
 	local correctKey = "testing123"
+	local secureParent = Assets.GetSecureParent()
+
+	-- Evita KeySystem duplicado
+	if hub and hub.__SeleniusKeyGui then
+		destroyGuiSafe(hub.__SeleniusKeyGui)
+		hub.__SeleniusKeyGui = nil
+	end
+	destroyExistingByName(secureParent, "SeleniusHub_KeySystem")
 
 	local gui = Instance.new("ScreenGui")
-	gui.Name = Assets.RandomString(20)
+	gui.Name = "SeleniusHub_KeySystem"
 	gui.ResetOnSpawn = false
-	gui.Parent = Assets.GetSecureParent()
+	gui.Parent = secureParent
 	gui.DisplayOrder = 100
+	if hub then
+		hub.__SeleniusKeyGui = gui
+	end
 
 	local main = Instance.new("Frame")
 	main.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -314,7 +355,9 @@ function Lifecycle.CreateKeySystem(hub)
 			gui:Destroy()
 
 			-- Mostra o hub IMEDIATAMENTE e faz o carregamento pesado no Loading.
-			hub:SetVisible(true, true)
+			if hub and type(hub.IsVisible) == "function" and (not hub:IsVisible()) then
+				hub:SetVisible(true, true)
+			end
 			Lifecycle.CreateLoadingScreen(hub)
 		else
 			statusText.TextColor3 = Theme.Error

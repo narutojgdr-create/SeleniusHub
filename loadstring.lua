@@ -353,11 +353,17 @@ end
 -- Bootstrap
 -- =====================
 
-if gvGet("SeleniusHubInstance") and type(gvGet("SeleniusHubInstance").Destroy) == "function" then
+local function destroyOldInstance(inst)
 	pcall(function()
-		gvGet("SeleniusHubInstance"):Destroy()
+		if inst and type(inst.Destroy) == "function" then
+			inst:Destroy()
+		end
 	end)
 end
+
+-- Alguns executores podem divergir entre _G e getgenv(); destruímos em ambos.
+destroyOldInstance(gvGet("SeleniusHubInstance"))
+destroyOldInstance(rawget(_G, "SeleniusHubInstance"))
 
 -- Carrega a library (init.lua)
 local lib = customRequire(ROOT["init"])
@@ -380,7 +386,9 @@ rawset(_G, "SeleniusHubReload", function()
 	hub = lib2.Init()
 	lib2.Lifecycle.CreateKeySystem(hub)
 	gvSet("SeleniusHubInstance", hub)
+	rawset(_G, "SeleniusHubInstance", hub)
 end)
 
 gvSet("SeleniusHubInstance", hub)
+rawset(_G, "SeleniusHubInstance", hub)
 return hub

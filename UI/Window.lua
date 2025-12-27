@@ -61,9 +61,9 @@ function Window.Create(ctx)
 		Parent = UI.TitleBar,
 	})
 
-	-- [V2.0] Version Badge
+	-- Version Badge (desativado)
 	UI.VersionBadge = ctx.instanceUtil.Create("TextLabel", {
-		Text = "2.0",
+		Text = "",
 		Font = Enum.Font.GothamBold,
 		TextSize = 11,
 		TextColor3 = Theme.Accent,
@@ -71,6 +71,7 @@ function Window.Create(ctx)
 		Position = UDim2.new(0, 155, 0, 4),
 		Size = UDim2.new(0, 30, 0, 16),
 		TextXAlignment = Enum.TextXAlignment.Left,
+		Visible = false,
 		Parent = UI.TitleBar,
 	})
 

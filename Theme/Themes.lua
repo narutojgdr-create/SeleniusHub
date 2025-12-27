@@ -1,4 +1,4 @@
--- Temas Modernos e Profissionais (v2.0 - EVOLUTION)
+-- Temas Modernos e Profissionais
 -- PALETA: DEEP MIDNIGHT & ELECTRIC BLUE (Refined)
 
 local Themes = {
