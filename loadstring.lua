@@ -273,9 +273,15 @@ local function customRequire(mod)
 	end
 
 	local chunkName = "=" .. path
-	local fn, err = loadstring(source, chunkName)
-	if not fn then
-		error("Falha ao compilar módulo: " .. path .. "\n" .. tostring(err))
+	-- Wrapper para não depender de setfenv/debug (muitos executores bloqueiam)
+	local wrapped = "return function(__script, __require)\nlocal script = __script\nlocal require = __require\n" .. source .. "\nend"
+	local factory, err = loadstring(wrapped, chunkName)
+	if not factory then
+		error("Falha ao compilar módulo (wrapper): " .. path .. "\n" .. tostring(err))
+	end
+	local fn = factory()
+	if type(fn) ~= "function" then
+		error("Falha ao carregar módulo (factory não retornou função): " .. path)
 	end
 
 	-- script virtual para compatibilidade com script.Parent...
@@ -296,14 +302,10 @@ local function customRequire(mod)
 	end
 	scriptNode = cur
 
-	local env = setmetatable({
-		script = scriptNode,
-		require = customRequire,
-	}, { __index = _getgenv() })
-
-	setFunctionEnv(fn, env)
-
-	local result = fn()
+	local ok, result = pcall(fn, scriptNode, customRequire)
+	if not ok then
+		error("Erro ao executar módulo: " .. path .. "\n" .. tostring(result))
+	end
 	MODULE_CACHE[path] = result
 	return result
 end
