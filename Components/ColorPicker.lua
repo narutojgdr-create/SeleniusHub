@@ -211,13 +211,13 @@ function ColorPicker.Create(ctx, parent, position, localeKey, default)
 		UpdateColor(false)
 	end
 
-	svMap.InputBegan:Connect(function(input)
+	ctx.addConnection(svMap.InputBegan, function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			draggingSV = true
 			UpdateSV(input)
 		end
 	end)
-	hueBar.InputBegan:Connect(function(input)
+	ctx.addConnection(hueBar.InputBegan, function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			draggingHue = true
 			UpdateHue(input)
@@ -249,12 +249,12 @@ function ColorPicker.Create(ctx, parent, position, localeKey, default)
 		h, s, v = Color3.toHSV(currentColor)
 		UpdateColor(false)
 	end
-	rInput.FocusLost:Connect(ManualUpdate)
-	gInput.FocusLost:Connect(ManualUpdate)
-	bInput.FocusLost:Connect(ManualUpdate)
+	ctx.addConnection(rInput.FocusLost, ManualUpdate)
+	ctx.addConnection(gInput.FocusLost, ManualUpdate)
+	ctx.addConnection(bInput.FocusLost, ManualUpdate)
 
 	local open = false
-	prev.MouseButton1Click:Connect(function()
+	ctx.addConnection(prev.MouseButton1Click, function()
 		open = not open
 		pickerFrame.Visible = true
 		pickerContent.Visible = open

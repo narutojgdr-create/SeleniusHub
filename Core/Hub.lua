@@ -1221,12 +1221,41 @@ function Hub:SetupButtons()
 end
 
 function Hub:Destroy()
+	if self._Destroyed then
+		return
+	end
+	self._Destroyed = true
+
 	for _, conn in ipairs(self.Connections) do
 		if conn and conn.Connected then
 			conn:Disconnect()
 		end
 	end
 	self.Connections = {}
+
+	pcall(function()
+		if type(getgenv) == "function" and getgenv().SeleniusHubInstance == self then
+			getgenv().SeleniusHubInstance = nil
+		end
+	end)
+	pcall(function()
+		if typeof(_G) == "table" and rawget(_G, "SeleniusHubInstance") == self then
+			rawset(_G, "SeleniusHubInstance", nil)
+		end
+	end)
+
+	pcall(function()
+		if self.__SeleniusKeyGui then
+			self.__SeleniusKeyGui:Destroy()
+			self.__SeleniusKeyGui = nil
+		end
+	end)
+	pcall(function()
+		if self.__SeleniusLoadingGui then
+			self.__SeleniusLoadingGui:Destroy()
+			self.__SeleniusLoadingGui = nil
+		end
+	end)
 
 	if self.BlurFunction then
 		self.BlurFunction(false)
@@ -1236,7 +1265,9 @@ function Hub:Destroy()
 	end
 
 	if self.UI and self.UI.ScreenGui then
-		self.UI.ScreenGui:Destroy()
+		pcall(function()
+			self.UI.ScreenGui:Destroy()
+		end)
 	end
 end
 

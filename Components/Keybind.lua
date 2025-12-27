@@ -89,7 +89,7 @@ function Keybind.Create(ctx, parent, position, localeKey, defaultKeyCode)
 			game:GetService("TweenService"):Create(btnScale, PopReturnTween, { Scale = 1 }):Play()
 		end)
 
-		captureConn = UserInputService.InputBegan:Connect(function(input, gp)
+		captureConn = ctx.addConnection(UserInputService.InputBegan, function(input, gp)
 			if gp or UserInputService:GetFocusedTextBox() then
 				return
 			end
