@@ -30,6 +30,16 @@ local function gvSet(key, value)
 	rawset(_gv, key, value)
 end
 
+-- Cache-buster por execução para evitar que o GitHub Raw entregue arquivos de commits diferentes
+-- (isso causa erros aleatórios quando só parte dos módulos atualiza).
+if type(gvGet("SELENIUS_CACHE_BUSTER")) ~= "string" then
+	local ok, buster = pcall(function()
+		local t = (type(tick) == "function" and tick()) or (os and os.clock and os.clock()) or 0
+		return tostring(math.floor(t * 1000)) .. "-" .. tostring(math.random(100000, 999999))
+	end)
+	gvSet("SELENIUS_CACHE_BUSTER", ok and buster or tostring(math.random(100000000, 999999999)))
+end
+
 local _task = task
 if type(_task) ~= "table" then
 	_task = {
@@ -149,6 +159,10 @@ local function getSourceFor(path)
 	end
 
 	local url = base .. path
+	local buster = gvGet("SELENIUS_CACHE_BUSTER")
+	if type(buster) == "string" and buster ~= "" then
+		url = url .. "?v=" .. buster
+	end
 	return httpGet(url)
 end
 
