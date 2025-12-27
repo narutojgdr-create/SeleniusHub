@@ -1,7 +1,7 @@
-local Assets = require(script.Parent.Parent.Utils.Assets)
-local Themes = require(script.Parent.Parent.Theme.Themes)
-local Defaults = require(script.Parent.Parent.Assets.Defaults)
-local InstanceUtil = require(script.Parent.Parent.Utils.Instance)
+local Assets = require(script.Parent.Parent.Parent.Utils.Assets)
+local Themes = require(script.Parent.Parent.Parent.Theme.Themes)
+local Defaults = require(script.Parent.Parent.Parent.Assets.Defaults)
+local InstanceUtil = require(script.Parent.Parent.Parent.Utils.Instance)
 
 local function sortedThemeNames()
 	local list = {}
