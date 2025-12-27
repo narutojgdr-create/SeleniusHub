@@ -2599,8 +2599,16 @@ end
 --------------------------------------------------------------------
 -- Iniciar Hub + Key System + Loading Seguro
 --------------------------------------------------------------------
-if getgenv().SeleniusHubInstance then
-    getgenv().SeleniusHubInstance:Destroy()
+do
+    local existing = getgenv().SeleniusHubInstance
+    if existing then
+        pcall(function()
+            if type(existing.SetVisible) == "function" then
+                existing:SetVisible(true, true)
+            end
+        end)
+        return existing
+    end
 end
 
 local hub = SeleniusHub.new()
