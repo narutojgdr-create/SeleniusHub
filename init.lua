@@ -1,6 +1,18 @@
 -- Suporte: se alguém executar este arquivo via loadstring direto (sem árvore `script`),
 -- redireciona para o loader principal que monta o require virtual.
-if script == nil then
+local function shouldRedirectToLoader()
+	if script == nil then
+		return true
+	end
+	-- Alguns executores criam um `script` fake/limitado. Se não tiver a árvore esperada,
+	-- usamos o loader para montar a estrutura virtual.
+	local ok, hasTree = pcall(function()
+		return script and script.Parent and script.Parent.Core and script.Parent.Core.Hub and script.Parent.Core.Lifecycle
+	end)
+	return (not ok) or (not hasTree)
+end
+
+if shouldRedirectToLoader() then
 	local _getgenv = (type(getgenv) == "function" and getgenv) or function()
 		return _G
 	end
