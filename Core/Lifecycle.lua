@@ -1,7 +1,5 @@
 local TweenService = game:GetService("TweenService")
-
-local Defaults = require(script.Parent.Parent.Assets.Defaults)
-local IconPaths = require(script.Parent.Parent.Assets.Icons)
+local StarterGui = game:GetService("StarterGui")
 
 local Assets = require(script.Parent.Parent.Utils.Assets)
 local InstanceUtil = require(script.Parent.Parent.Utils.Instance)
@@ -28,179 +26,17 @@ local function destroyExistingByName(parent, name)
 	end)
 end
 
+-- Loading removido: mantemos apenas uma função compatível (não cria UI).
 function Lifecycle.CreateLoadingScreen(hub)
-	local Theme = hub.ThemeManager:GetTheme()
-	local secureParent = Assets.GetSecureParent()
-
-	-- Hub deve ficar escondido enquanto o loading está na tela.
+	pcall(function()
+		if hub and type(hub.FinishInit) == "function" then
+			hub:FinishInit()
+		end
+	end)
 	pcall(function()
 		if hub and type(hub.SetVisible) == "function" then
-			hub:SetVisible(false, false)
+			hub:SetVisible(true, true)
 		end
-	end)
-
-	-- Evita loading duplicado
-	if hub and hub.__SeleniusLoadingGui then
-		destroyGuiSafe(hub.__SeleniusLoadingGui)
-		hub.__SeleniusLoadingGui = nil
-	end
-	destroyExistingByName(secureParent, "SeleniusHub_Loading")
-
-	local gui = Instance.new("ScreenGui")
-	gui.Name = "SeleniusHub_Loading"
-	gui.ResetOnSpawn = false
-	gui.Parent = secureParent
-	gui.DisplayOrder = 100
-	if hub then
-		hub.__SeleniusLoadingGui = gui
-	end
-
-	local main = Instance.new("Frame")
-	main.AnchorPoint = Vector2.new(0.5, 0.5)
-	main.Size = UDim2.new(0, 420, 0, 180)
-	main.Position = UDim2.new(0.5, 0, 0.5, 0)
-	main.BackgroundColor3 = Theme.Background
-	main.Parent = gui
-	main.BorderSizePixel = 0
-	main.ClipsDescendants = false
-	InstanceUtil.AddCorner(main, 8)
-
-	local mainScale = Instance.new("UIScale")
-	mainScale.Scale = 0
-	mainScale.Parent = main
-
-	Acrylic.Enable(main, Theme, InstanceUtil)
-
-	local logo = Instance.new("ImageLabel")
-	logo.BackgroundTransparency = 1
-	logo.Size = UDim2.new(0, 64, 0, 64)
-	logo.Position = UDim2.new(0, 20, 0, 20)
-	logo.Image = Assets.GetIcon(IconPaths.Logo)
-	logo.Parent = main
-
-	local title = Instance.new("TextLabel")
-	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0, 100, 0, 20)
-	title.Size = UDim2.new(1, -120, 0, 32)
-	title.Font = Enum.Font.GothamBold
-	title.TextSize = 28
-	title.TextXAlignment = Enum.TextXAlignment.Left
-	title.TextColor3 = Theme.Accent
-	title.Text = hub:GetText("loading_title")
-	title.Parent = main
-
-	local sub = Instance.new("TextLabel")
-	sub.BackgroundTransparency = 1
-	sub.Position = UDim2.new(0, 100, 0, 52)
-	sub.Size = UDim2.new(1, -120, 0, 20)
-	sub.Font = Enum.Font.GothamMedium
-	sub.TextSize = 18
-	sub.TextXAlignment = Enum.TextXAlignment.Left
-	sub.TextColor3 = Theme.AccentDark
-	sub.Text = hub:GetText("loading_sub")
-	sub.Parent = main
-
-	local barBg = Instance.new("Frame")
-	barBg.BackgroundColor3 = Theme.Separator
-	barBg.Position = UDim2.new(0, 20, 0, 100)
-	barBg.Size = UDim2.new(1, -40, 0, 10)
-	barBg.Parent = main
-	barBg.BorderSizePixel = 0
-	InstanceUtil.AddCorner(barBg, 5)
-
-	local barFill = Instance.new("Frame")
-	barFill.BackgroundColor3 = Theme.Accent
-	barFill.Size = UDim2.new(0, 0, 1, 0)
-	barFill.Parent = barBg
-	barFill.BorderSizePixel = 0
-	InstanceUtil.AddCorner(barFill, 5)
-
-	local percentLabel = Instance.new("TextLabel")
-	percentLabel.BackgroundTransparency = 1
-	percentLabel.Position = UDim2.new(0, 20, 0, 116)
-	percentLabel.Size = UDim2.new(0, 80, 0, 22)
-	percentLabel.Font = Enum.Font.GothamMedium
-	percentLabel.TextSize = 18
-	percentLabel.TextXAlignment = Enum.TextXAlignment.Left
-	percentLabel.TextColor3 = Theme.TextPrimary
-	percentLabel.Text = "0%"
-	percentLabel.Parent = main
-
-	local openBtn = Instance.new("TextButton")
-	openBtn.BackgroundColor3 = Theme.ButtonHover
-	openBtn.Size = UDim2.new(0, 130, 0, 32)
-	openBtn.Position = UDim2.new(1, -150, 1, -50)
-	openBtn.Font = Enum.Font.GothamMedium
-	openBtn.TextSize = 18
-	openBtn.TextColor3 = Theme.TextPrimary
-	openBtn.Text = hub:GetText("loading_button")
-	openBtn.AutoButtonColor = false
-	openBtn.Visible = false
-	openBtn.Parent = main
-	openBtn.BorderSizePixel = 0
-	InstanceUtil.AddCorner(openBtn, 6)
-	InstanceUtil.AddStroke(openBtn, Theme.Stroke, 1, 0.4)
-
-	InstanceUtil.Tween(mainScale, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1 })
-
-	-- Loading roda ANTES do hub aparecer; hub só aparece quando o usuário clicar no botão.
-	local done = false
-	task.spawn(function()
-		local ok = pcall(function()
-			if hub and type(hub.FinishInit) == "function" then
-				hub:FinishInit()
-			end
-		end)
-		-- Mesmo se der erro, não travar na tela.
-		done = true
-		if not ok then
-			-- sem spam; só garante que sai do loading
-		end
-	end)
-
-	local duration = 0.25
-	local steps = 24
-	task.spawn(function()
-		-- Sobe até 90% enquanto o init pesado roda
-		for i = 1, steps do
-			local progress = (i / steps) * 0.9
-			barFill.Size = UDim2.new(progress, 0, 1, 0)
-			percentLabel.Text = tostring(math.floor(progress * 100)) .. "%"
-			task.wait(duration / steps)
-			if done then
-				break
-			end
-		end
-
-		-- Espera terminar (curto)
-		local t0 = tick()
-		while not done and (tick() - t0) < 8 do
-			task.wait(0.05)
-		end
-
-		-- Finaliza 100%
-		barFill.Size = UDim2.new(1, 0, 1, 0)
-		percentLabel.Text = "100%"
-		openBtn.Visible = true
-	end)
-
-	openBtn.MouseEnter:Connect(function()
-		InstanceUtil.Tween(openBtn, Defaults.Tween.AnimConfig, { BackgroundColor3 = Theme.ButtonHover })
-	end)
-	openBtn.MouseLeave:Connect(function()
-		InstanceUtil.Tween(openBtn, Defaults.Tween.AnimConfig, { BackgroundColor3 = Theme.ButtonHover })
-	end)
-	openBtn.MouseButton1Click:Connect(function()
-		pcall(function()
-			if hub and type(hub.IsVisible) == "function" and type(hub.SetVisible) == "function" then
-				if not hub:IsVisible() then
-					hub:SetVisible(true, true)
-				end
-			end
-		end)
-		InstanceUtil.Tween(mainScale, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.In), { Scale = 0 })
-		task.wait(0.4)
-		destroyGuiSafe(gui)
 	end)
 end
 
@@ -208,6 +44,15 @@ function Lifecycle.CreateKeySystem(hub)
 	local Theme = hub.ThemeManager:GetTheme()
 	local correctKey = "testing123"
 	local secureParent = Assets.GetSecureParent()
+
+	-- Notificação ao executar o Hub.
+	pcall(function()
+		StarterGui:SetCore("SendNotification", {
+			Title = "SeleniusHub",
+			Text = "Hub inicializando, espere 5-10 segundos",
+			Duration = 6,
+		})
+	end)
 
 	-- Evita KeySystem duplicado
 	if hub and hub.__SeleniusKeyGui then
@@ -349,7 +194,7 @@ function Lifecycle.CreateKeySystem(hub)
 			sub.Visible = false
 
 			statusText.TextColor3 = Theme.Status
-			statusText.Text = "Success! Loading..."
+			statusText.Text = "Success! Abrindo Hub..."
 			statusText.Position = UDim2.new(0, 0, 0.5, -10)
 			statusText.TextSize = 18
 			TweenService:Create(statusText, TweenInfo.new(0.2), { TextTransparency = 0 }):Play()
@@ -362,13 +207,17 @@ function Lifecycle.CreateKeySystem(hub)
 			closeTween.Completed:Wait()
 			gui:Destroy()
 
-			-- Hub deve aparecer APENAS depois do botão no Loading.
+			-- Sem Loading: finaliza init e abre o Hub automaticamente.
 			pcall(function()
-				if hub and type(hub.SetVisible) == "function" then
-					hub:SetVisible(false, false)
+				if hub and type(hub.FinishInit) == "function" then
+					hub:FinishInit()
 				end
 			end)
-			Lifecycle.CreateLoadingScreen(hub)
+			pcall(function()
+				if hub and type(hub.SetVisible) == "function" then
+					hub:SetVisible(true, true)
+				end
+			end)
 		else
 			statusText.TextColor3 = Theme.Error
 			statusText.Text = "Invalid Key"
