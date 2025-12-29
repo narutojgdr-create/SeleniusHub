@@ -7,6 +7,8 @@ local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
 
 local Lifecycle = {}
 
+local DISCORD_INVITE_URL = "https://discord.gg/selenius"
+
 local SAVED_KEY_PATH = "SeleniusHub/key.txt"
 
 local function ensureWorkspaceCache()
@@ -116,7 +118,7 @@ function Lifecycle.CreateKeySystem(hub)
 	pcall(function()
 		local gv = (type(getgenv) == "function" and getgenv()) or _G
 		if not rawget(gv, "SELENIUS_BOOT_NOTIFIED") then
-			hubNotify(hub, "Inicializando Selenius... | Espere 5-10s", true)
+			hubNotify(hub, "Inicializando Selenius... | Espere 5-25s", true)
 		end
 	end)
 
@@ -148,7 +150,7 @@ function Lifecycle.CreateKeySystem(hub)
 	local main = Instance.new("Frame")
 	main.AnchorPoint = Vector2.new(0.5, 0.5)
 	main.Position = UDim2.new(0.5, 0, 0.5, 0)
-	main.Size = UDim2.new(0, 560, 0, 260)
+	main.Size = UDim2.new(0, 640, 0, 300)
 	main.BackgroundColor3 = Theme.Background
 	main.BorderSizePixel = 0
 	main.ClipsDescendants = false
@@ -170,26 +172,26 @@ function Lifecycle.CreateKeySystem(hub)
 	local left = Instance.new("Frame")
 	left.BackgroundTransparency = 1
 	left.Position = UDim2.new(0, 0, 0, 0)
-	left.Size = UDim2.new(0, 300, 1, 0)
+	left.Size = UDim2.new(0, 340, 1, 0)
 	left.Parent = content
 
 	local separator = Instance.new("Frame")
 	separator.BackgroundColor3 = Theme.Stroke
 	separator.BackgroundTransparency = 0.45
 	separator.BorderSizePixel = 0
-	separator.Position = UDim2.new(0, 300, 0, 16)
+	separator.Position = UDim2.new(0, 340, 0, 16)
 	separator.Size = UDim2.new(0, 1, 1, -32)
 	separator.Parent = content
 
 	local right = Instance.new("Frame")
 	right.BackgroundTransparency = 1
-	right.Position = UDim2.new(0, 301, 0, 0)
-	right.Size = UDim2.new(1, -301, 1, 0)
+	right.Position = UDim2.new(0, 341, 0, 0)
+	right.Size = UDim2.new(1, -341, 1, 0)
 	right.Parent = content
 
 	local title = Instance.new("TextLabel")
 	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0, 16, 0, 16)
+	title.Position = UDim2.new(0, 18, 0, 18)
 	title.Size = UDim2.new(1, -32, 0, 26)
 	title.Font = Enum.Font.GothamBold
 	title.TextSize = 20
@@ -200,7 +202,7 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local sub = Instance.new("TextLabel")
 	sub.BackgroundTransparency = 1
-	sub.Position = UDim2.new(0, 16, 0, 40)
+	sub.Position = UDim2.new(0, 18, 0, 44)
 	sub.Size = UDim2.new(1, -32, 0, 18)
 	sub.Font = Enum.Font.GothamMedium
 	sub.TextSize = 14
@@ -211,7 +213,7 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local inputBg = Instance.new("Frame")
 	inputBg.BackgroundColor3 = Theme.Secondary
-	inputBg.Position = UDim2.new(0, 16, 0, 68)
+	inputBg.Position = UDim2.new(0, 18, 0, 86)
 	inputBg.Size = UDim2.new(1, -32, 0, 40)
 	inputBg.Parent = left
 	InstanceUtil.AddCorner(inputBg, 6)
@@ -306,7 +308,7 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local btnContainer = Instance.new("Frame")
 	btnContainer.BackgroundTransparency = 1
-	btnContainer.Position = UDim2.new(0, 16, 0, 120)
+	btnContainer.Position = UDim2.new(0, 18, 0, 142)
 	btnContainer.Size = UDim2.new(1, -32, 0, 34)
 	btnContainer.Parent = left
 
@@ -331,18 +333,30 @@ function Lifecycle.CreateKeySystem(hub)
 	getBtn.Parent = btnContainer
 	InstanceUtil.AddCorner(getBtn, 6)
 
-	local discordText = Instance.new("TextLabel")
-	discordText.BackgroundTransparency = 1
-	discordText.Position = UDim2.new(0, 16, 0, 160)
-	discordText.Size = UDim2.new(1, -32, 0, 34)
-	discordText.Font = Enum.Font.GothamMedium
-	discordText.TextSize = 12
-	discordText.TextColor3 = Theme.AccentDark
-	discordText.TextTransparency = 0
-	discordText.TextWrapped = true
-	discordText.TextXAlignment = Enum.TextXAlignment.Left
-	discordText.Text = "Problemas com a key? Entre no nosso discord."
-	discordText.Parent = left
+	local discordLabel = Instance.new("TextLabel")
+	discordLabel.BackgroundTransparency = 1
+	discordLabel.Position = UDim2.new(0, 18, 0, 184)
+	discordLabel.Size = UDim2.new(1, -32, 0, 16)
+	discordLabel.Font = Enum.Font.GothamMedium
+	discordLabel.TextSize = 12
+	discordLabel.TextColor3 = Theme.AccentDark
+	discordLabel.TextTransparency = 0
+	discordLabel.TextWrapped = false
+	discordLabel.TextXAlignment = Enum.TextXAlignment.Left
+	discordLabel.Text = "Problemas com a key?"
+	discordLabel.Parent = left
+
+	local discordBtn = Instance.new("TextButton")
+	discordBtn.BackgroundTransparency = 1
+	discordBtn.AutoButtonColor = false
+	discordBtn.Position = UDim2.new(0, 18, 0, 202)
+	discordBtn.Size = UDim2.new(1, -32, 0, 18)
+	discordBtn.Font = Enum.Font.GothamBold
+	discordBtn.TextSize = 12
+	discordBtn.TextColor3 = Theme.Accent
+	discordBtn.TextXAlignment = Enum.TextXAlignment.Left
+	discordBtn.Text = "Entre no nosso servidor do Discord"
+	discordBtn.Parent = left
 
 	local statusText = Instance.new("TextLabel")
 	statusText.BackgroundTransparency = 1
@@ -355,6 +369,33 @@ function Lifecycle.CreateKeySystem(hub)
 	statusText.Text = ""
 	statusText.TextXAlignment = Enum.TextXAlignment.Left
 	statusText.Parent = left
+
+	local function notifyLinkCopied()
+		local notified = false
+		pcall(function()
+			if hub and type(hub.ShowWarning) == "function" then
+				hub:ShowWarning("Link copiado", "info")
+				notified = true
+			end
+		end)
+		if not notified then
+			statusText.TextColor3 = Theme.Accent
+			statusText.Text = "Link copiado"
+			TweenService:Create(statusText, fadeTweenInfo, { TextTransparency = 0 }):Play()
+			task.delay(2, function()
+				pcall(function()
+					TweenService:Create(statusText, TweenInfo.new(0.5), { TextTransparency = 1 }):Play()
+				end)
+			end)
+		end
+	end
+
+	discordBtn.MouseButton1Click:Connect(function()
+		if typeof(setclipboard) == "function" then
+			setclipboard(DISCORD_INVITE_URL)
+		end
+		notifyLinkCopied()
+	end)
 
 	local helpTitle = Instance.new("TextLabel")
 	helpTitle.BackgroundTransparency = 1

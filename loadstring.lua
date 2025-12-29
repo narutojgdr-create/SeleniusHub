@@ -469,7 +469,7 @@ local function showBootstrapNotice(text)
 		lbl.TextColor3 = Color3.fromRGB(235, 235, 235)
 		lbl.TextXAlignment = Enum.TextXAlignment.Left
 		lbl.TextWrapped = true
-		lbl.Text = tostring(text or "Inicializando Selenius... | Espere 5-10s")
+		lbl.Text = tostring(text or "Inicializando Selenius... | Espere 5-25s")
 		lbl.TextTransparency = 1
 		lbl.Parent = card
 
@@ -503,7 +503,7 @@ end
 
 -- Marca para o Lifecycle não tentar duplicar uma notificação "antes de tudo".
 gvSet("SELENIUS_BOOT_NOTIFIED", true)
-local bootstrapGui = showBootstrapNotice("Inicializando Selenius... | Espere 5-10s")
+local bootstrapGui = showBootstrapNotice("Inicializando Selenius... | Espere 5-25s")
 
 -- Deixa renderizar pelo menos 1 frame antes de carregar o resto.
 pcall(function()
@@ -526,8 +526,8 @@ end)
 lib.Lifecycle.CreateKeySystem(hub)
 
 -- Reload compatível com o monólito
-rawset(_G, "SeleniusHubReload", function()
-	local boot2 = showBootstrapNotice("Inicializando Selenius... | Espere 5-10s")
+	rawset(_G, "SeleniusHubReload", function()
+		local boot2 = showBootstrapNotice("Inicializando Selenius... | Espere 5-25s")
 	pcall(function()
 		_task.wait(0.05)
 	end)
