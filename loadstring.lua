@@ -451,9 +451,9 @@ local function showBootstrapNotice(text)
 		corner.CornerRadius = UDim.new(0, 8)
 		corner.Parent = card
 		local stroke = Instance.new("UIStroke")
-		stroke.Color = Color3.fromRGB(70, 70, 80)
+		stroke.Color = Color3.fromRGB(0, 120, 255)
 		stroke.Thickness = 2
-		stroke.Transparency = 0.35
+		stroke.Transparency = 0.15
 		stroke.Parent = card
 
 		local lbl = Instance.new("TextLabel")
@@ -465,7 +465,7 @@ local function showBootstrapNotice(text)
 		lbl.TextColor3 = Color3.fromRGB(235, 235, 235)
 		lbl.TextXAlignment = Enum.TextXAlignment.Left
 		lbl.TextWrapped = true
-		lbl.Text = tostring(text or "Carregando...")
+		lbl.Text = tostring(text or "Inicializando Selenius... | Espere 5-10s")
 		lbl.TextTransparency = 1
 		lbl.Parent = card
 
@@ -488,7 +488,7 @@ end
 
 -- Marca para o Lifecycle não tentar duplicar uma notificação "antes de tudo".
 gvSet("SELENIUS_BOOT_NOTIFIED", true)
-local bootstrapGui = showBootstrapNotice("Carregando...")
+local bootstrapGui = showBootstrapNotice("Inicializando Selenius... | Espere 5-10s")
 
 -- Deixa renderizar pelo menos 1 frame antes de carregar o resto.
 pcall(function()
@@ -512,7 +512,7 @@ lib.Lifecycle.CreateKeySystem(hub)
 
 -- Reload compatível com o monólito
 rawset(_G, "SeleniusHubReload", function()
-	local boot2 = showBootstrapNotice("Carregando...")
+	local boot2 = showBootstrapNotice("Inicializando Selenius... | Espere 5-10s")
 	pcall(function()
 		_task.wait(0.05)
 	end)

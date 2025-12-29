@@ -116,7 +116,7 @@ function Lifecycle.CreateKeySystem(hub)
 	pcall(function()
 		local gv = (type(getgenv) == "function" and getgenv()) or _G
 		if not rawget(gv, "SELENIUS_BOOT_NOTIFIED") then
-			hubNotify(hub, "Carregando...", true)
+			hubNotify(hub, "Inicializando Selenius... | Espere 5-10s", true)
 		end
 	end)
 

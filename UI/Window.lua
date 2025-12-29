@@ -2,6 +2,8 @@ local Defaults = require(script.Parent.Parent.Assets.Defaults)
 local IconPaths = require(script.Parent.Parent.Assets.Icons)
 local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
 
+local TweenService = game:GetService("TweenService")
+
 local Window = {}
 
 function Window.Create(ctx)
@@ -75,24 +77,33 @@ function Window.Create(ctx)
 		Parent = UI.TitleBar,
 	})
 
-	local titleGradient = Instance.new("UIGradient")
-	titleGradient.Rotation = 0
-	titleGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0.00, Theme.Accent),
-		ColorSequenceKeypoint.new(0.50, Theme.TextPrimary),
-		ColorSequenceKeypoint.new(1.00, Theme.Accent),
-	})
-	titleGradient.Parent = UI.TitleLabel
+	local titleScale = Instance.new("UIScale")
+	titleScale.Scale = 1
+	titleScale.Parent = UI.TitleLabel
 
 	task.spawn(function()
+		local basePos = UI.TitleLabel.Position
+		local upPos = basePos + UDim2.new(0, 0, 0, -2)
+		local downPos = basePos + UDim2.new(0, 0, 0, 2)
+		local tiPos = TweenInfo.new(0.32, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+		local tiScale = TweenInfo.new(0.32, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+
 		while UI.TitleLabel and UI.TitleLabel.Parent do
-			for i = 0, 360, 2 do
-				if not (UI.TitleLabel and UI.TitleLabel.Parent) then
-					break
-				end
-				titleGradient.Rotation = i
-				task.wait(0.05)
+			TweenService:Create(UI.TitleLabel, tiPos, { Position = upPos }):Play()
+			TweenService:Create(titleScale, tiScale, { Scale = 1.08 }):Play()
+			task.wait(0.34)
+			if not (UI.TitleLabel and UI.TitleLabel.Parent) then
+				break
 			end
+			TweenService:Create(UI.TitleLabel, tiPos, { Position = downPos }):Play()
+			TweenService:Create(titleScale, tiScale, { Scale = 0.98 }):Play()
+			task.wait(0.34)
+			if not (UI.TitleLabel and UI.TitleLabel.Parent) then
+				break
+			end
+			TweenService:Create(UI.TitleLabel, tiPos, { Position = basePos }):Play()
+			TweenService:Create(titleScale, tiScale, { Scale = 1.04 }):Play()
+			task.wait(0.28)
 		end
 	end)
 
