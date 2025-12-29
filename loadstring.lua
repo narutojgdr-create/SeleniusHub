@@ -443,14 +443,15 @@ local function showBootstrapNotice(text)
 		holder.AutomaticSize = Enum.AutomaticSize.Y
 		holder.Parent = g
 
+		local cornerPx = 18
+
 		local card = Instance.new("Frame")
 		card.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
 		card.BackgroundTransparency = 0.08
-		card.Size = UDim2.new(1, 0, 0, 0)
-		card.AutomaticSize = Enum.AutomaticSize.Y
+		card.Size = UDim2.new(1, 0, 0, 50)
 		card.Parent = holder
 		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 14)
+		corner.CornerRadius = UDim.new(0, cornerPx)
 		corner.Parent = card
 		local stroke = Instance.new("UIStroke")
 		stroke.Color = Color3.fromRGB(70, 70, 80)
@@ -458,59 +459,26 @@ local function showBootstrapNotice(text)
 		stroke.Transparency = 0.55
 		stroke.Parent = card
 
-		local stripMask = Instance.new("Frame")
-		stripMask.BackgroundTransparency = 1
-		stripMask.ClipsDescendants = true
-		stripMask.Size = UDim2.new(1, 0, 0, 5)
-		stripMask.Parent = card
-		local stripMaskCorner = Instance.new("UICorner")
-		stripMaskCorner.CornerRadius = UDim.new(0, 14)
-		stripMaskCorner.Parent = stripMask
-
-		local strip = Instance.new("Frame")
-		strip.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-		strip.Size = UDim2.new(1, 0, 1, 0)
-		strip.Parent = stripMask
-
-		local body = Instance.new("Frame")
-		body.BackgroundTransparency = 1
-		body.Size = UDim2.new(1, 0, 0, 0)
-		body.AutomaticSize = Enum.AutomaticSize.Y
-		body.Parent = card
-		local pad = Instance.new("UIPadding")
-		pad.PaddingLeft = UDim.new(0, 16)
-		pad.PaddingRight = UDim.new(0, 16)
-		pad.PaddingTop = UDim.new(0, 12)
-		pad.PaddingBottom = UDim.new(0, 14)
-		pad.Parent = body
-		local layout = Instance.new("UIListLayout")
-		layout.Padding = UDim.new(0, 6)
-		layout.SortOrder = Enum.SortOrder.LayoutOrder
-		layout.Parent = body
-
-		local header = Instance.new("TextLabel")
-		header.BackgroundTransparency = 1
-		header.Size = UDim2.new(1, 0, 0, 0)
-		header.AutomaticSize = Enum.AutomaticSize.Y
-		header.Font = Enum.Font.GothamBold
-		header.TextSize = 13
-		header.TextColor3 = Color3.fromRGB(160, 160, 170)
-		header.TextXAlignment = Enum.TextXAlignment.Left
-		header.TextWrapped = true
-		header.Text = "Informação"
-		header.Parent = body
+		local bar = Instance.new("Frame")
+		bar.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+		bar.BackgroundTransparency = 0
+		bar.Size = UDim2.new(0, 6, 1, 0)
+		bar.Parent = card
+		local barCorner = Instance.new("UICorner")
+		barCorner.CornerRadius = UDim.new(0, cornerPx)
+		barCorner.Parent = bar
 
 		local lbl = Instance.new("TextLabel")
 		lbl.BackgroundTransparency = 1
-		lbl.Size = UDim2.new(1, 0, 0, 0)
-		lbl.AutomaticSize = Enum.AutomaticSize.Y
-		lbl.Font = Enum.Font.GothamMedium
-		lbl.TextSize = 15
+		lbl.Position = UDim2.new(0, 16, 0, 0)
+		lbl.Size = UDim2.new(1, -24, 1, 0)
+		lbl.Font = Enum.Font.GothamBold
+		lbl.TextSize = 16
 		lbl.TextColor3 = Color3.fromRGB(235, 235, 235)
 		lbl.TextXAlignment = Enum.TextXAlignment.Left
 		lbl.TextWrapped = true
 		lbl.Text = tostring(text or "Carregando Hub...")
-		lbl.Parent = body
+		lbl.Parent = card
 
 		return g
 	end)

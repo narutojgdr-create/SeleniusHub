@@ -420,28 +420,17 @@ function Hub:ShowWarning(text, kind, instant)
 		self:CreateNotificationSystem()
 	end
 
-	-- Nova UI (refeita): card + header strip + corpo
-	local card = InstanceUtil.Create("Frame", {
+	local cornerPx = 18
+
+	-- UI antiga (simples): barra lateral + texto, com cantos mais arredondados
+	local frame = InstanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Secondary,
 		BackgroundTransparency = 0.08,
-		Size = UDim2.new(1, 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
+		Size = UDim2.new(1, 0, 0, 50),
 		Parent = self.NotificationHolder,
 	})
-	InstanceUtil.AddCorner(card, 14)
-	InstanceUtil.AddStroke(card, Theme.Stroke, 1, 0.45)
-	pcall(function()
-		Acrylic.Enable(card, Theme, InstanceUtil)
-	end)
-	pcall(function()
-		local grad = Instance.new("UIGradient")
-		grad.Rotation = 90
-		grad.Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Theme.Secondary:Lerp(Theme.Background, 0.35)),
-			ColorSequenceKeypoint.new(1, Theme.Secondary),
-		})
-		grad.Parent = card
-	end)
+	InstanceUtil.AddCorner(frame, cornerPx)
+	InstanceUtil.AddStroke(frame, Theme.Stroke, 1, 0.45)
 
 	local barColor = Theme.Accent
 	if kind == "error" then
@@ -451,91 +440,49 @@ function Hub:ShowWarning(text, kind, instant)
 		barColor = Theme.Warning
 	end
 
-	local stripMask = Instance.new("Frame")
-	stripMask.BackgroundTransparency = 1
-	stripMask.ClipsDescendants = true
-	stripMask.Size = UDim2.new(1, 0, 0, 5)
-	stripMask.Parent = card
-	local stripMaskCorner = Instance.new("UICorner")
-	stripMaskCorner.CornerRadius = UDim.new(0, 14)
-	stripMaskCorner.Parent = stripMask
-
-	local strip = Instance.new("Frame")
-	strip.BackgroundColor3 = barColor
-	strip.BackgroundTransparency = 0
-	strip.Size = UDim2.new(1, 0, 1, 0)
-	strip.Parent = stripMask
-
-	local body = Instance.new("Frame")
-	body.BackgroundTransparency = 1
-	body.Position = UDim2.new(0, 0, 0, 0)
-	body.Size = UDim2.new(1, 0, 0, 0)
-	body.AutomaticSize = Enum.AutomaticSize.Y
-	body.Parent = card
-
-	local bodyPad = Instance.new("UIPadding")
-	bodyPad.PaddingLeft = UDim.new(0, 16)
-	bodyPad.PaddingRight = UDim.new(0, 16)
-	bodyPad.PaddingTop = UDim.new(0, 12)
-	bodyPad.PaddingBottom = UDim.new(0, 14)
-	bodyPad.Parent = body
-
-	local bodyLayout = Instance.new("UIListLayout")
-	bodyLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	bodyLayout.Padding = UDim.new(0, 6)
-	bodyLayout.Parent = body
-
-	local header = Instance.new("TextLabel")
-	header.BackgroundTransparency = 1
-	header.Size = UDim2.new(1, 0, 0, 0)
-	header.AutomaticSize = Enum.AutomaticSize.Y
-	header.Font = Enum.Font.GothamBold
-	header.TextSize = 13
-	header.TextColor3 = Theme.TextSecondary
-	header.TextXAlignment = Enum.TextXAlignment.Left
-	header.TextWrapped = true
-	header.Text = (kind == "error" and "Erro") or (kind == "warn" and "Aviso") or "Informação"
-	header.Parent = body
+	local bar = Instance.new("Frame")
+	bar.BackgroundColor3 = barColor
+	bar.BackgroundTransparency = 0
+	bar.Size = UDim2.new(0, 6, 1, 0)
+	bar.Parent = frame
+	InstanceUtil.AddCorner(bar, cornerPx)
 
 	local title = Instance.new("TextLabel")
 	title.BackgroundTransparency = 1
-	title.Size = UDim2.new(1, 0, 0, 0)
-	title.AutomaticSize = Enum.AutomaticSize.Y
-	title.Font = Enum.Font.GothamMedium
-	title.TextSize = 15
+	title.Position = UDim2.new(0, 16, 0, 0)
+	title.Size = UDim2.new(1, -24, 1, 0)
+	title.Font = Enum.Font.GothamBold
+	title.TextSize = 16
 	title.TextColor3 = Theme.TextPrimary
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.TextWrapped = true
 	title.Text = text
-	title.Parent = body
+	title.Parent = frame
 
 	local timeout = 4
 
 	-- Entrada
-	card.Position = instant and UDim2.new(0, 0, 0, 0) or UDim2.new(1, 240, 0, 0)
-	card.BackgroundTransparency = instant and card.BackgroundTransparency or 1
+	frame.Position = instant and UDim2.new(0, 0, 0, 0) or UDim2.new(1, 240, 0, 0)
+	frame.BackgroundTransparency = instant and frame.BackgroundTransparency or 1
 	title.TextTransparency = instant and 0 or 1
-	header.TextTransparency = instant and 0 or 1
 
 	if not instant then
-		InstanceUtil.Tween(card, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+		InstanceUtil.Tween(frame, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 			Position = UDim2.new(0, 0, 0, 0),
 			BackgroundTransparency = 0.08,
 		})
 		InstanceUtil.Tween(title, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextTransparency = 0 })
-		InstanceUtil.Tween(header, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextTransparency = 0 })
 	end
 
 	task.delay(timeout, function()
-		if card then
-			local t = InstanceUtil.Tween(card, TweenInfo.new(0.38, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+		if frame then
+			local t = InstanceUtil.Tween(frame, TweenInfo.new(0.38, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
 				BackgroundTransparency = 1,
 				Position = UDim2.new(1, 240, 0, 0),
 			})
 			InstanceUtil.Tween(title, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { TextTransparency = 1 })
-			InstanceUtil.Tween(header, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { TextTransparency = 1 })
 			t.Completed:Wait()
-			card:Destroy()
+			frame:Destroy()
 		end
 	end)
 end
