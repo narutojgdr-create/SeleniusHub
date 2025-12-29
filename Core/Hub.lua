@@ -437,11 +437,17 @@ function Hub:ShowWarning(text, kind)
 		barColor = Theme.Warning
 	end
 
+	local barMask = Instance.new("Frame")
+	barMask.BackgroundTransparency = 1
+	barMask.ClipsDescendants = true
+	barMask.Size = UDim2.new(0, 4, 1, 0)
+	barMask.Parent = frame
+	InstanceUtil.AddCorner(barMask, 8)
+
 	local bar = Instance.new("Frame")
 	bar.BackgroundColor3 = barColor
-	bar.Size = UDim2.new(0, 4, 1, 0)
-	bar.Parent = frame
-	InstanceUtil.AddCorner(bar, 8)
+	bar.Size = UDim2.new(1, 0, 1, 0)
+	bar.Parent = barMask
 
 	local title = Instance.new("TextLabel")
 	title.BackgroundTransparency = 1

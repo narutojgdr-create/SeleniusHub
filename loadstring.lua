@@ -456,13 +456,19 @@ local function showBootstrapNotice(text)
 		stroke.Transparency = 0.5
 		stroke.Parent = card
 
+		local barMask = Instance.new("Frame")
+		barMask.BackgroundTransparency = 1
+		barMask.ClipsDescendants = true
+		barMask.Size = UDim2.new(0, 4, 1, 0)
+		barMask.Parent = card
+		local barMaskCorner = Instance.new("UICorner")
+		barMaskCorner.CornerRadius = UDim.new(0, 8)
+		barMaskCorner.Parent = barMask
+
 		local bar = Instance.new("Frame")
 		bar.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-		bar.Size = UDim2.new(0, 4, 1, 0)
-		bar.Parent = card
-		local barCorner = Instance.new("UICorner")
-		barCorner.CornerRadius = UDim.new(0, 8)
-		barCorner.Parent = bar
+		bar.Size = UDim2.new(1, 0, 1, 0)
+		bar.Parent = barMask
 
 		local lbl = Instance.new("TextLabel")
 		lbl.BackgroundTransparency = 1
