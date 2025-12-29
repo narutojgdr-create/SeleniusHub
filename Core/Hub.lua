@@ -393,14 +393,22 @@ function Hub:CreateNotificationSystem()
 	holder.BackgroundTransparency = 1
 	holder.Position = UDim2.new(1, -20, 1, -20)
 	holder.AnchorPoint = Vector2.new(1, 1)
-	holder.Size = UDim2.new(0, 300, 1, 0)
+	holder.Size = UDim2.new(0, 340, 1, 0)
 	holder.Parent = self.UI.ScreenGui
+	holder.ClipsDescendants = false
 
 	local layout = Instance.new("UIListLayout")
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
 	layout.Padding = UDim.new(0, 10)
 	layout.Parent = holder
+
+	local pad = Instance.new("UIPadding")
+	pad.PaddingLeft = UDim.new(0, 0)
+	pad.PaddingRight = UDim.new(0, 0)
+	pad.PaddingTop = UDim.new(0, 0)
+	pad.PaddingBottom = UDim.new(0, 0)
+	pad.Parent = holder
 
 	self.NotificationHolder = holder
 end
@@ -414,25 +422,32 @@ function Hub:ShowWarning(text, kind, instant)
 
 	local frame = InstanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Secondary,
-		Size = UDim2.new(1, 0, 0, 54),
-		BackgroundTransparency = 0.15,
+		BackgroundTransparency = 0.12,
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		Parent = self.NotificationHolder,
 	})
-	InstanceUtil.AddCorner(frame, 10)
-	InstanceUtil.AddStroke(frame, Theme.Stroke, 1, 0.5)
+	InstanceUtil.AddCorner(frame, 12)
+	InstanceUtil.AddStroke(frame, Theme.Stroke, 1, 0.45)
 	pcall(function()
 		Acrylic.Enable(frame, Theme, InstanceUtil)
 	end)
-
 	pcall(function()
 		local grad = Instance.new("UIGradient")
 		grad.Rotation = 90
 		grad.Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Theme.Secondary),
-			ColorSequenceKeypoint.new(1, Theme.Background),
+			ColorSequenceKeypoint.new(0, Theme.Secondary:Lerp(Theme.Background, 0.25)),
+			ColorSequenceKeypoint.new(1, Theme.Secondary),
 		})
 		grad.Parent = frame
 	end)
+
+	local framePad = Instance.new("UIPadding")
+	framePad.PaddingLeft = UDim.new(0, 14)
+	framePad.PaddingRight = UDim.new(0, 14)
+	framePad.PaddingTop = UDim.new(0, 12)
+	framePad.PaddingBottom = UDim.new(0, 12)
+	framePad.Parent = frame
 
 	local barColor = Theme.Accent
 	if kind == "error" then
@@ -444,37 +459,87 @@ function Hub:ShowWarning(text, kind, instant)
 
 	local bar = Instance.new("Frame")
 	bar.BackgroundColor3 = barColor
-	bar.Position = UDim2.new(0, 0, 0, 8)
-	bar.Size = UDim2.new(0, 4, 1, -16)
+	bar.Position = UDim2.new(0, -14, 0, 0)
+	bar.Size = UDim2.new(0, 4, 1, 0)
 	bar.Parent = frame
-	InstanceUtil.AddCorner(bar, 6)
+	InstanceUtil.AddCorner(bar, 8)
+
+	local content = Instance.new("Frame")
+	content.BackgroundTransparency = 1
+	content.Size = UDim2.new(1, 0, 0, 0)
+	content.AutomaticSize = Enum.AutomaticSize.Y
+	content.Parent = frame
+
+	local contentLayout = Instance.new("UIListLayout")
+	contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	contentLayout.Padding = UDim.new(0, 6)
+	contentLayout.Parent = content
+
+	local header = Instance.new("TextLabel")
+	header.BackgroundTransparency = 1
+	header.Size = UDim2.new(1, 0, 0, 0)
+	header.AutomaticSize = Enum.AutomaticSize.Y
+	header.Font = Enum.Font.GothamBold
+	header.TextSize = 14
+	header.TextColor3 = barColor
+	header.TextXAlignment = Enum.TextXAlignment.Left
+	header.TextWrapped = true
+	header.Text = (kind == "error" and "Erro") or (kind == "warn" and "Aviso") or "Info"
+	header.Parent = content
 
 	local title = Instance.new("TextLabel")
 	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0, 16, 0, 8)
-	title.Size = UDim2.new(1, -26, 1, -16)
-	title.Font = Enum.Font.GothamBold
+	title.Size = UDim2.new(1, 0, 0, 0)
+	title.AutomaticSize = Enum.AutomaticSize.Y
+	title.Font = Enum.Font.GothamMedium
 	title.TextSize = 15
 	title.TextColor3 = Theme.TextPrimary
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.TextWrapped = true
 	title.Text = text
-	title.Parent = frame
+	title.Parent = content
 
-	if instant then
-		frame.Position = UDim2.new(0, 0, 0, 0)
-	else
-		frame.Position = UDim2.new(1, 200, 0, 0)
-		InstanceUtil.Tween(frame, Defaults.Tween.AnimConfig, { Position = UDim2.new(0, 0, 0, 0) })
+	local timeout = 4
+	local timerBg = Instance.new("Frame")
+	timerBg.BackgroundTransparency = 1
+	timerBg.Size = UDim2.new(1, 0, 0, 3)
+	timerBg.Parent = content
+
+	local timer = Instance.new("Frame")
+	timer.BackgroundColor3 = barColor
+	timer.BackgroundTransparency = 0.35
+	timer.Size = UDim2.new(1, 0, 1, 0)
+	timer.Parent = timerBg
+	InstanceUtil.AddCorner(timer, 6)
+
+	-- Entrada
+	frame.Position = instant and UDim2.new(0, 0, 0, 0) or UDim2.new(1, 220, 0, 0)
+	frame.BackgroundTransparency = instant and frame.BackgroundTransparency or 1
+	title.TextTransparency = instant and 0 or 1
+	header.TextTransparency = instant and 0 or 1
+
+	if not instant then
+		InstanceUtil.Tween(frame, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+			Position = UDim2.new(0, 0, 0, 0),
+			BackgroundTransparency = 0.12,
+		})
+		InstanceUtil.Tween(title, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextTransparency = 0 })
+		InstanceUtil.Tween(header, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextTransparency = 0 })
 	end
 
-	task.delay(4, function()
+	-- Barra de tempo (discreta)
+	InstanceUtil.Tween(timer, TweenInfo.new(timeout, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {
+		Size = UDim2.new(0, 0, 1, 0),
+		BackgroundTransparency = 1,
+	})
+
+	task.delay(timeout, function()
 		if frame then
-			local t = InstanceUtil.Tween(frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+			local t = InstanceUtil.Tween(frame, TweenInfo.new(0.38, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
 				BackgroundTransparency = 1,
-				Size = UDim2.new(1, 0, 0, 0),
 			})
-			InstanceUtil.Tween(title, TweenInfo.new(0.3), { TextTransparency = 1 })
+			InstanceUtil.Tween(title, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { TextTransparency = 1 })
+			InstanceUtil.Tween(header, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { TextTransparency = 1 })
 			t.Completed:Wait()
 			frame:Destroy()
 		end
