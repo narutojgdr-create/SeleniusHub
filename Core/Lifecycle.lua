@@ -120,28 +120,14 @@ function Lifecycle.CreateKeySystem(hub)
 		end
 	end)
 
-	-- Se a key já estiver salva, pula a Key UI e abre direto.
+	-- Key UI deve SEMPRE aparecer.
+	-- Se existir key salva, apenas pré-preenche o campo para facilitar.
 	local savedKey = getSavedKey()
-	if savedKey and savedKey == correctKey then
-		pcall(function()
-			if cacheKeyValue then
-				cacheKeyValue.Value = savedKey
-			end
-		end)
-		pcall(function()
-			if hub and type(hub.SetVisible) == "function" then
-				hub:SetVisible(true, true)
-			end
-		end)
-		task.spawn(function()
-			pcall(function()
-				if hub and type(hub.FinishInit) == "function" then
-					hub:FinishInit()
-				end
-			end)
-		end)
-		return
-	end
+	pcall(function()
+		if cacheKeyValue and type(savedKey) == "string" then
+			cacheKeyValue.Value = savedKey
+		end
+	end)
 
 	-- Evita KeySystem duplicado
 	if hub and hub.__SeleniusKeyGui then
@@ -217,7 +203,7 @@ function Lifecycle.CreateKeySystem(hub)
 	keyBox.TextColor3 = Theme.TextPrimary
 	keyBox.PlaceholderText = "Insert Key Here..."
 	keyBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
-	keyBox.Text = ""
+	keyBox.Text = (type(savedKey) == "string" and savedKey) or ""
 	keyBox.ClearTextOnFocus = false
 	keyBox.Parent = inputBg
 

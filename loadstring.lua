@@ -439,19 +439,30 @@ local function showBootstrapNotice(text)
 		holder.BackgroundTransparency = 1
 		holder.Position = UDim2.new(1, -20, 1, -20)
 		holder.AnchorPoint = Vector2.new(1, 1)
-		holder.Size = UDim2.new(0, 300, 0, 60)
+		holder.Size = UDim2.new(0, 300, 0, 50)
 		holder.Parent = g
 
 		local frame = Instance.new("Frame")
-		frame.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
+		frame.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
 		frame.BackgroundTransparency = 0.15
 		frame.Size = UDim2.new(1, 0, 1, 0)
 		frame.Parent = holder
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 8)
+		corner.Parent = frame
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = Color3.fromRGB(70, 70, 80)
+		stroke.Thickness = 1
+		stroke.Transparency = 0.5
+		stroke.Parent = frame
 
 		local bar = Instance.new("Frame")
 		bar.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 		bar.Size = UDim2.new(0, 4, 1, 0)
 		bar.Parent = frame
+		local barCorner = Instance.new("UICorner")
+		barCorner.CornerRadius = UDim.new(0, 8)
+		barCorner.Parent = bar
 
 		local lbl = Instance.new("TextLabel")
 		lbl.BackgroundTransparency = 1
