@@ -83,27 +83,29 @@ function Window.Create(ctx)
 
 	task.spawn(function()
 		local basePos = UI.TitleLabel.Position
-		local upPos = basePos + UDim2.new(0, 0, 0, -2)
-		local downPos = basePos + UDim2.new(0, 0, 0, 2)
-		local tiPos = TweenInfo.new(0.32, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
-		local tiScale = TweenInfo.new(0.32, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+		local baseRot = UI.TitleLabel.Rotation
+		local ti = TweenInfo.new(1.15, Enum.EasingStyle.Quint, Enum.EasingDirection.InOut)
+
+		local p1 = basePos + UDim2.new(0, 3, 0, -2)
+		local p2 = basePos + UDim2.new(0, -2, 0, 2)
+		local p3 = basePos + UDim2.new(0, 1, 0, 0)
 
 		while UI.TitleLabel and UI.TitleLabel.Parent do
-			TweenService:Create(UI.TitleLabel, tiPos, { Position = upPos }):Play()
-			TweenService:Create(titleScale, tiScale, { Scale = 1.08 }):Play()
-			task.wait(0.34)
+			TweenService:Create(UI.TitleLabel, ti, { Position = p1, Rotation = baseRot + 1.2 }):Play()
+			TweenService:Create(titleScale, ti, { Scale = 1.06 }):Play()
+			task.wait(1.2)
 			if not (UI.TitleLabel and UI.TitleLabel.Parent) then
 				break
 			end
-			TweenService:Create(UI.TitleLabel, tiPos, { Position = downPos }):Play()
-			TweenService:Create(titleScale, tiScale, { Scale = 0.98 }):Play()
-			task.wait(0.34)
+			TweenService:Create(UI.TitleLabel, ti, { Position = p2, Rotation = baseRot - 1.0 }):Play()
+			TweenService:Create(titleScale, ti, { Scale = 1.01 }):Play()
+			task.wait(1.2)
 			if not (UI.TitleLabel and UI.TitleLabel.Parent) then
 				break
 			end
-			TweenService:Create(UI.TitleLabel, tiPos, { Position = basePos }):Play()
-			TweenService:Create(titleScale, tiScale, { Scale = 1.04 }):Play()
-			task.wait(0.28)
+			TweenService:Create(UI.TitleLabel, ti, { Position = p3, Rotation = baseRot }):Play()
+			TweenService:Create(titleScale, ti, { Scale = 1.03 }):Play()
+			task.wait(0.9)
 		end
 	end)
 

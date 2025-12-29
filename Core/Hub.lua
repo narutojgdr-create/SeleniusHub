@@ -427,7 +427,7 @@ function Hub:ShowWarning(text, kind)
 		Parent = self.NotificationHolder,
 	})
 	InstanceUtil.AddCorner(frame, 8)
-	InstanceUtil.AddStroke(frame, Theme.Accent, 2, 0.15)
+	InstanceUtil.AddStroke(frame, Theme.Accent, 2, 0.35)
 
 	local scale = Instance.new("UIScale")
 	scale.Scale = 0.86

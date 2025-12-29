@@ -453,7 +453,7 @@ local function showBootstrapNotice(text)
 		local stroke = Instance.new("UIStroke")
 		stroke.Color = Color3.fromRGB(0, 120, 255)
 		stroke.Thickness = 2
-		stroke.Transparency = 0.15
+		stroke.Transparency = 0.35
 		stroke.Parent = card
 
 		local lbl = Instance.new("TextLabel")
