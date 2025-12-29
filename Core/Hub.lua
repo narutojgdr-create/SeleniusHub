@@ -451,22 +451,20 @@ function Hub:ShowWarning(text, kind, instant)
 		barColor = Theme.Warning
 	end
 
+	local stripMask = Instance.new("Frame")
+	stripMask.BackgroundTransparency = 1
+	stripMask.ClipsDescendants = true
+	stripMask.Size = UDim2.new(1, 0, 0, 5)
+	stripMask.Parent = card
+	local stripMaskCorner = Instance.new("UICorner")
+	stripMaskCorner.CornerRadius = UDim.new(0, 14)
+	stripMaskCorner.Parent = stripMask
+
 	local strip = Instance.new("Frame")
 	strip.BackgroundColor3 = barColor
 	strip.BackgroundTransparency = 0
-	strip.Size = UDim2.new(1, 0, 0, 5)
-	strip.Parent = card
-	local stripCorner = Instance.new("UICorner")
-	stripCorner.CornerRadius = UDim.new(0, 14)
-	stripCorner.Parent = strip
-	pcall(function()
-		local mask = Instance.new("Frame")
-		mask.BackgroundTransparency = 1
-		mask.ClipsDescendants = true
-		mask.Size = UDim2.new(1, 0, 0, 5)
-		mask.Parent = card
-		strip.Parent = mask
-	end)
+	strip.Size = UDim2.new(1, 0, 1, 0)
+	strip.Parent = stripMask
 
 	local body = Instance.new("Frame")
 	body.BackgroundTransparency = 1
