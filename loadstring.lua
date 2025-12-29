@@ -382,17 +382,128 @@ end
 destroyOldInstance(gvGet("SeleniusHubInstance"))
 destroyOldInstance(rawget(_G, "SeleniusHubInstance"))
 
+-- Mostrar uma notificação ANTES de tudo (antes de baixar/carregar os módulos do Hub).
+-- Isso garante que o usuário veja feedback imediato, e só depois o resto começa a carregar.
+local function getBootstrapParent()
+	local okHui, hui = pcall(function()
+		return gethui()
+	end)
+	if okHui and hui then
+		return hui
+	end
+
+	local okCoreGui, coreGui = pcall(function()
+		return game:GetService("CoreGui")
+	end)
+	if okCoreGui and coreGui then
+		return coreGui
+	end
+
+	local okPlayers, players = pcall(function()
+		return game:GetService("Players")
+	end)
+	if okPlayers and players and players.LocalPlayer then
+		local okPg, pg = pcall(function()
+			return players.LocalPlayer:WaitForChild("PlayerGui")
+		end)
+		if okPg and pg then
+			return pg
+		end
+	end
+
+	return nil
+end
+
+local function showBootstrapNotice(text)
+	local parent = getBootstrapParent()
+	if not parent then
+		return nil
+	end
+
+	pcall(function()
+		local old = parent:FindFirstChild("SeleniusHub_BootstrapNotice")
+		if old and old.Destroy then
+			old:Destroy()
+		end
+	end)
+
+	local ok, gui = pcall(function()
+		local g = Instance.new("ScreenGui")
+		g.Name = "SeleniusHub_BootstrapNotice"
+		g.ResetOnSpawn = false
+		g.DisplayOrder = 9999
+		g.IgnoreGuiInset = true
+		g.Parent = parent
+
+		local holder = Instance.new("Frame")
+		holder.BackgroundTransparency = 1
+		holder.Position = UDim2.new(1, -20, 1, -20)
+		holder.AnchorPoint = Vector2.new(1, 1)
+		holder.Size = UDim2.new(0, 300, 0, 60)
+		holder.Parent = g
+
+		local frame = Instance.new("Frame")
+		frame.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
+		frame.BackgroundTransparency = 0.15
+		frame.Size = UDim2.new(1, 0, 1, 0)
+		frame.Parent = holder
+
+		local bar = Instance.new("Frame")
+		bar.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+		bar.Size = UDim2.new(0, 4, 1, 0)
+		bar.Parent = frame
+
+		local lbl = Instance.new("TextLabel")
+		lbl.BackgroundTransparency = 1
+		lbl.Position = UDim2.new(0, 12, 0, 0)
+		lbl.Size = UDim2.new(1, -20, 1, 0)
+		lbl.Font = Enum.Font.GothamBold
+		lbl.TextSize = 16
+		lbl.TextColor3 = Color3.fromRGB(235, 235, 235)
+		lbl.TextXAlignment = Enum.TextXAlignment.Left
+		lbl.TextWrapped = true
+		lbl.Text = tostring(text or "Carregando Hub...")
+		lbl.Parent = frame
+
+		return g
+	end)
+
+	if ok then
+		return gui
+	end
+	return nil
+end
+
+-- Marca para o Lifecycle não tentar duplicar uma notificação "antes de tudo".
+gvSet("SELENIUS_BOOT_NOTIFIED", true)
+local bootstrapGui = showBootstrapNotice("Carregando Hub...")
+
+-- Deixa renderizar pelo menos 1 frame antes de carregar o resto.
+pcall(function()
+	_task.wait(0.05)
+end)
+
 -- Carrega a library (init.lua)
 local lib = customRequire(ROOT["init"])
 
 -- Cria o hub
 local hub = lib.Init()
 
+pcall(function()
+	if bootstrapGui and bootstrapGui.Parent then
+		bootstrapGui:Destroy()
+	end
+end)
+
 -- Inicia KeySystem primeiro e, ao concluir, Loading mostra o Hub
 lib.Lifecycle.CreateKeySystem(hub)
 
 -- Reload compatível com o monólito
 rawset(_G, "SeleniusHubReload", function()
+	local boot2 = showBootstrapNotice("Carregando Hub...")
+	pcall(function()
+		_task.wait(0.05)
+	end)
 	pcall(function()
 		if hub and type(hub.Destroy) == "function" then
 			hub:Destroy()
@@ -401,6 +512,11 @@ rawset(_G, "SeleniusHubReload", function()
 	_task.wait(0.1)
 	local lib2 = customRequire(ROOT["init"])
 	hub = lib2.Init()
+	pcall(function()
+		if boot2 and boot2.Parent then
+			boot2:Destroy()
+		end
+	end)
 	lib2.Lifecycle.CreateKeySystem(hub)
 	gvSet("SeleniusHubInstance", hub)
 	rawset(_G, "SeleniusHubInstance", hub)

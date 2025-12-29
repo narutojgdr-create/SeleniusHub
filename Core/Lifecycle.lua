@@ -111,8 +111,14 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local cacheFolder, cacheKeyValue = ensureWorkspaceCache()
 
-	-- Notificação nova (antes de tudo, instantânea)
-	hubNotify(hub, "Carregando Hub...", true)
+	-- A notificação "antes de tudo" é responsabilidade do loadstring.lua (bootstrap).
+	-- Aqui só mostramos se não houver bootstrap (ex.: uso local sem o loader).
+	pcall(function()
+		local gv = (type(getgenv) == "function" and getgenv()) or _G
+		if not rawget(gv, "SELENIUS_BOOT_NOTIFIED") then
+			hubNotify(hub, "Carregando Hub...", true)
+		end
+	end)
 
 	-- Se a key já estiver salva, pula a Key UI e abre direto.
 	local savedKey = getSavedKey()
