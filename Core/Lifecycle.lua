@@ -118,7 +118,7 @@ function Lifecycle.CreateKeySystem(hub)
 	pcall(function()
 		local gv = (type(getgenv) == "function" and getgenv()) or _G
 		if not rawget(gv, "SELENIUS_BOOT_NOTIFIED") then
-			hubNotify(hub, "Inicializando Selenius... | Espere 5-25s", true)
+			hubNotify(hub, "Inicializando Selenius...", true)
 		end
 	end)
 
@@ -150,7 +150,7 @@ function Lifecycle.CreateKeySystem(hub)
 	local main = Instance.new("Frame")
 	main.AnchorPoint = Vector2.new(0.5, 0.5)
 	main.Position = UDim2.new(0.5, 0, 0.5, 0)
-	main.Size = UDim2.new(0, 640, 0, 300)
+	main.Size = UDim2.new(0, 720, 0, 330)
 	main.BackgroundColor3 = Theme.Background
 	main.BorderSizePixel = 0
 	main.ClipsDescendants = false
@@ -172,51 +172,64 @@ function Lifecycle.CreateKeySystem(hub)
 	local left = Instance.new("Frame")
 	left.BackgroundTransparency = 1
 	left.Position = UDim2.new(0, 0, 0, 0)
-	left.Size = UDim2.new(0, 340, 1, 0)
+	left.Size = UDim2.new(0, 380, 1, 0)
 	left.Parent = content
+
+	local leftPad = Instance.new("UIPadding")
+	leftPad.PaddingLeft = UDim.new(0, 22)
+	leftPad.PaddingRight = UDim.new(0, 22)
+	leftPad.PaddingTop = UDim.new(0, 22)
+	leftPad.PaddingBottom = UDim.new(0, 22)
+	leftPad.Parent = left
+
+	local leftLayout = Instance.new("UIListLayout")
+	leftLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	leftLayout.Padding = UDim.new(0, 10)
+	leftLayout.Parent = left
 
 	local separator = Instance.new("Frame")
 	separator.BackgroundColor3 = Theme.Stroke
 	separator.BackgroundTransparency = 0.45
 	separator.BorderSizePixel = 0
-	separator.Position = UDim2.new(0, 340, 0, 16)
+	separator.Position = UDim2.new(0, 380, 0, 16)
 	separator.Size = UDim2.new(0, 1, 1, -32)
 	separator.Parent = content
 
 	local right = Instance.new("Frame")
 	right.BackgroundTransparency = 1
-	right.Position = UDim2.new(0, 341, 0, 0)
-	right.Size = UDim2.new(1, -341, 1, 0)
+	right.Position = UDim2.new(0, 381, 0, 0)
+	right.Size = UDim2.new(1, -381, 1, 0)
 	right.Parent = content
 
 	local title = Instance.new("TextLabel")
 	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0, 18, 0, 18)
-	title.Size = UDim2.new(1, -32, 0, 26)
+	title.Size = UDim2.new(1, 0, 0, 26)
 	title.Font = Enum.Font.GothamBold
 	title.TextSize = 20
 	title.TextColor3 = Theme.Accent
 	title.Text = "SELENIUS KEY"
 	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.LayoutOrder = 1
 	title.Parent = left
 
 	local sub = Instance.new("TextLabel")
 	sub.BackgroundTransparency = 1
-	sub.Position = UDim2.new(0, 18, 0, 44)
-	sub.Size = UDim2.new(1, -32, 0, 18)
+	sub.Size = UDim2.new(1, 0, 0, 18)
 	sub.Font = Enum.Font.GothamMedium
 	sub.TextSize = 14
 	sub.TextColor3 = Theme.AccentDark
 	sub.Text = "Authentication Required"
 	sub.TextXAlignment = Enum.TextXAlignment.Left
+	sub.LayoutOrder = 2
 	sub.Parent = left
 
 	local inputBg = Instance.new("Frame")
 	inputBg.BackgroundColor3 = Theme.Secondary
-	inputBg.Position = UDim2.new(0, 18, 0, 86)
-	inputBg.Size = UDim2.new(1, -32, 0, 40)
+	inputBg.Size = UDim2.new(1, 0, 0, 44)
+	inputBg.LayoutOrder = 3
 	inputBg.Parent = left
 	InstanceUtil.AddCorner(inputBg, 6)
+	InstanceUtil.AddStroke(inputBg, Theme.Stroke, 1, 0.55)
 
 	local showKey = false
 	local function maskKey(s)
@@ -308,35 +321,52 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local btnContainer = Instance.new("Frame")
 	btnContainer.BackgroundTransparency = 1
-	btnContainer.Position = UDim2.new(0, 18, 0, 142)
-	btnContainer.Size = UDim2.new(1, -32, 0, 34)
+	btnContainer.Size = UDim2.new(1, 0, 0, 38)
+	btnContainer.LayoutOrder = 4
 	btnContainer.Parent = left
+
+	local btnLayout = Instance.new("UIListLayout")
+	btnLayout.FillDirection = Enum.FillDirection.Horizontal
+	btnLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	btnLayout.Padding = UDim.new(0, 10)
+	btnLayout.Parent = btnContainer
 
 	local enterBtn = Instance.new("TextButton")
 	enterBtn.BackgroundColor3 = Theme.Button
-	enterBtn.Size = UDim2.new(0.48, 0, 1, 0)
+	enterBtn.Size = UDim2.new(0.5, -5, 1, 0)
 	enterBtn.Font = Enum.Font.GothamBold
 	enterBtn.TextSize = 14
 	enterBtn.TextColor3 = Theme.Accent
 	enterBtn.Text = "CHECK KEY"
+	enterBtn.LayoutOrder = 1
 	enterBtn.Parent = btnContainer
 	InstanceUtil.AddCorner(enterBtn, 6)
 
 	local getBtn = Instance.new("TextButton")
 	getBtn.BackgroundColor3 = Theme.Button
-	getBtn.Position = UDim2.new(0.52, 0, 0, 0)
-	getBtn.Size = UDim2.new(0.48, 0, 1, 0)
+	getBtn.Size = UDim2.new(0.5, -5, 1, 0)
 	getBtn.Font = Enum.Font.GothamBold
 	getBtn.TextSize = 14
 	getBtn.TextColor3 = Theme.TextPrimary
 	getBtn.Text = "GET KEY"
+	getBtn.LayoutOrder = 2
 	getBtn.Parent = btnContainer
 	InstanceUtil.AddCorner(getBtn, 6)
 
+	local discordRow = Instance.new("Frame")
+	discordRow.BackgroundTransparency = 1
+	discordRow.Size = UDim2.new(1, 0, 0, 44)
+	discordRow.LayoutOrder = 5
+	discordRow.Parent = left
+
+	local discordLayout = Instance.new("UIListLayout")
+	discordLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	discordLayout.Padding = UDim.new(0, 2)
+	discordLayout.Parent = discordRow
+
 	local discordLabel = Instance.new("TextLabel")
 	discordLabel.BackgroundTransparency = 1
-	discordLabel.Position = UDim2.new(0, 18, 0, 184)
-	discordLabel.Size = UDim2.new(1, -32, 0, 16)
+	discordLabel.Size = UDim2.new(1, 0, 0, 16)
 	discordLabel.Font = Enum.Font.GothamMedium
 	discordLabel.TextSize = 12
 	discordLabel.TextColor3 = Theme.AccentDark
@@ -344,30 +374,31 @@ function Lifecycle.CreateKeySystem(hub)
 	discordLabel.TextWrapped = false
 	discordLabel.TextXAlignment = Enum.TextXAlignment.Left
 	discordLabel.Text = "Problemas com a key?"
-	discordLabel.Parent = left
+	discordLabel.LayoutOrder = 1
+	discordLabel.Parent = discordRow
 
 	local discordBtn = Instance.new("TextButton")
 	discordBtn.BackgroundTransparency = 1
 	discordBtn.AutoButtonColor = false
-	discordBtn.Position = UDim2.new(0, 18, 0, 202)
-	discordBtn.Size = UDim2.new(1, -32, 0, 18)
+	discordBtn.Size = UDim2.new(1, 0, 0, 18)
 	discordBtn.Font = Enum.Font.GothamBold
 	discordBtn.TextSize = 12
 	discordBtn.TextColor3 = Theme.Accent
 	discordBtn.TextXAlignment = Enum.TextXAlignment.Left
 	discordBtn.Text = "Entre no nosso servidor do Discord"
-	discordBtn.Parent = left
+	discordBtn.LayoutOrder = 2
+	discordBtn.Parent = discordRow
 
 	local statusText = Instance.new("TextLabel")
 	statusText.BackgroundTransparency = 1
-	statusText.Position = UDim2.new(0, 16, 1, -26)
-	statusText.Size = UDim2.new(1, -32, 0, 20)
+	statusText.Size = UDim2.new(1, 0, 0, 20)
 	statusText.Font = Enum.Font.GothamMedium
 	statusText.TextSize = 12
 	statusText.TextColor3 = Theme.Error
 	statusText.TextTransparency = 1
 	statusText.Text = ""
 	statusText.TextXAlignment = Enum.TextXAlignment.Left
+	statusText.LayoutOrder = 6
 	statusText.Parent = left
 
 	local function notifyLinkCopied()
@@ -510,12 +541,7 @@ function Lifecycle.CreateKeySystem(hub)
 		if typeof(setclipboard) == "function" then
 			setclipboard("https://linkvertise.com/example-key")
 		end
-		statusText.TextColor3 = Theme.Accent
-		statusText.Text = "Link copied to clipboard"
-		TweenService:Create(statusText, TweenInfo.new(0.2), { TextTransparency = 0 }):Play()
-		task.delay(2, function()
-			TweenService:Create(statusText, TweenInfo.new(0.5), { TextTransparency = 1 }):Play()
-		end)
+		notifyLinkCopied()
 	end)
 end
 
