@@ -426,7 +426,7 @@ function Hub:ShowWarning(text, kind)
 		BackgroundTransparency = 0.1,
 		Parent = self.NotificationHolder,
 	})
-	InstanceUtil.AddCorner(frame, 8)
+	InstanceUtil.AddCorner(frame, 12)
 	InstanceUtil.AddStroke(frame, Theme.Stroke, 1, 0.5)
 
 	local barColor = Theme.Accent
@@ -439,14 +439,15 @@ function Hub:ShowWarning(text, kind)
 
 	local bar = Instance.new("Frame")
 	bar.BackgroundColor3 = barColor
-	bar.Size = UDim2.new(0, 4, 1, 0)
+	bar.Position = UDim2.new(0, 6, 0, 6)
+	bar.Size = UDim2.new(0, 4, 1, -12)
 	bar.Parent = frame
-	InstanceUtil.AddCorner(bar, 8)
+	InstanceUtil.AddCorner(bar, 999)
 
 	local title = Instance.new("TextLabel")
 	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0, 12, 0, 0)
-	title.Size = UDim2.new(1, -20, 1, 0)
+	title.Position = UDim2.new(0, 16, 0, 0)
+	title.Size = UDim2.new(1, -24, 1, 0)
 	title.Font = Enum.Font.GothamBold
 	title.TextSize = 16
 	title.TextColor3 = Theme.TextPrimary

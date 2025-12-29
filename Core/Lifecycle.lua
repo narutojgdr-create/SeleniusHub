@@ -116,7 +116,7 @@ function Lifecycle.CreateKeySystem(hub)
 	pcall(function()
 		local gv = (type(getgenv) == "function" and getgenv()) or _G
 		if not rawget(gv, "SELENIUS_BOOT_NOTIFIED") then
-			hubNotify(hub, "Inicializando... aguarde de 5 a 10 segundos.", true)
+			hubNotify(hub, "Iniciando... 5-10s", true)
 		end
 	end)
 
@@ -205,6 +205,10 @@ function Lifecycle.CreateKeySystem(hub)
 	keyBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
 	keyBox.Text = (type(savedKey) == "string" and savedKey) or ""
 	keyBox.ClearTextOnFocus = false
+	-- Deixa como campo de senha (se disponível na versão do Roblox)
+	pcall(function()
+		keyBox.TextMasked = true
+	end)
 	keyBox.Parent = inputBg
 
 	local btnContainer = Instance.new("Frame")
