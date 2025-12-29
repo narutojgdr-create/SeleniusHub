@@ -443,14 +443,14 @@ function Hub:ShowWarning(text, kind, instant)
 	local bar = Instance.new("Frame")
 	bar.BackgroundColor3 = barColor
 	bar.BackgroundTransparency = 0
-	bar.Size = UDim2.new(0, 6, 1, 0)
+	bar.Size = UDim2.new(0, 10, 1, 0)
 	bar.Parent = frame
-	InstanceUtil.AddCorner(bar, cornerPx)
+	InstanceUtil.AddCorner(bar, 999)
 
 	local title = Instance.new("TextLabel")
 	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0, 16, 0, 0)
-	title.Size = UDim2.new(1, -24, 1, 0)
+	title.Position = UDim2.new(0, 20, 0, 0)
+	title.Size = UDim2.new(1, -28, 1, 0)
 	title.Font = Enum.Font.GothamBold
 	title.TextSize = 16
 	title.TextColor3 = Theme.TextPrimary

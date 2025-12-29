@@ -462,22 +462,22 @@ local function showBootstrapNotice(text)
 		local bar = Instance.new("Frame")
 		bar.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 		bar.BackgroundTransparency = 0
-		bar.Size = UDim2.new(0, 6, 1, 0)
+		bar.Size = UDim2.new(0, 10, 1, 0)
 		bar.Parent = card
 		local barCorner = Instance.new("UICorner")
-		barCorner.CornerRadius = UDim.new(0, cornerPx)
+		barCorner.CornerRadius = UDim.new(0, 999)
 		barCorner.Parent = bar
 
 		local lbl = Instance.new("TextLabel")
 		lbl.BackgroundTransparency = 1
-		lbl.Position = UDim2.new(0, 16, 0, 0)
-		lbl.Size = UDim2.new(1, -24, 1, 0)
+		lbl.Position = UDim2.new(0, 20, 0, 0)
+		lbl.Size = UDim2.new(1, -28, 1, 0)
 		lbl.Font = Enum.Font.GothamBold
 		lbl.TextSize = 16
 		lbl.TextColor3 = Color3.fromRGB(235, 235, 235)
 		lbl.TextXAlignment = Enum.TextXAlignment.Left
 		lbl.TextWrapped = true
-		lbl.Text = tostring(text or "Carregando Hub...")
+		lbl.Text = tostring(text or "Inicializando... aguarde de 5 a 10 segundos.")
 		lbl.Parent = card
 
 		return g
@@ -491,7 +491,7 @@ end
 
 -- Marca para o Lifecycle não tentar duplicar uma notificação "antes de tudo".
 gvSet("SELENIUS_BOOT_NOTIFIED", true)
-local bootstrapGui = showBootstrapNotice("Carregando Hub...")
+local bootstrapGui = showBootstrapNotice("Inicializando... aguarde de 5 a 10 segundos.")
 
 -- Deixa renderizar pelo menos 1 frame antes de carregar o resto.
 pcall(function()
@@ -515,7 +515,7 @@ lib.Lifecycle.CreateKeySystem(hub)
 
 -- Reload compatível com o monólito
 rawset(_G, "SeleniusHubReload", function()
-	local boot2 = showBootstrapNotice("Carregando Hub...")
+	local boot2 = showBootstrapNotice("Inicializando... aguarde de 5 a 10 segundos.")
 	pcall(function()
 		_task.wait(0.05)
 	end)
