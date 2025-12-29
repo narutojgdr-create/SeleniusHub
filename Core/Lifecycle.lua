@@ -209,7 +209,7 @@ function Lifecycle.CreateKeySystem(hub)
 		if rest <= 0 then
 			return prefix
 		end
-		return prefix .. " " .. string.rep("•", rest)
+		return prefix .. " " .. string.rep("●", rest)
 	end
 
 	local showBtn = Instance.new("TextButton")
@@ -229,7 +229,7 @@ function Lifecycle.CreateKeySystem(hub)
 	keyBox.Position = UDim2.new(0, 10, 0, 0)
 	keyBox.Size = UDim2.new(1, -112, 1, 0)
 	keyBox.Font = Enum.Font.GothamMedium
-	keyBox.TextSize = 14
+	keyBox.TextSize = 16
 	keyBox.TextColor3 = Theme.TextPrimary
 	keyBox.PlaceholderText = "Insert Key Here..."
 	keyBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
@@ -246,14 +246,27 @@ function Lifecycle.CreateKeySystem(hub)
 	maskLbl.TextColor3 = keyBox.TextColor3
 	maskLbl.TextXAlignment = Enum.TextXAlignment.Left
 	maskLbl.TextWrapped = false
-	maskLbl.TextTruncate = Enum.TextTruncate.AtEnd
+	maskLbl.TextTruncate = Enum.TextTruncate.None
 	maskLbl.Text = maskKey(keyBox.Text)
 	maskLbl.Parent = inputBg
+	maskLbl.ZIndex = (keyBox.ZIndex == 0 and 2) or (keyBox.ZIndex + 1)
+	keyBox.ZIndex = (keyBox.ZIndex == 0 and 1) or keyBox.ZIndex
+
+	local placeholderColorShown = keyBox.PlaceholderColor3
 
 	local function refreshKeyMask()
 		maskLbl.Text = maskKey(keyBox.Text)
 		maskLbl.Visible = not showKey
-		keyBox.TextTransparency = showKey and 0 or 1
+		if showKey then
+			keyBox.TextTransparency = 0
+			keyBox.TextColor3 = Theme.TextPrimary
+			keyBox.PlaceholderColor3 = placeholderColorShown
+		else
+			-- Evita "vazar" letras/cursor: pinta o texto com a cor do fundo
+			keyBox.TextTransparency = 0
+			keyBox.TextColor3 = inputBg.BackgroundColor3
+			keyBox.PlaceholderColor3 = inputBg.BackgroundColor3
+		end
 		showBtn.Text = showKey and "OCULTAR" or "MOSTRAR"
 	end
 
