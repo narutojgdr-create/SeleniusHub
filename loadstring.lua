@@ -439,39 +439,35 @@ local function showBootstrapNotice(text)
 		holder.BackgroundTransparency = 1
 		holder.Position = UDim2.new(1, -20, 1, -20)
 		holder.AnchorPoint = Vector2.new(1, 1)
-		holder.Size = UDim2.new(0, 340, 0, 0)
-		holder.AutomaticSize = Enum.AutomaticSize.Y
+		holder.Size = UDim2.new(0, 340, 0, 50)
 		holder.Parent = g
-
-		local cornerPx = 18
 
 		local card = Instance.new("Frame")
 		card.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
-		card.BackgroundTransparency = 0.08
+		card.BackgroundTransparency = 0.1
 		card.Size = UDim2.new(1, 0, 0, 50)
 		card.Parent = holder
 		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, cornerPx)
+		corner.CornerRadius = UDim.new(0, 8)
 		corner.Parent = card
 		local stroke = Instance.new("UIStroke")
 		stroke.Color = Color3.fromRGB(70, 70, 80)
 		stroke.Thickness = 1
-		stroke.Transparency = 0.55
+		stroke.Transparency = 0.5
 		stroke.Parent = card
 
 		local bar = Instance.new("Frame")
 		bar.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-		bar.BackgroundTransparency = 0
-		bar.Size = UDim2.new(0, 10, 1, 0)
+		bar.Size = UDim2.new(0, 4, 1, 0)
 		bar.Parent = card
 		local barCorner = Instance.new("UICorner")
-		barCorner.CornerRadius = UDim.new(0, 999)
+		barCorner.CornerRadius = UDim.new(0, 8)
 		barCorner.Parent = bar
 
 		local lbl = Instance.new("TextLabel")
 		lbl.BackgroundTransparency = 1
-		lbl.Position = UDim2.new(0, 20, 0, 0)
-		lbl.Size = UDim2.new(1, -28, 1, 0)
+		lbl.Position = UDim2.new(0, 12, 0, 0)
+		lbl.Size = UDim2.new(1, -20, 1, 0)
 		lbl.Font = Enum.Font.GothamBold
 		lbl.TextSize = 16
 		lbl.TextColor3 = Color3.fromRGB(235, 235, 235)
