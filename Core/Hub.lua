@@ -16,6 +16,8 @@ local Assets = require(script.Parent.Parent.Utils.Assets)
 local InstanceUtil = require(script.Parent.Parent.Utils.Instance)
 local MathUtil = require(script.Parent.Parent.Utils.Math)
 
+local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
+
 local ThemeManager = require(script.Parent.Parent.Theme.ThemeManager)
 local LocaleManager = require(script.Parent.Parent.Locale.LocaleManager)
 
@@ -412,12 +414,25 @@ function Hub:ShowWarning(text, kind, instant)
 
 	local frame = InstanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Secondary,
-		Size = UDim2.new(1, 0, 0, 50),
-		BackgroundTransparency = 0.1,
+		Size = UDim2.new(1, 0, 0, 54),
+		BackgroundTransparency = 0.15,
 		Parent = self.NotificationHolder,
 	})
-	InstanceUtil.AddCorner(frame, 8)
+	InstanceUtil.AddCorner(frame, 10)
 	InstanceUtil.AddStroke(frame, Theme.Stroke, 1, 0.5)
+	pcall(function()
+		Acrylic.Enable(frame, Theme, InstanceUtil)
+	end)
+
+	pcall(function()
+		local grad = Instance.new("UIGradient")
+		grad.Rotation = 90
+		grad.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Theme.Secondary),
+			ColorSequenceKeypoint.new(1, Theme.Background),
+		})
+		grad.Parent = frame
+	end)
 
 	local barColor = Theme.Accent
 	if kind == "error" then
@@ -429,16 +444,17 @@ function Hub:ShowWarning(text, kind, instant)
 
 	local bar = Instance.new("Frame")
 	bar.BackgroundColor3 = barColor
-	bar.Size = UDim2.new(0, 4, 1, 0)
+	bar.Position = UDim2.new(0, 0, 0, 8)
+	bar.Size = UDim2.new(0, 4, 1, -16)
 	bar.Parent = frame
-	InstanceUtil.AddCorner(bar, 8)
+	InstanceUtil.AddCorner(bar, 6)
 
 	local title = Instance.new("TextLabel")
 	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0, 12, 0, 0)
-	title.Size = UDim2.new(1, -20, 1, 0)
+	title.Position = UDim2.new(0, 16, 0, 8)
+	title.Size = UDim2.new(1, -26, 1, -16)
 	title.Font = Enum.Font.GothamBold
-	title.TextSize = 16
+	title.TextSize = 15
 	title.TextColor3 = Theme.TextPrimary
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.TextWrapped = true
@@ -1214,13 +1230,17 @@ function Hub:SetupButtons()
 
 			task.delay(0.1, function()
 				UI.ContentContainer.Visible = true
-				UI.Separator.Visible = true
+				if UI.Separator then
+					UI.Separator.Visible = true
+				end
 			end)
 		else
 			self.Minimized = true
 			self.SavedSize = frame.Size
 			UI.ContentContainer.Visible = false
-			UI.Separator.Visible = false
+			if UI.Separator then
+				UI.Separator.Visible = false
+			end
 			InstanceUtil.Tween(frame, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 				Size = UDim2.new(0, frame.Size.X.Offset, 0, self.MinimizedHeight),
 			})

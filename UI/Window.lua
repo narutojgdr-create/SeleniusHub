@@ -159,19 +159,10 @@ function Window.Create(ctx)
 		UI.CloseBtn.BackgroundColor3 = T.Button
 	end)
 
-	UI.Separator = ctx.instanceUtil.Create("Frame", {
-		BackgroundColor3 = Theme.Separator,
-		Position = UDim2.new(0, 0, 0, 46),
-		Size = UDim2.new(1, 0, 0, 2),
-		Parent = UI.MainFrame,
-		ZIndex = 2,
-	})
-	ctx.themeManager:Register(UI.Separator, "BackgroundColor3", "Separator")
-
 	UI.ContentContainer = ctx.instanceUtil.Create("Frame", {
 		BackgroundTransparency = 1,
-		Position = UDim2.new(0, 0, 0, 48),
-		Size = UDim2.new(1, 0, 1, -48),
+		Position = UDim2.new(0, 0, 0, 46),
+		Size = UDim2.new(1, 0, 1, -46),
 		Parent = UI.MainFrame,
 		ZIndex = 2,
 	})
@@ -195,19 +186,11 @@ function Window.Create(ctx)
 	})
 	ctx.instanceUtil.Create("UIPadding", { PaddingTop = UDim.new(0, 10), Parent = UI.Sidebar })
 
-	UI.VerticalSeparator = ctx.instanceUtil.Create("Frame", {
-		BackgroundColor3 = Theme.Separator,
-		Position = UDim2.new(0, 153, 0, 0),
-		Size = UDim2.new(0, 2, 1, 0),
-		Parent = UI.ContentContainer,
-	})
-	ctx.themeManager:Register(UI.VerticalSeparator, "BackgroundColor3", "Separator")
-
 	UI.PagesContainer = ctx.instanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Secondary,
 		BackgroundTransparency = 0.5,
-		Position = UDim2.new(0, 158, 0, 7),
-		Size = UDim2.new(1, -165, 1, -14),
+		Position = UDim2.new(0, 153, 0, 7),
+		Size = UDim2.new(1, -160, 1, -14),
 		ClipsDescendants = true,
 		Parent = UI.ContentContainer,
 	})
