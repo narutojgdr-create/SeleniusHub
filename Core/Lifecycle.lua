@@ -116,7 +116,7 @@ function Lifecycle.CreateKeySystem(hub)
 	pcall(function()
 		local gv = (type(getgenv) == "function" and getgenv()) or _G
 		if not rawget(gv, "SELENIUS_BOOT_NOTIFIED") then
-			hubNotify(hub, "Iniciando... 5-10s", true)
+			hubNotify(hub, "Carregando...", true)
 		end
 	end)
 
@@ -194,10 +194,40 @@ function Lifecycle.CreateKeySystem(hub)
 	inputBg.Parent = content
 	InstanceUtil.AddCorner(inputBg, 6)
 
+	local showKey = false
+	local function maskKey(s)
+		s = tostring(s or "")
+		if showKey then
+			return s
+		end
+		if #s == 0 then
+			return ""
+		end
+		local prefixLen = math.min(2, #s)
+		local prefix = string.sub(s, 1, prefixLen)
+		local rest = #s - prefixLen
+		if rest <= 0 then
+			return prefix
+		end
+		return prefix .. " " .. string.rep("•", rest)
+	end
+
+	local showBtn = Instance.new("TextButton")
+	showBtn.BackgroundColor3 = Theme.Button
+	showBtn.Position = UDim2.new(1, -92, 0, 6)
+	showBtn.Size = UDim2.new(0, 86, 0, 28)
+	showBtn.Font = Enum.Font.GothamBold
+	showBtn.TextSize = 12
+	showBtn.TextColor3 = Theme.TextPrimary
+	showBtn.Text = "MOSTRAR"
+	showBtn.AutoButtonColor = false
+	showBtn.Parent = inputBg
+	InstanceUtil.AddCorner(showBtn, 6)
+
 	local keyBox = Instance.new("TextBox")
 	keyBox.BackgroundTransparency = 1
 	keyBox.Position = UDim2.new(0, 10, 0, 0)
-	keyBox.Size = UDim2.new(1, -20, 1, 0)
+	keyBox.Size = UDim2.new(1, -112, 1, 0)
 	keyBox.Font = Enum.Font.GothamMedium
 	keyBox.TextSize = 14
 	keyBox.TextColor3 = Theme.TextPrimary
@@ -205,11 +235,34 @@ function Lifecycle.CreateKeySystem(hub)
 	keyBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
 	keyBox.Text = (type(savedKey) == "string" and savedKey) or ""
 	keyBox.ClearTextOnFocus = false
-	-- Deixa como campo de senha (se disponível na versão do Roblox)
-	pcall(function()
-		keyBox.TextMasked = true
-	end)
 	keyBox.Parent = inputBg
+
+	local maskLbl = Instance.new("TextLabel")
+	maskLbl.BackgroundTransparency = 1
+	maskLbl.Position = keyBox.Position
+	maskLbl.Size = keyBox.Size
+	maskLbl.Font = keyBox.Font
+	maskLbl.TextSize = keyBox.TextSize
+	maskLbl.TextColor3 = keyBox.TextColor3
+	maskLbl.TextXAlignment = Enum.TextXAlignment.Left
+	maskLbl.TextWrapped = false
+	maskLbl.TextTruncate = Enum.TextTruncate.AtEnd
+	maskLbl.Text = maskKey(keyBox.Text)
+	maskLbl.Parent = inputBg
+
+	local function refreshKeyMask()
+		maskLbl.Text = maskKey(keyBox.Text)
+		maskLbl.Visible = not showKey
+		keyBox.TextTransparency = showKey and 0 or 1
+		showBtn.Text = showKey and "OCULTAR" or "MOSTRAR"
+	end
+
+	keyBox:GetPropertyChangedSignal("Text"):Connect(refreshKeyMask)
+	showBtn.MouseButton1Click:Connect(function()
+		showKey = not showKey
+		refreshKeyMask()
+	end)
+	refreshKeyMask()
 
 	local btnContainer = Instance.new("Frame")
 	btnContainer.BackgroundTransparency = 1

@@ -448,7 +448,7 @@ local function showBootstrapNotice(text)
 		card.Size = UDim2.new(1, 0, 0, 50)
 		card.Parent = holder
 		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 12)
+		corner.CornerRadius = UDim.new(0, 8)
 		corner.Parent = card
 		local stroke = Instance.new("UIStroke")
 		stroke.Color = Color3.fromRGB(70, 70, 80)
@@ -458,23 +458,22 @@ local function showBootstrapNotice(text)
 
 		local bar = Instance.new("Frame")
 		bar.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-		bar.Position = UDim2.new(0, 6, 0, 6)
-		bar.Size = UDim2.new(0, 4, 1, -12)
+		bar.Size = UDim2.new(0, 4, 1, 0)
 		bar.Parent = card
 		local barCorner = Instance.new("UICorner")
-		barCorner.CornerRadius = UDim.new(0, 999)
+		barCorner.CornerRadius = UDim.new(0, 8)
 		barCorner.Parent = bar
 
 		local lbl = Instance.new("TextLabel")
 		lbl.BackgroundTransparency = 1
-		lbl.Position = UDim2.new(0, 16, 0, 0)
-		lbl.Size = UDim2.new(1, -24, 1, 0)
+		lbl.Position = UDim2.new(0, 12, 0, 0)
+		lbl.Size = UDim2.new(1, -20, 1, 0)
 		lbl.Font = Enum.Font.GothamBold
 		lbl.TextSize = 16
 		lbl.TextColor3 = Color3.fromRGB(235, 235, 235)
 		lbl.TextXAlignment = Enum.TextXAlignment.Left
 		lbl.TextWrapped = true
-		lbl.Text = tostring(text or "Iniciando... 5-10s")
+		lbl.Text = tostring(text or "Carregando...")
 		lbl.Parent = card
 
 		return g
@@ -488,7 +487,7 @@ end
 
 -- Marca para o Lifecycle não tentar duplicar uma notificação "antes de tudo".
 gvSet("SELENIUS_BOOT_NOTIFIED", true)
-local bootstrapGui = showBootstrapNotice("Iniciando... 5-10s")
+local bootstrapGui = showBootstrapNotice("Carregando...")
 
 -- Deixa renderizar pelo menos 1 frame antes de carregar o resto.
 pcall(function()
@@ -512,7 +511,7 @@ lib.Lifecycle.CreateKeySystem(hub)
 
 -- Reload compatível com o monólito
 rawset(_G, "SeleniusHubReload", function()
-	local boot2 = showBootstrapNotice("Iniciando... 5-10s")
+	local boot2 = showBootstrapNotice("Carregando...")
 	pcall(function()
 		_task.wait(0.05)
 	end)
