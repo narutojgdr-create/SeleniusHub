@@ -203,13 +203,7 @@ function Lifecycle.CreateKeySystem(hub)
 		if #s == 0 then
 			return ""
 		end
-		local prefixLen = math.min(2, #s)
-		local prefix = string.sub(s, 1, prefixLen)
-		local rest = #s - prefixLen
-		if rest <= 0 then
-			return prefix
-		end
-		return prefix .. " " .. string.rep("●", rest)
+		return string.rep("●", #s)
 	end
 
 	local showBtn = Instance.new("TextButton")

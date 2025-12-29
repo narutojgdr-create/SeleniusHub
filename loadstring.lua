@@ -452,23 +452,9 @@ local function showBootstrapNotice(text)
 		corner.Parent = card
 		local stroke = Instance.new("UIStroke")
 		stroke.Color = Color3.fromRGB(70, 70, 80)
-		stroke.Thickness = 1
-		stroke.Transparency = 0.5
+		stroke.Thickness = 2
+		stroke.Transparency = 0.35
 		stroke.Parent = card
-
-		local barMask = Instance.new("Frame")
-		barMask.BackgroundTransparency = 1
-		barMask.ClipsDescendants = true
-		barMask.Size = UDim2.new(0, 4, 1, 0)
-		barMask.Parent = card
-		local barMaskCorner = Instance.new("UICorner")
-		barMaskCorner.CornerRadius = UDim.new(0, 8)
-		barMaskCorner.Parent = barMask
-
-		local bar = Instance.new("Frame")
-		bar.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-		bar.Size = UDim2.new(1, 0, 1, 0)
-		bar.Parent = barMask
 
 		local lbl = Instance.new("TextLabel")
 		lbl.BackgroundTransparency = 1
@@ -480,7 +466,16 @@ local function showBootstrapNotice(text)
 		lbl.TextXAlignment = Enum.TextXAlignment.Left
 		lbl.TextWrapped = true
 		lbl.Text = tostring(text or "Carregando...")
+		lbl.TextTransparency = 1
 		lbl.Parent = card
+
+		pcall(function()
+			local TweenService = game:GetService("TweenService")
+			local ti = TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+			card.Position = UDim2.new(1, 260, 0, 0)
+			TweenService:Create(card, ti, { Position = UDim2.new(0, 0, 0, 0) }):Play()
+			TweenService:Create(lbl, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextTransparency = 0 }):Play()
+		end)
 
 		return g
 	end)

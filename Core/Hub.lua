@@ -427,27 +427,11 @@ function Hub:ShowWarning(text, kind)
 		Parent = self.NotificationHolder,
 	})
 	InstanceUtil.AddCorner(frame, 8)
-	InstanceUtil.AddStroke(frame, Theme.Stroke, 1, 0.5)
+	InstanceUtil.AddStroke(frame, Theme.Stroke, 2, 0.35)
 
-	local barColor = Theme.Accent
-	if kind == "error" then
-		barColor = Theme.Error
-	end
-	if kind == "warn" then
-		barColor = Theme.Warning
-	end
-
-	local barMask = Instance.new("Frame")
-	barMask.BackgroundTransparency = 1
-	barMask.ClipsDescendants = true
-	barMask.Size = UDim2.new(0, 4, 1, 0)
-	barMask.Parent = frame
-	InstanceUtil.AddCorner(barMask, 8)
-
-	local bar = Instance.new("Frame")
-	bar.BackgroundColor3 = barColor
-	bar.Size = UDim2.new(1, 0, 1, 0)
-	bar.Parent = barMask
+	local scale = Instance.new("UIScale")
+	scale.Scale = 0.86
+	scale.Parent = frame
 
 	local title = Instance.new("TextLabel")
 	title.BackgroundTransparency = 1
@@ -461,16 +445,25 @@ function Hub:ShowWarning(text, kind)
 	title.Text = text
 	title.Parent = frame
 
-	frame.Position = UDim2.new(1, 200, 0, 0)
-	InstanceUtil.Tween(frame, Defaults.Tween.AnimConfig, { Position = UDim2.new(0, 0, 0, 0) })
+	frame.Position = UDim2.new(1, 260, 0, 0)
+	frame.BackgroundTransparency = 1
+	title.TextTransparency = 1
+
+	InstanceUtil.Tween(frame, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0, 0, 0, 0),
+		BackgroundTransparency = 0.1,
+	})
+	InstanceUtil.Tween(scale, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 })
+	InstanceUtil.Tween(title, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextTransparency = 0 })
 
 	task.delay(4, function()
 		if frame then
 			local t = InstanceUtil.Tween(frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
 				BackgroundTransparency = 1,
-				Size = UDim2.new(1, 0, 0, 0),
+				Position = UDim2.new(1, 260, 0, 0),
 			})
-			InstanceUtil.Tween(title, TweenInfo.new(0.3), { TextTransparency = 1 })
+			InstanceUtil.Tween(scale, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), { Scale = 0.86 })
+			InstanceUtil.Tween(title, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { TextTransparency = 1 })
 			t.Completed:Wait()
 			frame:Destroy()
 		end
