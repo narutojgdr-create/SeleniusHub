@@ -1,11 +1,18 @@
 local TweenService = game:GetService("TweenService")
-local StarterGui = game:GetService("StarterGui")
 
 local Assets = require(script.Parent.Parent.Utils.Assets)
 local InstanceUtil = require(script.Parent.Parent.Utils.Instance)
 local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
 
 local Lifecycle = {}
+
+local function hubNotify(hub, text)
+	pcall(function()
+		if hub and type(hub.ShowWarning) == "function" then
+			hub:ShowWarning(text, "warn")
+		end
+	end)
+end
 
 local function destroyGuiSafe(gui)
 	pcall(function()
@@ -48,13 +55,7 @@ function Lifecycle.CreateKeySystem(hub)
 	local fadeTweenInfo = TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
 	-- Notificação ao executar o Hub.
-	pcall(function()
-		StarterGui:SetCore("SendNotification", {
-			Title = "SeleniusHub",
-			Text = "Hub inicializando, espere 5-10 segundos",
-			Duration = 6,
-		})
-	end)
+	hubNotify(hub, "Hub inicializando, espere 5-10 segundos")
 
 	-- Evita KeySystem duplicado
 	if hub and hub.__SeleniusKeyGui then
@@ -197,13 +198,7 @@ function Lifecycle.CreateKeySystem(hub)
 		submitting = true
 		if keyBox.Text == correctKey then
 			-- Notificação após clicar/enter (do jeito que você pediu)
-			pcall(function()
-				StarterGui:SetCore("SendNotification", {
-					Title = "SeleniusHub",
-					Text = "Hub inicializando, espere 5-10 segundos",
-					Duration = 6,
-				})
-			end)
+			hubNotify(hub, "Hub inicializando, espere 5-10 segundos")
 
 			inputBg.Visible = false
 			btnContainer.Visible = false
