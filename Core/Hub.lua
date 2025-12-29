@@ -413,24 +413,21 @@ function Hub:CreateNotificationSystem()
 	self.NotificationHolder = holder
 end
 
-function Hub:ShowWarning(text, kind, instant)
+function Hub:ShowWarning(text, kind)
 	local Theme = self.ThemeManager:GetTheme()
 
 	if not self.NotificationHolder then
 		self:CreateNotificationSystem()
 	end
 
-	local cornerPx = 18
-
-	-- UI antiga (simples): barra lateral + texto, com cantos mais arredondados
 	local frame = InstanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Secondary,
-		BackgroundTransparency = 0.08,
 		Size = UDim2.new(1, 0, 0, 50),
+		BackgroundTransparency = 0.1,
 		Parent = self.NotificationHolder,
 	})
-	InstanceUtil.AddCorner(frame, cornerPx)
-	InstanceUtil.AddStroke(frame, Theme.Stroke, 1, 0.45)
+	InstanceUtil.AddCorner(frame, 8)
+	InstanceUtil.AddStroke(frame, Theme.Stroke, 1, 0.5)
 
 	local barColor = Theme.Accent
 	if kind == "error" then
@@ -442,15 +439,14 @@ function Hub:ShowWarning(text, kind, instant)
 
 	local bar = Instance.new("Frame")
 	bar.BackgroundColor3 = barColor
-	bar.BackgroundTransparency = 0
-	bar.Size = UDim2.new(0, 10, 1, 0)
+	bar.Size = UDim2.new(0, 4, 1, 0)
 	bar.Parent = frame
-	InstanceUtil.AddCorner(bar, 999)
+	InstanceUtil.AddCorner(bar, 8)
 
 	local title = Instance.new("TextLabel")
 	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0, 20, 0, 0)
-	title.Size = UDim2.new(1, -28, 1, 0)
+	title.Position = UDim2.new(0, 12, 0, 0)
+	title.Size = UDim2.new(1, -20, 1, 0)
 	title.Font = Enum.Font.GothamBold
 	title.TextSize = 16
 	title.TextColor3 = Theme.TextPrimary
@@ -459,28 +455,16 @@ function Hub:ShowWarning(text, kind, instant)
 	title.Text = text
 	title.Parent = frame
 
-	local timeout = 4
+	frame.Position = UDim2.new(1, 200, 0, 0)
+	InstanceUtil.Tween(frame, Defaults.Tween.AnimConfig, { Position = UDim2.new(0, 0, 0, 0) })
 
-	-- Entrada
-	frame.Position = instant and UDim2.new(0, 0, 0, 0) or UDim2.new(1, 240, 0, 0)
-	frame.BackgroundTransparency = instant and frame.BackgroundTransparency or 1
-	title.TextTransparency = instant and 0 or 1
-
-	if not instant then
-		InstanceUtil.Tween(frame, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-			Position = UDim2.new(0, 0, 0, 0),
-			BackgroundTransparency = 0.08,
-		})
-		InstanceUtil.Tween(title, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextTransparency = 0 })
-	end
-
-	task.delay(timeout, function()
+	task.delay(4, function()
 		if frame then
-			local t = InstanceUtil.Tween(frame, TweenInfo.new(0.38, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+			local t = InstanceUtil.Tween(frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
 				BackgroundTransparency = 1,
-				Position = UDim2.new(1, 240, 0, 0),
+				Size = UDim2.new(1, 0, 0, 0),
 			})
-			InstanceUtil.Tween(title, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { TextTransparency = 1 })
+			InstanceUtil.Tween(title, TweenInfo.new(0.3), { TextTransparency = 1 })
 			t.Completed:Wait()
 			frame:Destroy()
 		end
