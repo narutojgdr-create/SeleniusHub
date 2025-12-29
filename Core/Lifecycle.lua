@@ -6,11 +6,11 @@ local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
 
 local Lifecycle = {}
 
-local function hubNotify(hub, text)
+local function hubNotify(hub, text, instant)
 	pcall(function()
 		if hub and type(hub.ShowWarning) == "function" then
 			-- "info" usa o Accent do tema (normalmente azul)
-			hub:ShowWarning(text, "info")
+			hub:ShowWarning(text, "info", instant)
 		end
 	end)
 end
@@ -55,7 +55,8 @@ function Lifecycle.CreateKeySystem(hub)
 	local hoverTweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	local fadeTweenInfo = TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
-	-- Notificação deve aparecer só depois que a UI de key fechar.
+	-- Notificação do próprio Hub deve aparecer antes de tudo (instantânea).
+	hubNotify(hub, "Hub inicializando, espere 5-10 segundos", true)
 
 	-- Evita KeySystem duplicado
 	if hub and hub.__SeleniusKeyGui then
@@ -215,9 +216,6 @@ function Lifecycle.CreateKeySystem(hub)
 			})
 			closeTween.Completed:Wait()
 			gui:Destroy()
-
-			-- Notificação do próprio Hub (azul) só agora, após fechar a Key UI.
-			hubNotify(hub, "Hub inicializando, espere 5-10 segundos")
 
 			-- Abrir o Hub rápido: mostra primeiro, termina init em paralelo.
 			pcall(function()

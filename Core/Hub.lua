@@ -403,8 +403,12 @@ function Hub:CreateNotificationSystem()
 	self.NotificationHolder = holder
 end
 
-function Hub:ShowWarning(text, kind)
+function Hub:ShowWarning(text, kind, instant)
 	local Theme = self.ThemeManager:GetTheme()
+
+	if not self.NotificationHolder then
+		self:CreateNotificationSystem()
+	end
 
 	local frame = InstanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Secondary,
@@ -441,8 +445,12 @@ function Hub:ShowWarning(text, kind)
 	title.Text = text
 	title.Parent = frame
 
-	frame.Position = UDim2.new(1, 200, 0, 0)
-	InstanceUtil.Tween(frame, Defaults.Tween.AnimConfig, { Position = UDim2.new(0, 0, 0, 0) })
+	if instant then
+		frame.Position = UDim2.new(0, 0, 0, 0)
+	else
+		frame.Position = UDim2.new(1, 200, 0, 0)
+		InstanceUtil.Tween(frame, Defaults.Tween.AnimConfig, { Position = UDim2.new(0, 0, 0, 0) })
+	end
 
 	task.delay(4, function()
 		if frame then
