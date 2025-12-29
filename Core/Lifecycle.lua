@@ -1,10 +1,64 @@
 local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
 
 local Assets = require(script.Parent.Parent.Utils.Assets)
 local InstanceUtil = require(script.Parent.Parent.Utils.Instance)
 local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
 
 local Lifecycle = {}
+
+local SAVED_KEY_PATH = "SeleniusHub/key.txt"
+
+local function ensureWorkspaceCache()
+	local folder = Workspace:FindFirstChild("SeleniusHub")
+	if not folder then
+		folder = Instance.new("Folder")
+		folder.Name = "SeleniusHub"
+		folder.Parent = Workspace
+	end
+
+	local keyValue = folder:FindFirstChild("SavedKey")
+	if not keyValue then
+		keyValue = Instance.new("StringValue")
+		keyValue.Name = "SavedKey"
+		keyValue.Value = ""
+		keyValue.Parent = folder
+	end
+
+	local status = folder:FindFirstChild("Status")
+	if not status then
+		status = Instance.new("StringValue")
+		status.Name = "Status"
+		status.Value = "Loaded"
+		status.Parent = folder
+	else
+		status.Value = "Loaded"
+	end
+
+	return folder, keyValue
+end
+
+local function getSavedKey()
+	if type(Assets.SafeIsFile) == "function" and Assets.SafeIsFile(SAVED_KEY_PATH) then
+		local k = Assets.SafeReadFile(SAVED_KEY_PATH)
+		if type(k) == "string" then
+			k = k:gsub("%s+$", "")
+			if k ~= "" then
+				return k
+			end
+		end
+	end
+	return nil
+end
+
+local function saveKey(value)
+	if type(value) ~= "string" or value == "" then
+		return
+	end
+	pcall(function()
+		Assets.SafeWriteFile(SAVED_KEY_PATH, value)
+	end)
+end
 
 local function hubNotify(hub, text, instant)
 	pcall(function()
@@ -55,8 +109,33 @@ function Lifecycle.CreateKeySystem(hub)
 	local hoverTweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	local fadeTweenInfo = TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
-	-- Notificação do próprio Hub deve aparecer antes de tudo (instantânea).
-	hubNotify(hub, "Hub inicializando, espere 5-10 segundos", true)
+	local cacheFolder, cacheKeyValue = ensureWorkspaceCache()
+
+	-- Notificação nova (antes de tudo, instantânea)
+	hubNotify(hub, "Carregando Hub...", true)
+
+	-- Se a key já estiver salva, pula a Key UI e abre direto.
+	local savedKey = getSavedKey()
+	if savedKey and savedKey == correctKey then
+		pcall(function()
+			if cacheKeyValue then
+				cacheKeyValue.Value = savedKey
+			end
+		end)
+		pcall(function()
+			if hub and type(hub.SetVisible) == "function" then
+				hub:SetVisible(true, true)
+			end
+		end)
+		task.spawn(function()
+			pcall(function()
+				if hub and type(hub.FinishInit) == "function" then
+					hub:FinishInit()
+				end
+			end)
+		end)
+		return
+	end
 
 	-- Evita KeySystem duplicado
 	if hub and hub.__SeleniusKeyGui then
@@ -198,6 +277,13 @@ function Lifecycle.CreateKeySystem(hub)
 		end
 		submitting = true
 		if keyBox.Text == correctKey then
+			saveKey(keyBox.Text)
+			pcall(function()
+				if cacheKeyValue then
+					cacheKeyValue.Value = keyBox.Text
+				end
+			end)
+
 			inputBg.Visible = false
 			btnContainer.Visible = false
 			title.Visible = false
