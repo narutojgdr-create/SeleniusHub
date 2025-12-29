@@ -9,7 +9,8 @@ local Lifecycle = {}
 local function hubNotify(hub, text)
 	pcall(function()
 		if hub and type(hub.ShowWarning) == "function" then
-			hub:ShowWarning(text, "warn")
+			-- "info" usa o Accent do tema (normalmente azul)
+			hub:ShowWarning(text, "info")
 		end
 	end)
 end
@@ -54,8 +55,7 @@ function Lifecycle.CreateKeySystem(hub)
 	local hoverTweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	local fadeTweenInfo = TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
-	-- Notificação ao executar o Hub.
-	hubNotify(hub, "Hub inicializando, espere 5-10 segundos")
+	-- Notificação deve aparecer só depois que a UI de key fechar.
 
 	-- Evita KeySystem duplicado
 	if hub and hub.__SeleniusKeyGui then
@@ -197,9 +197,6 @@ function Lifecycle.CreateKeySystem(hub)
 		end
 		submitting = true
 		if keyBox.Text == correctKey then
-			-- Notificação após clicar/enter (do jeito que você pediu)
-			hubNotify(hub, "Hub inicializando, espere 5-10 segundos")
-
 			inputBg.Visible = false
 			btnContainer.Visible = false
 			title.Visible = false
@@ -219,16 +216,21 @@ function Lifecycle.CreateKeySystem(hub)
 			closeTween.Completed:Wait()
 			gui:Destroy()
 
-			-- Sem Loading: finaliza init e abre o Hub automaticamente.
-			pcall(function()
-				if hub and type(hub.FinishInit) == "function" then
-					hub:FinishInit()
-				end
-			end)
+			-- Notificação do próprio Hub (azul) só agora, após fechar a Key UI.
+			hubNotify(hub, "Hub inicializando, espere 5-10 segundos")
+
+			-- Abrir o Hub rápido: mostra primeiro, termina init em paralelo.
 			pcall(function()
 				if hub and type(hub.SetVisible) == "function" then
 					hub:SetVisible(true, true)
 				end
+			end)
+			task.spawn(function()
+				pcall(function()
+					if hub and type(hub.FinishInit) == "function" then
+						hub:FinishInit()
+					end
+				end)
 			end)
 		else
 			statusText.TextColor3 = Theme.Error
