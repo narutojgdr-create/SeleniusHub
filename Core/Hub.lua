@@ -443,10 +443,11 @@ function Hub:ShowWarning(text, kind, instant)
 	end)
 
 	local framePad = Instance.new("UIPadding")
-	framePad.PaddingLeft = UDim.new(0, 14)
-	framePad.PaddingRight = UDim.new(0, 14)
-	framePad.PaddingTop = UDim.new(0, 12)
-	framePad.PaddingBottom = UDim.new(0, 12)
+	-- Padding vai no conteúdo (pra barra ficar colada na borda esquerda)
+	framePad.PaddingLeft = UDim.new(0, 0)
+	framePad.PaddingRight = UDim.new(0, 0)
+	framePad.PaddingTop = UDim.new(0, 0)
+	framePad.PaddingBottom = UDim.new(0, 0)
 	framePad.Parent = frame
 
 	local barColor = Theme.Accent
@@ -459,8 +460,8 @@ function Hub:ShowWarning(text, kind, instant)
 
 	local bar = Instance.new("Frame")
 	bar.BackgroundColor3 = barColor
-	bar.Position = UDim2.new(0, -14, 0, 0)
-	bar.Size = UDim2.new(0, 4, 1, 0)
+	bar.Position = UDim2.new(0, 0, 0, 10)
+	bar.Size = UDim2.new(0, 4, 1, -20)
 	bar.Parent = frame
 	InstanceUtil.AddCorner(bar, 8)
 
@@ -469,6 +470,13 @@ function Hub:ShowWarning(text, kind, instant)
 	content.Size = UDim2.new(1, 0, 0, 0)
 	content.AutomaticSize = Enum.AutomaticSize.Y
 	content.Parent = frame
+
+	local contentPad = Instance.new("UIPadding")
+	contentPad.PaddingLeft = UDim.new(0, 14)
+	contentPad.PaddingRight = UDim.new(0, 14)
+	contentPad.PaddingTop = UDim.new(0, 12)
+	contentPad.PaddingBottom = UDim.new(0, 12)
+	contentPad.Parent = content
 
 	local contentLayout = Instance.new("UIListLayout")
 	contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
