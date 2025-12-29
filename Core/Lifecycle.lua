@@ -44,6 +44,8 @@ function Lifecycle.CreateKeySystem(hub)
 	local Theme = hub.ThemeManager:GetTheme()
 	local correctKey = "testing123"
 	local secureParent = Assets.GetSecureParent()
+	local hoverTweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local fadeTweenInfo = TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
 	-- Notificação ao executar o Hub.
 	pcall(function()
@@ -170,24 +172,39 @@ function Lifecycle.CreateKeySystem(hub)
 	statusText.Text = ""
 	statusText.Parent = content
 
-	InstanceUtil.Tween(mainScale, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1 })
+	-- Animação mais fluida
+	InstanceUtil.Tween(mainScale, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1 })
 
 	enterBtn.MouseEnter:Connect(function()
-		TweenService:Create(enterBtn, TweenInfo.new(0.2), { BackgroundColor3 = Theme.ButtonHover }):Play()
+		TweenService:Create(enterBtn, hoverTweenInfo, { BackgroundColor3 = Theme.ButtonHover }):Play()
 	end)
 	enterBtn.MouseLeave:Connect(function()
-		TweenService:Create(enterBtn, TweenInfo.new(0.2), { BackgroundColor3 = Theme.Button }):Play()
+		TweenService:Create(enterBtn, hoverTweenInfo, { BackgroundColor3 = Theme.Button }):Play()
 	end)
 
 	getBtn.MouseEnter:Connect(function()
-		TweenService:Create(getBtn, TweenInfo.new(0.2), { BackgroundColor3 = Theme.ButtonHover }):Play()
+		TweenService:Create(getBtn, hoverTweenInfo, { BackgroundColor3 = Theme.ButtonHover }):Play()
 	end)
 	getBtn.MouseLeave:Connect(function()
-		TweenService:Create(getBtn, TweenInfo.new(0.2), { BackgroundColor3 = Theme.Button }):Play()
+		TweenService:Create(getBtn, hoverTweenInfo, { BackgroundColor3 = Theme.Button }):Play()
 	end)
 
-	enterBtn.MouseButton1Click:Connect(function()
+	local submitting = false
+	local function submitKey()
+		if submitting then
+			return
+		end
+		submitting = true
 		if keyBox.Text == correctKey then
+			-- Notificação após clicar/enter (do jeito que você pediu)
+			pcall(function()
+				StarterGui:SetCore("SendNotification", {
+					Title = "SeleniusHub",
+					Text = "Hub inicializando, espere 5-10 segundos",
+					Duration = 6,
+				})
+			end)
+
 			inputBg.Visible = false
 			btnContainer.Visible = false
 			title.Visible = false
@@ -197,11 +214,11 @@ function Lifecycle.CreateKeySystem(hub)
 			statusText.Text = "Success! Abrindo Hub..."
 			statusText.Position = UDim2.new(0, 0, 0.5, -10)
 			statusText.TextSize = 18
-			TweenService:Create(statusText, TweenInfo.new(0.2), { TextTransparency = 0 }):Play()
-			task.wait(0.6)
+			TweenService:Create(statusText, fadeTweenInfo, { TextTransparency = 0 }):Play()
+			task.wait(0.35)
 			content.Visible = false
 
-			local closeTween = InstanceUtil.Tween(mainScale, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+			local closeTween = InstanceUtil.Tween(mainScale, TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
 				Scale = 0,
 			})
 			closeTween.Completed:Wait()
@@ -221,7 +238,7 @@ function Lifecycle.CreateKeySystem(hub)
 		else
 			statusText.TextColor3 = Theme.Error
 			statusText.Text = "Invalid Key"
-			TweenService:Create(statusText, TweenInfo.new(0.2), { TextTransparency = 0 }):Play()
+			TweenService:Create(statusText, fadeTweenInfo, { TextTransparency = 0 }):Play()
 			local x = inputBg.Position.X.Scale
 			local y = inputBg.Position.Y.Scale
 			for _ = 1, 6 do
@@ -229,6 +246,14 @@ function Lifecycle.CreateKeySystem(hub)
 				task.wait(0.05)
 			end
 			inputBg.Position = UDim2.new(x, 0, y, 0)
+			submitting = false
+		end
+	end
+
+	enterBtn.MouseButton1Click:Connect(submitKey)
+	keyBox.FocusLost:Connect(function(enterPressed)
+		if enterPressed then
+			submitKey()
 		end
 	end)
 
