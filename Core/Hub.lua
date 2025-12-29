@@ -427,10 +427,11 @@ function Hub:ShowWarning(text, kind)
 		Parent = self.NotificationHolder,
 	})
 	InstanceUtil.AddCorner(frame, 8)
-	InstanceUtil.AddStroke(frame, Theme.Accent, 2, 0.35)
+	local notifStrokeColor = Color3.fromRGB(0, 22, 85)
+	local stroke = InstanceUtil.AddStroke(frame, notifStrokeColor, 4, 1)
 
 	local scale = Instance.new("UIScale")
-	scale.Scale = 0.86
+	scale.Scale = 0.72
 	scale.Parent = frame
 
 	local title = Instance.new("TextLabel")
@@ -446,14 +447,25 @@ function Hub:ShowWarning(text, kind)
 	title.Parent = frame
 
 	frame.Position = UDim2.new(1, 260, 0, 0)
+	frame.Rotation = -2.5
 	frame.BackgroundTransparency = 1
 	title.TextTransparency = 1
 
 	InstanceUtil.Tween(frame, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 		Position = UDim2.new(0, 0, 0, 0),
 		BackgroundTransparency = 0.1,
+		Rotation = 0,
 	})
-	InstanceUtil.Tween(scale, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 })
+	InstanceUtil.Tween(scale, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1.06 })
+	InstanceUtil.Tween(stroke, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Transparency = 0.22,
+		Thickness = 2,
+	})
+	task.delay(0.22, function()
+		if scale and scale.Parent then
+			InstanceUtil.Tween(scale, TweenInfo.new(0.18, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1 })
+		end
+	end)
 	InstanceUtil.Tween(title, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextTransparency = 0 })
 
 	task.delay(4, function()
@@ -461,8 +473,14 @@ function Hub:ShowWarning(text, kind)
 			local t = InstanceUtil.Tween(frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
 				BackgroundTransparency = 1,
 				Position = UDim2.new(1, 260, 0, 0),
+				Rotation = 2.5,
 			})
-			InstanceUtil.Tween(scale, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), { Scale = 0.86 })
+			InstanceUtil.Tween(scale, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), { Scale = 0.72 })
+			pcall(function()
+				InstanceUtil.Tween(stroke, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+					Transparency = 1,
+				})
+			end)
 			InstanceUtil.Tween(title, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { TextTransparency = 1 })
 			t.Completed:Wait()
 			frame:Destroy()

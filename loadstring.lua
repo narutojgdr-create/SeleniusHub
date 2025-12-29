@@ -451,10 +451,14 @@ local function showBootstrapNotice(text)
 		corner.CornerRadius = UDim.new(0, 8)
 		corner.Parent = card
 		local stroke = Instance.new("UIStroke")
-		stroke.Color = Color3.fromRGB(0, 120, 255)
-		stroke.Thickness = 2
-		stroke.Transparency = 0.35
+		stroke.Color = Color3.fromRGB(0, 22, 85)
+		stroke.Thickness = 4
+		stroke.Transparency = 1
 		stroke.Parent = card
+
+		local scale = Instance.new("UIScale")
+		scale.Scale = 0.78
+		scale.Parent = card
 
 		local lbl = Instance.new("TextLabel")
 		lbl.BackgroundTransparency = 1
@@ -473,7 +477,18 @@ local function showBootstrapNotice(text)
 			local TweenService = game:GetService("TweenService")
 			local ti = TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 			card.Position = UDim2.new(1, 260, 0, 0)
-			TweenService:Create(card, ti, { Position = UDim2.new(0, 0, 0, 0) }):Play()
+			card.Rotation = -2.5
+			TweenService:Create(card, ti, { Position = UDim2.new(0, 0, 0, 0), Rotation = 0 }):Play()
+			TweenService:Create(scale, ti, { Scale = 1.06 }):Play()
+			TweenService:Create(stroke, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				Transparency = 0.22,
+				Thickness = 2,
+			}):Play()
+			task.delay(0.22, function()
+				pcall(function()
+					TweenService:Create(scale, TweenInfo.new(0.18, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+				end)
+			end)
 			TweenService:Create(lbl, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextTransparency = 0 }):Play()
 		end)
 

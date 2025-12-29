@@ -81,34 +81,6 @@ function Window.Create(ctx)
 	titleScale.Scale = 1
 	titleScale.Parent = UI.TitleLabel
 
-	task.spawn(function()
-		local basePos = UI.TitleLabel.Position
-		local baseRot = UI.TitleLabel.Rotation
-		local ti = TweenInfo.new(1.15, Enum.EasingStyle.Quint, Enum.EasingDirection.InOut)
-
-		local p1 = basePos + UDim2.new(0, 3, 0, -2)
-		local p2 = basePos + UDim2.new(0, -2, 0, 2)
-		local p3 = basePos + UDim2.new(0, 1, 0, 0)
-
-		while UI.TitleLabel and UI.TitleLabel.Parent do
-			TweenService:Create(UI.TitleLabel, ti, { Position = p1, Rotation = baseRot + 1.2 }):Play()
-			TweenService:Create(titleScale, ti, { Scale = 1.06 }):Play()
-			task.wait(1.2)
-			if not (UI.TitleLabel and UI.TitleLabel.Parent) then
-				break
-			end
-			TweenService:Create(UI.TitleLabel, ti, { Position = p2, Rotation = baseRot - 1.0 }):Play()
-			TweenService:Create(titleScale, ti, { Scale = 1.01 }):Play()
-			task.wait(1.2)
-			if not (UI.TitleLabel and UI.TitleLabel.Parent) then
-				break
-			end
-			TweenService:Create(UI.TitleLabel, ti, { Position = p3, Rotation = baseRot }):Play()
-			TweenService:Create(titleScale, ti, { Scale = 1.03 }):Play()
-			task.wait(0.9)
-		end
-	end)
-
 	UI.SearchBox = ctx.instanceUtil.Create("TextBox", {
 		BackgroundColor3 = Theme.Button,
 		Position = UDim2.new(0, 200, 0, 10),

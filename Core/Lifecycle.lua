@@ -148,7 +148,7 @@ function Lifecycle.CreateKeySystem(hub)
 	local main = Instance.new("Frame")
 	main.AnchorPoint = Vector2.new(0.5, 0.5)
 	main.Position = UDim2.new(0.5, 0, 0.5, 0)
-	main.Size = UDim2.new(0, 380, 0, 220)
+	main.Size = UDim2.new(0, 560, 0, 260)
 	main.BackgroundColor3 = Theme.Background
 	main.BorderSizePixel = 0
 	main.ClipsDescendants = false
@@ -167,31 +167,53 @@ function Lifecycle.CreateKeySystem(hub)
 	content.Parent = main
 	content.Visible = true
 
+	local left = Instance.new("Frame")
+	left.BackgroundTransparency = 1
+	left.Position = UDim2.new(0, 0, 0, 0)
+	left.Size = UDim2.new(0, 300, 1, 0)
+	left.Parent = content
+
+	local separator = Instance.new("Frame")
+	separator.BackgroundColor3 = Theme.Stroke
+	separator.BackgroundTransparency = 0.45
+	separator.BorderSizePixel = 0
+	separator.Position = UDim2.new(0, 300, 0, 16)
+	separator.Size = UDim2.new(0, 1, 1, -32)
+	separator.Parent = content
+
+	local right = Instance.new("Frame")
+	right.BackgroundTransparency = 1
+	right.Position = UDim2.new(0, 301, 0, 0)
+	right.Size = UDim2.new(1, -301, 1, 0)
+	right.Parent = content
+
 	local title = Instance.new("TextLabel")
 	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0, 0, 0, 25)
-	title.Size = UDim2.new(1, 0, 0, 30)
+	title.Position = UDim2.new(0, 16, 0, 16)
+	title.Size = UDim2.new(1, -32, 0, 26)
 	title.Font = Enum.Font.GothamBold
-	title.TextSize = 22
+	title.TextSize = 20
 	title.TextColor3 = Theme.Accent
 	title.Text = "SELENIUS KEY"
-	title.Parent = content
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.Parent = left
 
 	local sub = Instance.new("TextLabel")
 	sub.BackgroundTransparency = 1
-	sub.Position = UDim2.new(0, 0, 0, 50)
-	sub.Size = UDim2.new(1, 0, 0, 20)
+	sub.Position = UDim2.new(0, 16, 0, 40)
+	sub.Size = UDim2.new(1, -32, 0, 18)
 	sub.Font = Enum.Font.GothamMedium
 	sub.TextSize = 14
 	sub.TextColor3 = Theme.AccentDark
 	sub.Text = "Authentication Required"
-	sub.Parent = content
+	sub.TextXAlignment = Enum.TextXAlignment.Left
+	sub.Parent = left
 
 	local inputBg = Instance.new("Frame")
 	inputBg.BackgroundColor3 = Theme.Secondary
-	inputBg.Position = UDim2.new(0.1, 0, 0.35, 0)
-	inputBg.Size = UDim2.new(0.8, 0, 0, 40)
-	inputBg.Parent = content
+	inputBg.Position = UDim2.new(0, 16, 0, 68)
+	inputBg.Size = UDim2.new(1, -32, 0, 40)
+	inputBg.Parent = left
 	InstanceUtil.AddCorner(inputBg, 6)
 
 	local showKey = false
@@ -243,23 +265,34 @@ function Lifecycle.CreateKeySystem(hub)
 	maskLbl.TextTruncate = Enum.TextTruncate.None
 	maskLbl.Text = maskKey(keyBox.Text)
 	maskLbl.Parent = inputBg
+	maskLbl.Active = false
+	maskLbl.Selectable = false
 	maskLbl.ZIndex = (keyBox.ZIndex == 0 and 2) or (keyBox.ZIndex + 1)
 	keyBox.ZIndex = (keyBox.ZIndex == 0 and 1) or keyBox.ZIndex
 
 	local placeholderColorShown = keyBox.PlaceholderColor3
 
 	local function refreshKeyMask()
-		maskLbl.Text = maskKey(keyBox.Text)
-		maskLbl.Visible = not showKey
+		local current = tostring(keyBox.Text or "")
 		if showKey then
+			maskLbl.Visible = false
 			keyBox.TextTransparency = 0
 			keyBox.TextColor3 = Theme.TextPrimary
 			keyBox.PlaceholderColor3 = placeholderColorShown
 		else
-			-- Evita "vazar" letras/cursor: pinta o texto com a cor do fundo
-			keyBox.TextTransparency = 0
-			keyBox.TextColor3 = inputBg.BackgroundColor3
-			keyBox.PlaceholderColor3 = inputBg.BackgroundColor3
+			if current == "" then
+				maskLbl.Visible = false
+				keyBox.TextTransparency = 0
+				keyBox.TextColor3 = Theme.TextPrimary
+				keyBox.PlaceholderColor3 = placeholderColorShown
+			else
+				maskLbl.Text = string.rep("●", #current)
+				maskLbl.Visible = true
+				-- Some o texto real pra não interferir na edição/apagar.
+				keyBox.TextTransparency = 1
+				keyBox.TextColor3 = Theme.TextPrimary
+				keyBox.PlaceholderColor3 = placeholderColorShown
+			end
 		end
 		showBtn.Text = showKey and "OCULTAR" or "MOSTRAR"
 	end
@@ -273,9 +306,9 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local btnContainer = Instance.new("Frame")
 	btnContainer.BackgroundTransparency = 1
-	btnContainer.Position = UDim2.new(0.1, 0, 0.65, 0)
-	btnContainer.Size = UDim2.new(0.8, 0, 0, 35)
-	btnContainer.Parent = content
+	btnContainer.Position = UDim2.new(0, 16, 0, 120)
+	btnContainer.Size = UDim2.new(1, -32, 0, 34)
+	btnContainer.Parent = left
 
 	local enterBtn = Instance.new("TextButton")
 	enterBtn.BackgroundColor3 = Theme.Button
@@ -298,16 +331,54 @@ function Lifecycle.CreateKeySystem(hub)
 	getBtn.Parent = btnContainer
 	InstanceUtil.AddCorner(getBtn, 6)
 
+	local discordText = Instance.new("TextLabel")
+	discordText.BackgroundTransparency = 1
+	discordText.Position = UDim2.new(0, 16, 0, 160)
+	discordText.Size = UDim2.new(1, -32, 0, 34)
+	discordText.Font = Enum.Font.GothamMedium
+	discordText.TextSize = 12
+	discordText.TextColor3 = Theme.AccentDark
+	discordText.TextTransparency = 0
+	discordText.TextWrapped = true
+	discordText.TextXAlignment = Enum.TextXAlignment.Left
+	discordText.Text = "Problemas com a key? Entre no nosso discord."
+	discordText.Parent = left
+
 	local statusText = Instance.new("TextLabel")
 	statusText.BackgroundTransparency = 1
-	statusText.Position = UDim2.new(0, 0, 0.85, 0)
-	statusText.Size = UDim2.new(1, 0, 0, 20)
+	statusText.Position = UDim2.new(0, 16, 1, -26)
+	statusText.Size = UDim2.new(1, -32, 0, 20)
 	statusText.Font = Enum.Font.GothamMedium
 	statusText.TextSize = 12
 	statusText.TextColor3 = Theme.Error
 	statusText.TextTransparency = 1
 	statusText.Text = ""
-	statusText.Parent = content
+	statusText.TextXAlignment = Enum.TextXAlignment.Left
+	statusText.Parent = left
+
+	local helpTitle = Instance.new("TextLabel")
+	helpTitle.BackgroundTransparency = 1
+	helpTitle.Position = UDim2.new(0, 16, 0, 18)
+	helpTitle.Size = UDim2.new(1, -32, 0, 18)
+	helpTitle.Font = Enum.Font.GothamBold
+	helpTitle.TextSize = 14
+	helpTitle.TextColor3 = Theme.TextPrimary
+	helpTitle.TextXAlignment = Enum.TextXAlignment.Left
+	helpTitle.Text = "Como pegar a key:"
+	helpTitle.Parent = right
+
+	local helpBody = Instance.new("TextLabel")
+	helpBody.BackgroundTransparency = 1
+	helpBody.Position = UDim2.new(0, 16, 0, 42)
+	helpBody.Size = UDim2.new(1, -32, 1, -58)
+	helpBody.Font = Enum.Font.GothamMedium
+	helpBody.TextSize = 12
+	helpBody.TextColor3 = Theme.AccentDark
+	helpBody.TextXAlignment = Enum.TextXAlignment.Left
+	helpBody.TextYAlignment = Enum.TextYAlignment.Top
+	helpBody.TextWrapped = true
+	helpBody.Text = "1) Clique em GET KEY\n2) Abra o link e complete o processo\n3) Copie a key gerada\n4) Cole aqui e clique CHECK KEY"
+	helpBody.Parent = right
 
 	-- Animação mais fluida
 	InstanceUtil.Tween(mainScale, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1 })
