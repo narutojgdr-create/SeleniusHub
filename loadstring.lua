@@ -18,10 +18,16 @@ local function normalizePath(p)
 	return p
 end
 
-local _getgenv = (type(getgenv) == "function" and getgenv) or function()
-	return _G
-end
-
+		-- Reutilizável: se já existir, só atualiza o texto
+		local existing = parent:FindFirstChild("SeleniusHub_BootstrapNotice")
+		if existing and existing:IsA("ScreenGui") then
+			local card = existing:FindFirstChild("Holder") and existing.Holder:FindFirstChild("Card")
+			local msg = card and card:FindFirstChild("Message")
+			if msg and msg:IsA("TextLabel") then
+				msg.Text = tostring(text or "Inicializando Selenius...")
+			end
+			return existing
+		end
 local _gv = _getgenv()
 local function gvGet(key)
 	return rawget(_gv, key)
@@ -36,58 +42,108 @@ if type(gvGet("SELENIUS_CACHE_BUSTER")) ~= "string" then
 	local ok, buster = pcall(function()
 		local t = (type(tick) == "function" and tick()) or (os and os.clock and os.clock()) or 0
 		return tostring(math.floor(t * 1000)) .. "-" .. tostring(math.random(100000, 999999))
-	end)
+		holder.Size = UDim2.new(0, 340, 0, 58)
 	gvSet("SELENIUS_CACHE_BUSTER", ok and buster or tostring(math.random(100000000, 999999999)))
 end
 
-local _task = task
-if type(_task) ~= "table" then
-	_task = {
-		wait = wait,
-		delay = delay,
-		spawn = spawn,
-	}
-end
+		local card = Instance.new("Frame")
+		card.Name = "Card"
+		card.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+		card.BackgroundTransparency = 0.12
+		card.Size = UDim2.new(1, 0, 1, 0)
+		card.ClipsDescendants = true
+		card.Parent = holder
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 12)
+		corner.Parent = card
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = Color3.fromRGB(55, 65, 90)
+		stroke.Thickness = 1
+		stroke.Transparency = 1
+		stroke.Parent = card
 
-local MANIFEST = {
-	"init.lua",
-	"Scriptparaseparacao.lua",
-	"Assets/Defaults.lua",
-	"Assets/Fonts.lua",
-	"Assets/Icons.lua",
-	"Components/Button.lua",
-	"Components/Checkbox.lua",
-	"Components/ColorPicker.lua",
-	"Components/Dropdown.lua",
-	"Components/Keybind.lua",
-	"Components/Label.lua",
-	"Components/MultiDropdown.lua",
-	"Components/Section.lua",
-	"Components/Slider.lua",
-	"Components/Toggle.lua",
-	"Core/Config.lua",
-	"Core/Hub.lua",
-	"Core/Lifecycle.lua",
-	"Core/Option.lua",
+		local iconBg = Instance.new("Frame")
+		iconBg.Name = "IconBg"
+		iconBg.BackgroundColor3 = Color3.fromRGB(80, 140, 255)
+		iconBg.BackgroundTransparency = 0.15
+		iconBg.BorderSizePixel = 0
+		iconBg.Size = UDim2.new(0, 30, 0, 30)
+		iconBg.Position = UDim2.new(0, 12, 0.5, -15)
+		iconBg.Parent = card
+		local iconCorner = Instance.new("UICorner")
+		iconCorner.CornerRadius = UDim.new(0, 15)
+		iconCorner.Parent = iconBg
+
+		local icon = Instance.new("TextLabel")
+		icon.Name = "Icon"
+		icon.BackgroundTransparency = 1
+		icon.Size = UDim2.new(1, 0, 1, 0)
+		icon.Font = Enum.Font.GothamBold
+		icon.TextSize = 14
+		icon.TextColor3 = Color3.fromRGB(235, 235, 235)
+		icon.Text = "i"
+		icon.Parent = iconBg
+
+		local title = Instance.new("TextLabel")
+		title.Name = "Title"
+		title.BackgroundTransparency = 1
+		title.Position = UDim2.new(0, 52, 0, 10)
+		title.Size = UDim2.new(1, -64, 0, 14)
+		title.Font = Enum.Font.GothamBold
+		title.TextSize = 12
+		title.TextColor3 = Color3.fromRGB(160, 190, 255)
+		title.TextXAlignment = Enum.TextXAlignment.Left
+		title.Text = "INFO"
+		title.TextTransparency = 1
+		title.Parent = card
+
+		local msg = Instance.new("TextLabel")
+		msg.Name = "Message"
+		msg.BackgroundTransparency = 1
+		msg.Position = UDim2.new(0, 52, 0, 26)
+		msg.Size = UDim2.new(1, -64, 0, 20)
+		msg.Font = Enum.Font.GothamMedium
+		msg.TextSize = 13
+		msg.TextColor3 = Color3.fromRGB(235, 235, 235)
+		msg.TextXAlignment = Enum.TextXAlignment.Left
+		msg.TextYAlignment = Enum.TextYAlignment.Top
+		msg.TextWrapped = true
+		msg.TextTruncate = Enum.TextTruncate.AtEnd
+		msg.Text = tostring(text or "Inicializando Selenius...")
+		msg.TextTransparency = 1
+		msg.Parent = card
+
+		local progressBg = Instance.new("Frame")
+		progressBg.Name = "ProgressBg"
+		progressBg.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+		progressBg.BackgroundTransparency = 0.35
+		progressBg.BorderSizePixel = 0
+		progressBg.Size = UDim2.new(1, 0, 0, 3)
+		progressBg.Position = UDim2.new(0, 0, 1, -3)
+		progressBg.Parent = card
+
+		local progress = Instance.new("Frame")
+		progress.Name = "Progress"
+		progress.BackgroundColor3 = Color3.fromRGB(80, 140, 255)
+		progress.BackgroundTransparency = 1
+		progress.BorderSizePixel = 0
+		progress.Size = UDim2.new(1, 0, 1, 0)
+		progress.Parent = progressBg
+
+		local scale = Instance.new("UIScale")
+		scale.Scale = 0.92
+		scale.Parent = card
 	"Core/Permissions.lua",
 	"Core/Registry.lua",
 	"Core/State.lua",
 	"Core/Tab.lua",
-	"Locale/en.lua",
-	"Locale/LocaleManager.lua",
-	"Locale/pt.lua",
-	"Tabs/Combat/init.lua",
-	"Tabs/Combat/logic.lua",
-	"Tabs/Player/init.lua",
-	"Tabs/Player/logic.lua",
-	"Tabs/Settings/init.lua",
-	"Tabs/Visual/init.lua",
-	"Tabs/Visual/logic.lua",
-	"Tabs/World/init.lua",
-	"Theme/Acrylic.lua",
-	"Theme/ThemeManager.lua",
-	"Theme/Themes.lua",
-	"UI/Builder.lua",
+		local ti = TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+		TweenService:Create(scale, ti, { Scale = 1 }):Play()
+		TweenService:Create(stroke, ti, { Transparency = 0.55 }):Play()
+		TweenService:Create(title, ti, { TextTransparency = 0 }):Play()
+		TweenService:Create(msg, ti, { TextTransparency = 0 }):Play()
+		TweenService:Create(progress, TweenInfo.new(2.2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { Size = UDim2.new(0, 0, 1, 0) }):Play()
+		TweenService:Create(progress, ti, { BackgroundTransparency = 0 }):Play()
 	"UI/Drag.lua",
 	"UI/Footer.lua",
 	"UI/Header.lua",
@@ -420,12 +476,22 @@ local function showBootstrapNotice(text)
 		return nil
 	end
 
+	-- Reutilizável: se já existir, só atualiza o texto
+	local existing = nil
 	pcall(function()
-		local old = parent:FindFirstChild("SeleniusHub_BootstrapNotice")
-		if old and old.Destroy then
-			old:Destroy()
-		end
+		existing = parent:FindFirstChild("SeleniusHub_BootstrapNotice")
 	end)
+	if existing and existing:IsA("ScreenGui") then
+		pcall(function()
+			local holder = existing:FindFirstChild("Holder")
+			local card = holder and holder:FindFirstChild("Card")
+			local msg = card and card:FindFirstChild("Message")
+			if msg and msg:IsA("TextLabel") then
+				msg.Text = tostring(text or "Inicializando Selenius...")
+			end
+		end)
+		return existing
+	end
 
 	local ok, gui = pcall(function()
 		local g = Instance.new("ScreenGui")
@@ -436,60 +502,110 @@ local function showBootstrapNotice(text)
 		g.Parent = parent
 
 		local holder = Instance.new("Frame")
+		holder.Name = "Holder"
 		holder.BackgroundTransparency = 1
 		holder.Position = UDim2.new(1, -20, 1, -20)
 		holder.AnchorPoint = Vector2.new(1, 1)
-		holder.Size = UDim2.new(0, 340, 0, 50)
+		holder.Size = UDim2.new(0, 340, 0, 58)
 		holder.Parent = g
 
 		local card = Instance.new("Frame")
+		card.Name = "Card"
 		card.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
-		card.BackgroundTransparency = 0.1
-		card.Size = UDim2.new(1, 0, 0, 50)
+		card.BackgroundTransparency = 0.12
+		card.Size = UDim2.new(1, 0, 1, 0)
+		card.ClipsDescendants = true
 		card.Parent = holder
 		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 8)
+		corner.CornerRadius = UDim.new(0, 12)
 		corner.Parent = card
 		local stroke = Instance.new("UIStroke")
-		stroke.Color = Color3.fromRGB(0, 22, 85)
-		stroke.Thickness = 4
+		stroke.Color = Color3.fromRGB(55, 65, 90)
+		stroke.Thickness = 1
 		stroke.Transparency = 1
 		stroke.Parent = card
 
-		local scale = Instance.new("UIScale")
-		scale.Scale = 0.78
-		scale.Parent = card
+		local iconBg = Instance.new("Frame")
+		iconBg.Name = "IconBg"
+		iconBg.BackgroundColor3 = Color3.fromRGB(80, 140, 255)
+		iconBg.BackgroundTransparency = 0.15
+		iconBg.BorderSizePixel = 0
+		iconBg.Size = UDim2.new(0, 30, 0, 30)
+		iconBg.Position = UDim2.new(0, 12, 0.5, -15)
+		iconBg.Parent = card
+		local iconCorner = Instance.new("UICorner")
+		iconCorner.CornerRadius = UDim.new(0, 15)
+		iconCorner.Parent = iconBg
 
-		local lbl = Instance.new("TextLabel")
-		lbl.BackgroundTransparency = 1
-		lbl.Position = UDim2.new(0, 12, 0, 0)
-		lbl.Size = UDim2.new(1, -20, 1, 0)
-		lbl.Font = Enum.Font.GothamBold
-		lbl.TextSize = 16
-		lbl.TextColor3 = Color3.fromRGB(235, 235, 235)
-		lbl.TextXAlignment = Enum.TextXAlignment.Left
-		lbl.TextWrapped = true
-		lbl.Text = tostring(text or "Inicializando Selenius...")
-		lbl.TextTransparency = 1
-		lbl.Parent = card
+		local icon = Instance.new("TextLabel")
+		icon.Name = "Icon"
+		icon.BackgroundTransparency = 1
+		icon.Size = UDim2.new(1, 0, 1, 0)
+		icon.Font = Enum.Font.GothamBold
+		icon.TextSize = 14
+		icon.TextColor3 = Color3.fromRGB(235, 235, 235)
+		icon.Text = "i"
+		icon.Parent = iconBg
+
+		local title = Instance.new("TextLabel")
+		title.Name = "Title"
+		title.BackgroundTransparency = 1
+		title.Position = UDim2.new(0, 52, 0, 10)
+		title.Size = UDim2.new(1, -64, 0, 14)
+		title.Font = Enum.Font.GothamBold
+		title.TextSize = 12
+		title.TextColor3 = Color3.fromRGB(160, 190, 255)
+		title.TextXAlignment = Enum.TextXAlignment.Left
+		title.Text = "INFO"
+		title.TextTransparency = 1
+		title.Parent = card
+
+		local msg = Instance.new("TextLabel")
+		msg.Name = "Message"
+		msg.BackgroundTransparency = 1
+		msg.Position = UDim2.new(0, 52, 0, 26)
+		msg.Size = UDim2.new(1, -64, 0, 20)
+		msg.Font = Enum.Font.GothamMedium
+		msg.TextSize = 13
+		msg.TextColor3 = Color3.fromRGB(235, 235, 235)
+		msg.TextXAlignment = Enum.TextXAlignment.Left
+		msg.TextYAlignment = Enum.TextYAlignment.Top
+		msg.TextWrapped = true
+		msg.TextTruncate = Enum.TextTruncate.AtEnd
+		msg.Text = tostring(text or "Inicializando Selenius...")
+		msg.TextTransparency = 1
+		msg.Parent = card
+
+		local progressBg = Instance.new("Frame")
+		progressBg.Name = "ProgressBg"
+		progressBg.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+		progressBg.BackgroundTransparency = 0.35
+		progressBg.BorderSizePixel = 0
+		progressBg.Size = UDim2.new(1, 0, 0, 3)
+		progressBg.Position = UDim2.new(0, 0, 1, -3)
+		progressBg.Parent = card
+
+		local progress = Instance.new("Frame")
+		progress.Name = "Progress"
+		progress.BackgroundColor3 = Color3.fromRGB(80, 140, 255)
+		progress.BackgroundTransparency = 1
+		progress.BorderSizePixel = 0
+		progress.Size = UDim2.new(1, 0, 1, 0)
+		progress.Parent = progressBg
+
+		local scale = Instance.new("UIScale")
+		scale.Scale = 0.94
+		scale.Parent = card
 
 		pcall(function()
 			local TweenService = game:GetService("TweenService")
-			local ti = TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-			card.Position = UDim2.new(1, 260, 0, 0)
-			card.Rotation = -2.5
-			TweenService:Create(card, ti, { Position = UDim2.new(0, 0, 0, 0), Rotation = 0 }):Play()
-			TweenService:Create(scale, ti, { Scale = 1.06 }):Play()
-			TweenService:Create(stroke, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-				Transparency = 0.22,
-				Thickness = 2,
-			}):Play()
-			task.delay(0.22, function()
-				pcall(function()
-					TweenService:Create(scale, TweenInfo.new(0.18, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1 }):Play()
-				end)
-			end)
-			TweenService:Create(lbl, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextTransparency = 0 }):Play()
+			local ti = TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			TweenService:Create(scale, ti, { Scale = 1 }):Play()
+			TweenService:Create(stroke, ti, { Transparency = 0.55 }):Play()
+			TweenService:Create(title, ti, { TextTransparency = 0 }):Play()
+			TweenService:Create(msg, ti, { TextTransparency = 0 }):Play()
+			TweenService:Create(progress, ti, { BackgroundTransparency = 0 }):Play()
+			TweenService:Create(progress, TweenInfo.new(2.2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { Size = UDim2.new(0, 0, 1, 0) }):Play()
 		end)
 
 		return g

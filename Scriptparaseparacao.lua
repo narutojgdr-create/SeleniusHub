@@ -619,17 +619,17 @@ function SeleniusHub:CreateNotificationSystem()
     local holder = Instance.new("Frame")
     holder.Name = "Notifications"
     holder.BackgroundTransparency = 1
-    -- UI NOVA: toasts no topo/centro
-    holder.Position = UDim2.new(0.5, 0, 0, 18)
-    holder.AnchorPoint = Vector2.new(0.5, 0)
-    holder.Size = UDim2.new(0, 360, 1, -36)
+    -- Mantém a posição original (canto inferior direito)
+    holder.Position = UDim2.new(1, -20, 1, -20)
+    holder.AnchorPoint = Vector2.new(1, 1)
+    holder.Size = UDim2.new(0, 340, 1, 0)
     holder.Parent = self.UI.ScreenGui
     holder.ClipsDescendants = false
 
     local layout = Instance.new("UIListLayout")
     layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.VerticalAlignment = Enum.VerticalAlignment.Top
-    layout.Padding = UDim.new(0, 8)
+    layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+    layout.Padding = UDim.new(0, 10)
     layout.Parent = holder
 
     self.NotificationHolder = holder
@@ -649,45 +649,40 @@ function SeleniusHub:ShowWarning(text, kind, instant)
     local token = self._NotificationSeq
 
     local accentColor = Theme.Accent
+    local titleText = "INFO"
     local iconChar = "i"
     if kind == "error" then
         accentColor = Theme.Error
+        titleText = "ERRO"
         iconChar = "×"
     elseif kind == "warn" then
         accentColor = Theme.AccentDark or Theme.Accent
+        titleText = "AVISO"
         iconChar = "!"
     elseif kind == "success" or kind == "status" then
         accentColor = Theme.Status or Theme.Accent
+        titleText = "SUCESSO"
         iconChar = "✓"
     end
 
     local frame = table.remove(self._NotificationPool)
     if not frame then
         frame = Utils:CreateInstance("Frame", {
-            Name = "Toast",
-            BackgroundTransparency = 0.15,
-            Size = UDim2.new(1, 0, 0, 48),
+            Name = "Notification",
             ClipsDescendants = true,
+            Size = UDim2.new(1, 0, 0, 58),
         })
-        Utils:AddCorner(frame, 14)
+        Utils:AddCorner(frame, 12)
         Utils:AddStroke(frame, Theme.Stroke, 1, 1).Name = "Stroke"
-
-        local pad = Instance.new("UIPadding")
-        pad.Name = "Pad"
-        pad.PaddingLeft = UDim.new(0, 12)
-        pad.PaddingRight = UDim.new(0, 12)
-        pad.PaddingTop = UDim.new(0, 10)
-        pad.PaddingBottom = UDim.new(0, 10)
-        pad.Parent = frame
 
         local iconBg = Instance.new("Frame")
         iconBg.Name = "IconBg"
         iconBg.AnchorPoint = Vector2.new(0, 0.5)
-        iconBg.Position = UDim2.new(0, 0, 0.5, 0)
-        iconBg.Size = UDim2.new(0, 26, 0, 26)
+        iconBg.Position = UDim2.new(0, 12, 0.5, 0)
+        iconBg.Size = UDim2.new(0, 30, 0, 30)
         iconBg.BorderSizePixel = 0
         iconBg.Parent = frame
-        Utils:AddCorner(iconBg, 13)
+        Utils:AddCorner(iconBg, 15)
 
         local icon = Instance.new("TextLabel")
         icon.Name = "Icon"
@@ -699,26 +694,47 @@ function SeleniusHub:ShowWarning(text, kind, instant)
         icon.TextYAlignment = Enum.TextYAlignment.Center
         icon.Parent = iconBg
 
+        local title = Instance.new("TextLabel")
+        title.Name = "Title"
+        title.BackgroundTransparency = 1
+        title.Position = UDim2.new(0, 52, 0, 10)
+        title.Size = UDim2.new(1, -64, 0, 14)
+        title.Font = Enum.Font.GothamBold
+        title.TextSize = 12
+        title.TextXAlignment = Enum.TextXAlignment.Left
+        title.TextYAlignment = Enum.TextYAlignment.Center
+        title.TextWrapped = false
+        title.TextTruncate = Enum.TextTruncate.AtEnd
+        title.Parent = frame
+
         local msg = Instance.new("TextLabel")
         msg.Name = "Message"
         msg.BackgroundTransparency = 1
-        msg.Position = UDim2.new(0, 36, 0, 0)
-        msg.Size = UDim2.new(1, -36, 1, 0)
+        msg.Position = UDim2.new(0, 52, 0, 26)
+        msg.Size = UDim2.new(1, -64, 0, 20)
         msg.Font = Enum.Font.GothamMedium
-        msg.TextSize = 14
+        msg.TextSize = 13
         msg.TextXAlignment = Enum.TextXAlignment.Left
-        msg.TextYAlignment = Enum.TextYAlignment.Center
+        msg.TextYAlignment = Enum.TextYAlignment.Top
         msg.TextWrapped = true
         msg.TextTruncate = Enum.TextTruncate.AtEnd
         msg.Parent = frame
+
+        local progressBg = Instance.new("Frame")
+        progressBg.Name = "ProgressBg"
+        progressBg.AnchorPoint = Vector2.new(0, 1)
+        progressBg.Position = UDim2.new(0, 0, 1, 0)
+        progressBg.Size = UDim2.new(1, 0, 0, 3)
+        progressBg.BorderSizePixel = 0
+        progressBg.Parent = frame
 
         local progress = Instance.new("Frame")
         progress.Name = "Progress"
         progress.AnchorPoint = Vector2.new(0, 1)
         progress.Position = UDim2.new(0, 0, 1, 0)
-        progress.Size = UDim2.new(1, 0, 0, 2)
+        progress.Size = UDim2.new(1, 0, 0, 3)
         progress.BorderSizePixel = 0
-        progress.Parent = frame
+        progress.Parent = progressBg
 
         local scale = Instance.new("UIScale")
         scale.Name = "Scale"
@@ -733,7 +749,7 @@ function SeleniusHub:ShowWarning(text, kind, instant)
     frame.Parent = self.NotificationHolder
 
     frame.BackgroundColor3 = Theme.Secondary
-    frame.BackgroundTransparency = instant and 0.15 or 1
+    frame.BackgroundTransparency = instant and 0.12 or 1
 
     local stroke = frame:FindFirstChild("Stroke")
     if stroke then
@@ -743,31 +759,42 @@ function SeleniusHub:ShowWarning(text, kind, instant)
 
     local iconBg = frame:FindFirstChild("IconBg")
     local icon = iconBg and iconBg:FindFirstChild("Icon")
+    local title = frame:FindFirstChild("Title")
     local msg = frame:FindFirstChild("Message")
-    local progress = frame:FindFirstChild("Progress")
+    local progressBg = frame:FindFirstChild("ProgressBg")
+    local progress = progressBg and progressBg:FindFirstChild("Progress")
     local scale = frame:FindFirstChild("Scale")
 
     if iconBg then
         iconBg.BackgroundColor3 = accentColor
-        iconBg.BackgroundTransparency = instant and 0 or 1
+        iconBg.BackgroundTransparency = 0.15
     end
     if icon then
         icon.Text = iconChar
         icon.TextColor3 = Theme.TextPrimary
-        icon.TextTransparency = instant and 0 or 1
+        icon.TextTransparency = 0
+    end
+    if title then
+        title.Text = titleText
+        title.TextColor3 = accentColor
+        title.TextTransparency = instant and 0 or 1
     end
     if msg then
         msg.Text = tostring(text or "")
         msg.TextColor3 = Theme.TextPrimary
         msg.TextTransparency = instant and 0 or 1
     end
+    if progressBg then
+        progressBg.BackgroundColor3 = Theme.Button
+        progressBg.BackgroundTransparency = 0.35
+    end
     if progress then
         progress.BackgroundColor3 = accentColor
         progress.BackgroundTransparency = instant and 0 or 1
-        progress.Size = UDim2.new(1, 0, 0, 2)
+        progress.Size = UDim2.new(1, 0, 0, 3)
     end
     if scale then
-        scale.Scale = instant and 1 or 0.92
+        scale.Scale = instant and 1 or 0.94
     end
 
     local inTween = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
@@ -775,10 +802,9 @@ function SeleniusHub:ShowWarning(text, kind, instant)
 
     if not instant then
         if scale then Utils:Tween(scale, inTween, { Scale = 1 }) end
-        Utils:Tween(frame, inTween, { BackgroundTransparency = 0.15 })
+        Utils:Tween(frame, inTween, { BackgroundTransparency = 0.12 })
+        if title then Utils:Tween(title, inTween, { TextTransparency = 0 }) end
         if msg then Utils:Tween(msg, inTween, { TextTransparency = 0 }) end
-        if iconBg then Utils:Tween(iconBg, inTween, { BackgroundTransparency = 0 }) end
-        if icon then Utils:Tween(icon, inTween, { TextTransparency = 0 }) end
         if progress then Utils:Tween(progress, inTween, { BackgroundTransparency = 0 }) end
         pcall(function()
             if stroke then Utils:Tween(stroke, inTween, { Transparency = 0.55 }) end
@@ -787,7 +813,7 @@ function SeleniusHub:ShowWarning(text, kind, instant)
 
     local lifetime = 3.4
     if progress then
-        Utils:Tween(progress, TweenInfo.new(lifetime, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { Size = UDim2.new(0, 0, 0, 2) })
+        Utils:Tween(progress, TweenInfo.new(lifetime, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { Size = UDim2.new(0, 0, 0, 3) })
     end
 
     task.delay(lifetime, function()
@@ -797,9 +823,8 @@ function SeleniusHub:ShowWarning(text, kind, instant)
 
         if scale then Utils:Tween(scale, outTween, { Scale = 0.94 }) end
         local t = Utils:Tween(frame, outTween, { BackgroundTransparency = 1 })
+        if title then Utils:Tween(title, outTween, { TextTransparency = 1 }) end
         if msg then Utils:Tween(msg, outTween, { TextTransparency = 1 }) end
-        if iconBg then Utils:Tween(iconBg, outTween, { BackgroundTransparency = 1 }) end
-        if icon then Utils:Tween(icon, outTween, { TextTransparency = 1 }) end
         if progress then Utils:Tween(progress, outTween, { BackgroundTransparency = 1 }) end
         pcall(function()
             if stroke then Utils:Tween(stroke, outTween, { Transparency = 1 }) end

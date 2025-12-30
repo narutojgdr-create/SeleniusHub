@@ -395,17 +395,17 @@ function Hub:CreateNotificationSystem()
 	local holder = Instance.new("Frame")
 	holder.Name = "Notifications"
 	holder.BackgroundTransparency = 1
-	-- UI NOVA: toasts no topo/centro
-	holder.Position = UDim2.new(0.5, 0, 0, 18)
-	holder.AnchorPoint = Vector2.new(0.5, 0)
-	holder.Size = UDim2.new(0, 360, 1, -36)
+	-- Mantém a posição original (canto inferior direito)
+	holder.Position = UDim2.new(1, -20, 1, -20)
+	holder.AnchorPoint = Vector2.new(1, 1)
+	holder.Size = UDim2.new(0, 340, 1, 0)
 	holder.Parent = self.UI.ScreenGui
 	holder.ClipsDescendants = false
 
 	local layout = Instance.new("UIListLayout")
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.VerticalAlignment = Enum.VerticalAlignment.Top
-	layout.Padding = UDim.new(0, 8)
+	layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+	layout.Padding = UDim.new(0, 10)
 	layout.Parent = holder
 
 	self.NotificationHolder = holder
@@ -426,47 +426,42 @@ function Hub:ShowWarning(text, kind, instant)
 	local token = self._NotificationSeq
 
 	local accentColor = Theme.Accent
+	local titleText = "INFO"
 	local iconChar = "i"
 	if kind == "error" then
 		accentColor = Theme.Error
+		titleText = "ERRO"
 		iconChar = "×"
 	elseif kind == "warn" then
 		accentColor = Theme.AccentDark
+		titleText = "AVISO"
 		iconChar = "!"
 	elseif kind == "success" or kind == "status" then
 		accentColor = Theme.Status
+		titleText = "SUCESSO"
 		iconChar = "✓"
 	end
 
 	local frame = table.remove(self._NotificationPool)
 	if not frame then
 		frame = InstanceUtil.Create("Frame", {
-			Name = "Toast",
-			BackgroundTransparency = 0.15,
-			Size = UDim2.new(1, 0, 0, 48),
+			Name = "Notification",
 			ClipsDescendants = true,
+			Size = UDim2.new(1, 0, 0, 58),
 		})
-		InstanceUtil.AddCorner(frame, 14)
-		InstanceUtil.Create("UIPadding", {
-			Name = "Pad",
-			PaddingLeft = UDim.new(0, 12),
-			PaddingRight = UDim.new(0, 12),
-			PaddingTop = UDim.new(0, 10),
-			PaddingBottom = UDim.new(0, 10),
-			Parent = frame,
-		})
+		InstanceUtil.AddCorner(frame, 12)
 		local stroke = InstanceUtil.AddStroke(frame, Theme.Stroke, 1, 1)
 		stroke.Name = "Stroke"
 
 		local iconBg = InstanceUtil.Create("Frame", {
 			Name = "IconBg",
 			AnchorPoint = Vector2.new(0, 0.5),
-			Position = UDim2.new(0, 0, 0.5, 0),
-			Size = UDim2.new(0, 26, 0, 26),
+			Position = UDim2.new(0, 12, 0.5, 0),
+			Size = UDim2.new(0, 30, 0, 30),
 			BorderSizePixel = 0,
 			Parent = frame,
 		})
-		InstanceUtil.AddCorner(iconBg, 13)
+		InstanceUtil.AddCorner(iconBg, 15)
 
 		local icon = InstanceUtil.Create("TextLabel", {
 			Name = "Icon",
@@ -479,17 +474,40 @@ function Hub:ShowWarning(text, kind, instant)
 			Parent = iconBg,
 		})
 
+		local title = InstanceUtil.Create("TextLabel", {
+			Name = "Title",
+			BackgroundTransparency = 1,
+			Position = UDim2.new(0, 52, 0, 10),
+			Size = UDim2.new(1, -64, 0, 14),
+			Font = Enum.Font.GothamBold,
+			TextSize = 12,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextYAlignment = Enum.TextYAlignment.Center,
+			TextWrapped = false,
+			TextTruncate = Enum.TextTruncate.AtEnd,
+			Parent = frame,
+		})
+
 		local msg = InstanceUtil.Create("TextLabel", {
 			Name = "Message",
 			BackgroundTransparency = 1,
-			Position = UDim2.new(0, 36, 0, 0),
-			Size = UDim2.new(1, -36, 1, 0),
+			Position = UDim2.new(0, 52, 0, 26),
+			Size = UDim2.new(1, -64, 0, 20),
 			Font = Enum.Font.GothamMedium,
-			TextSize = 14,
+			TextSize = 13,
 			TextXAlignment = Enum.TextXAlignment.Left,
-			TextYAlignment = Enum.TextYAlignment.Center,
+			TextYAlignment = Enum.TextYAlignment.Top,
 			TextWrapped = true,
 			TextTruncate = Enum.TextTruncate.AtEnd,
+			Parent = frame,
+		})
+
+		local progressBg = InstanceUtil.Create("Frame", {
+			Name = "ProgressBg",
+			AnchorPoint = Vector2.new(0, 1),
+			Position = UDim2.new(0, 0, 1, 0),
+			Size = UDim2.new(1, 0, 0, 3),
+			BorderSizePixel = 0,
 			Parent = frame,
 		})
 
@@ -497,9 +515,9 @@ function Hub:ShowWarning(text, kind, instant)
 			Name = "Progress",
 			AnchorPoint = Vector2.new(0, 1),
 			Position = UDim2.new(0, 0, 1, 0),
-			Size = UDim2.new(1, 0, 0, 2),
+			Size = UDim2.new(1, 0, 0, 3),
 			BorderSizePixel = 0,
-			Parent = frame,
+			Parent = progressBg,
 		})
 
 		local scale = Instance.new("UIScale")
@@ -513,6 +531,7 @@ function Hub:ShowWarning(text, kind, instant)
 	frame.Parent = self.NotificationHolder
 
 	frame.BackgroundColor3 = Theme.Secondary
+	frame.BackgroundTransparency = 0.12
 	local stroke = frame:FindFirstChild("Stroke")
 	if stroke then
 		stroke.Color = Theme.Stroke
@@ -521,33 +540,44 @@ function Hub:ShowWarning(text, kind, instant)
 
 	local iconBg = frame:FindFirstChild("IconBg")
 	local icon = iconBg and iconBg:FindFirstChild("Icon")
+	local title = frame:FindFirstChild("Title")
 	local msg = frame:FindFirstChild("Message")
-	local progress = frame:FindFirstChild("Progress")
+	local progressBg = frame:FindFirstChild("ProgressBg")
+	local progress = progressBg and progressBg:FindFirstChild("Progress")
 	local scale = frame:FindFirstChild("Scale")
 
 	if iconBg then
 		iconBg.BackgroundColor3 = accentColor
-		iconBg.BackgroundTransparency = 1
+		iconBg.BackgroundTransparency = 0.15
 	end
 	if icon then
 		icon.Text = iconChar
 		icon.TextColor3 = Theme.TextPrimary
-		icon.TextTransparency = 1
+		icon.TextTransparency = 0
+	end
+	if title then
+		title.Text = titleText
+		title.TextColor3 = accentColor
+		title.TextTransparency = 1
 	end
 	if msg then
 		msg.Text = tostring(text or "")
 		msg.TextColor3 = Theme.TextPrimary
 		msg.TextTransparency = 1
 	end
+	if progressBg then
+		progressBg.BackgroundColor3 = Theme.Button
+		progressBg.BackgroundTransparency = 0.35
+	end
 	if progress then
 		progress.BackgroundColor3 = accentColor
 		progress.BackgroundTransparency = 1
-		progress.Size = UDim2.new(1, 0, 0, 2)
+		progress.Size = UDim2.new(1, 0, 0, 3)
 	end
 	if scale then
-		scale.Scale = instant and 1 or 0.92
+		scale.Scale = instant and 1 or 0.94
 	end
-	frame.BackgroundTransparency = instant and 0.15 or 1
+	frame.BackgroundTransparency = instant and 0.12 or 1
 
 	local inTween = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	local outTween = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
@@ -556,15 +586,12 @@ function Hub:ShowWarning(text, kind, instant)
 		if scale then
 			InstanceUtil.Tween(scale, inTween, { Scale = 1 })
 		end
-		InstanceUtil.Tween(frame, inTween, { BackgroundTransparency = 0.15 })
+		InstanceUtil.Tween(frame, inTween, { BackgroundTransparency = 0.12 })
+		if title then
+			InstanceUtil.Tween(title, inTween, { TextTransparency = 0 })
+		end
 		if msg then
 			InstanceUtil.Tween(msg, inTween, { TextTransparency = 0 })
-		end
-		if iconBg then
-			InstanceUtil.Tween(iconBg, inTween, { BackgroundTransparency = 0 })
-		end
-		if icon then
-			InstanceUtil.Tween(icon, inTween, { TextTransparency = 0 })
 		end
 		if progress then
 			InstanceUtil.Tween(progress, inTween, { BackgroundTransparency = 0 })
@@ -578,7 +605,7 @@ function Hub:ShowWarning(text, kind, instant)
 
 	local lifetime = 3.4
 	if progress then
-		InstanceUtil.Tween(progress, TweenInfo.new(lifetime, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { Size = UDim2.new(0, 0, 0, 2) })
+		InstanceUtil.Tween(progress, TweenInfo.new(lifetime, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { Size = UDim2.new(0, 0, 0, 3) })
 	end
 
 	task.delay(lifetime, function()
@@ -593,14 +620,11 @@ function Hub:ShowWarning(text, kind, instant)
 			InstanceUtil.Tween(scale, outTween, { Scale = 0.94 })
 		end
 		local t = InstanceUtil.Tween(frame, outTween, { BackgroundTransparency = 1 })
+		if title then
+			InstanceUtil.Tween(title, outTween, { TextTransparency = 1 })
+		end
 		if msg then
 			InstanceUtil.Tween(msg, outTween, { TextTransparency = 1 })
-		end
-		if iconBg then
-			InstanceUtil.Tween(iconBg, outTween, { BackgroundTransparency = 1 })
-		end
-		if icon then
-			InstanceUtil.Tween(icon, outTween, { TextTransparency = 1 })
 		end
 		if progress then
 			InstanceUtil.Tween(progress, outTween, { BackgroundTransparency = 1 })
