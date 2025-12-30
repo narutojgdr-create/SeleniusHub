@@ -612,65 +612,205 @@ function SeleniusHub:LoadConfig(name)
 end
 
 function SeleniusHub:CreateNotificationSystem()
+    if self.NotificationHolder and self.NotificationHolder.Parent then
+        return
+    end
+
     local holder = Instance.new("Frame")
     holder.Name = "Notifications"
     holder.BackgroundTransparency = 1
-    holder.Position = UDim2.new(1, -20, 1, -20) 
-    holder.AnchorPoint = Vector2.new(1, 1)
-    holder.Size = UDim2.new(0, 300, 1, 0)
+    -- UI NOVA: toasts no topo/centro
+    holder.Position = UDim2.new(0.5, 0, 0, 18)
+    holder.AnchorPoint = Vector2.new(0.5, 0)
+    holder.Size = UDim2.new(0, 360, 1, -36)
     holder.Parent = self.UI.ScreenGui
-    
+    holder.ClipsDescendants = false
+
     local layout = Instance.new("UIListLayout")
     layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
-    layout.Padding = UDim.new(0, 10)
+    layout.VerticalAlignment = Enum.VerticalAlignment.Top
+    layout.Padding = UDim.new(0, 8)
     layout.Parent = holder
-    
+
     self.NotificationHolder = holder
+    self._NotificationPool = self._NotificationPool or {}
+    self._NotificationSeq = self._NotificationSeq or 0
 end
 
-function SeleniusHub:ShowWarning(text, kind)
-    local frame = Utils:CreateInstance("Frame", {
-        BackgroundColor3 = Theme.Secondary,
-        Size = UDim2.new(1, 0, 0, 50),
-        BackgroundTransparency = 0.1,
-        Parent = self.NotificationHolder
-    })
-    Utils:AddCorner(frame, 8)
-    Utils:AddStroke(frame, Theme.Stroke, 1, 0.5) -- Stroke adicionado
-    
-    local barColor = Theme.Accent
-    if kind == "error" then barColor = Theme.Error end
-    if kind == "warn" then barColor = Theme.Warning end
-    
-    local bar = Instance.new("Frame")
-    bar.BackgroundColor3 = barColor
-    bar.Size = UDim2.new(0, 4, 1, 0)
-    bar.Parent = frame
-    Utils:AddCorner(bar, 8)
-    
-    local title = Instance.new("TextLabel")
-    title.BackgroundTransparency = 1
-    title.Position = UDim2.new(0, 12, 0, 0)
-    title.Size = UDim2.new(1, -20, 1, 0)
-    title.Font = Enum.Font.GothamBold -- Mudado para Gotham
-    title.TextSize = 16
-    title.TextColor3 = Theme.TextPrimary
-    title.TextXAlignment = Enum.TextXAlignment.Left
-    title.TextWrapped = true
-    title.Text = text
-    title.Parent = frame
-    
-    frame.Position = UDim2.new(1, 200, 0, 0) 
-    Utils:Tween(frame, AnimConfig, {Position = UDim2.new(0, 0, 0, 0)}) 
-    
-    task.delay(4, function()
-        if frame then
-            local t = Utils:Tween(frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {BackgroundTransparency = 1, Size = UDim2.new(1,0,0,0)})
-            Utils:Tween(title, TweenInfo.new(0.3), {TextTransparency = 1})
-            t.Completed:Wait()
-            frame:Destroy()
-        end
+function SeleniusHub:ShowWarning(text, kind, instant)
+    kind = kind or "info"
+
+    if not self.NotificationHolder then
+        self:CreateNotificationSystem()
+    end
+
+    self._NotificationPool = self._NotificationPool or {}
+    self._NotificationSeq = (self._NotificationSeq or 0) + 1
+    local token = self._NotificationSeq
+
+    local accentColor = Theme.Accent
+    local iconChar = "i"
+    if kind == "error" then
+        accentColor = Theme.Error
+        iconChar = "×"
+    elseif kind == "warn" then
+        accentColor = Theme.AccentDark or Theme.Accent
+        iconChar = "!"
+    elseif kind == "success" or kind == "status" then
+        accentColor = Theme.Status or Theme.Accent
+        iconChar = "✓"
+    end
+
+    local frame = table.remove(self._NotificationPool)
+    if not frame then
+        frame = Utils:CreateInstance("Frame", {
+            Name = "Toast",
+            BackgroundTransparency = 0.15,
+            Size = UDim2.new(1, 0, 0, 48),
+            ClipsDescendants = true,
+        })
+        Utils:AddCorner(frame, 14)
+        Utils:AddStroke(frame, Theme.Stroke, 1, 1).Name = "Stroke"
+
+        local pad = Instance.new("UIPadding")
+        pad.Name = "Pad"
+        pad.PaddingLeft = UDim.new(0, 12)
+        pad.PaddingRight = UDim.new(0, 12)
+        pad.PaddingTop = UDim.new(0, 10)
+        pad.PaddingBottom = UDim.new(0, 10)
+        pad.Parent = frame
+
+        local iconBg = Instance.new("Frame")
+        iconBg.Name = "IconBg"
+        iconBg.AnchorPoint = Vector2.new(0, 0.5)
+        iconBg.Position = UDim2.new(0, 0, 0.5, 0)
+        iconBg.Size = UDim2.new(0, 26, 0, 26)
+        iconBg.BorderSizePixel = 0
+        iconBg.Parent = frame
+        Utils:AddCorner(iconBg, 13)
+
+        local icon = Instance.new("TextLabel")
+        icon.Name = "Icon"
+        icon.BackgroundTransparency = 1
+        icon.Size = UDim2.new(1, 0, 1, 0)
+        icon.Font = Enum.Font.GothamBold
+        icon.TextSize = 14
+        icon.TextXAlignment = Enum.TextXAlignment.Center
+        icon.TextYAlignment = Enum.TextYAlignment.Center
+        icon.Parent = iconBg
+
+        local msg = Instance.new("TextLabel")
+        msg.Name = "Message"
+        msg.BackgroundTransparency = 1
+        msg.Position = UDim2.new(0, 36, 0, 0)
+        msg.Size = UDim2.new(1, -36, 1, 0)
+        msg.Font = Enum.Font.GothamMedium
+        msg.TextSize = 14
+        msg.TextXAlignment = Enum.TextXAlignment.Left
+        msg.TextYAlignment = Enum.TextYAlignment.Center
+        msg.TextWrapped = true
+        msg.TextTruncate = Enum.TextTruncate.AtEnd
+        msg.Parent = frame
+
+        local progress = Instance.new("Frame")
+        progress.Name = "Progress"
+        progress.AnchorPoint = Vector2.new(0, 1)
+        progress.Position = UDim2.new(0, 0, 1, 0)
+        progress.Size = UDim2.new(1, 0, 0, 2)
+        progress.BorderSizePixel = 0
+        progress.Parent = frame
+
+        local scale = Instance.new("UIScale")
+        scale.Name = "Scale"
+        scale.Scale = 1
+        scale.Parent = frame
+    end
+
+    pcall(function()
+        frame:SetAttribute("NotifToken", token)
+    end)
+    frame.LayoutOrder = token
+    frame.Parent = self.NotificationHolder
+
+    frame.BackgroundColor3 = Theme.Secondary
+    frame.BackgroundTransparency = instant and 0.15 or 1
+
+    local stroke = frame:FindFirstChild("Stroke")
+    if stroke then
+        stroke.Color = Theme.Stroke
+        stroke.Transparency = 1
+    end
+
+    local iconBg = frame:FindFirstChild("IconBg")
+    local icon = iconBg and iconBg:FindFirstChild("Icon")
+    local msg = frame:FindFirstChild("Message")
+    local progress = frame:FindFirstChild("Progress")
+    local scale = frame:FindFirstChild("Scale")
+
+    if iconBg then
+        iconBg.BackgroundColor3 = accentColor
+        iconBg.BackgroundTransparency = instant and 0 or 1
+    end
+    if icon then
+        icon.Text = iconChar
+        icon.TextColor3 = Theme.TextPrimary
+        icon.TextTransparency = instant and 0 or 1
+    end
+    if msg then
+        msg.Text = tostring(text or "")
+        msg.TextColor3 = Theme.TextPrimary
+        msg.TextTransparency = instant and 0 or 1
+    end
+    if progress then
+        progress.BackgroundColor3 = accentColor
+        progress.BackgroundTransparency = instant and 0 or 1
+        progress.Size = UDim2.new(1, 0, 0, 2)
+    end
+    if scale then
+        scale.Scale = instant and 1 or 0.92
+    end
+
+    local inTween = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local outTween = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+
+    if not instant then
+        if scale then Utils:Tween(scale, inTween, { Scale = 1 }) end
+        Utils:Tween(frame, inTween, { BackgroundTransparency = 0.15 })
+        if msg then Utils:Tween(msg, inTween, { TextTransparency = 0 }) end
+        if iconBg then Utils:Tween(iconBg, inTween, { BackgroundTransparency = 0 }) end
+        if icon then Utils:Tween(icon, inTween, { TextTransparency = 0 }) end
+        if progress then Utils:Tween(progress, inTween, { BackgroundTransparency = 0 }) end
+        pcall(function()
+            if stroke then Utils:Tween(stroke, inTween, { Transparency = 0.55 }) end
+        end)
+    end
+
+    local lifetime = 3.4
+    if progress then
+        Utils:Tween(progress, TweenInfo.new(lifetime, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { Size = UDim2.new(0, 0, 0, 2) })
+    end
+
+    task.delay(lifetime, function()
+        if not (frame and frame.Parent) then return end
+        local ok, current = pcall(function() return frame:GetAttribute("NotifToken") end)
+        if ok and current ~= token then return end
+
+        if scale then Utils:Tween(scale, outTween, { Scale = 0.94 }) end
+        local t = Utils:Tween(frame, outTween, { BackgroundTransparency = 1 })
+        if msg then Utils:Tween(msg, outTween, { TextTransparency = 1 }) end
+        if iconBg then Utils:Tween(iconBg, outTween, { BackgroundTransparency = 1 }) end
+        if icon then Utils:Tween(icon, outTween, { TextTransparency = 1 }) end
+        if progress then Utils:Tween(progress, outTween, { BackgroundTransparency = 1 }) end
+        pcall(function()
+            if stroke then Utils:Tween(stroke, outTween, { Transparency = 1 }) end
+        end)
+        pcall(function() t.Completed:Wait() end)
+
+        ok, current = pcall(function() return frame:GetAttribute("NotifToken") end)
+        if ok and current ~= token then return end
+
+        frame.Parent = nil
+        table.insert(self._NotificationPool, frame)
     end)
 end
 
