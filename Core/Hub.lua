@@ -67,7 +67,7 @@ function Hub.new()
 	self.Tabs = {}
 	self.Minimized = false
 	self.MinWidth = 520
-	self.MinHeight = 350
+	self.MinHeight = 420
 	self.MinimizedHeight = 46
 
 	self.State = State.new()
@@ -413,78 +413,105 @@ function Hub:CreateNotificationSystem()
 	self.NotificationHolder = holder
 end
 
-function Hub:ShowWarning(text, kind)
+function Hub:ShowWarning(text, kind, instant)
 	local Theme = self.ThemeManager:GetTheme()
+	kind = kind or "info"
 
 	if not self.NotificationHolder then
 		self:CreateNotificationSystem()
 	end
 
+	local accentColor = Theme.Accent
+	if kind == "error" then
+		accentColor = Theme.Error
+	elseif kind == "warn" then
+		accentColor = Theme.AccentDark
+	elseif kind == "success" or kind == "status" then
+		accentColor = Theme.Status
+	end
+
 	local frame = InstanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Secondary,
-		Size = UDim2.new(1, 0, 0, 50),
-		BackgroundTransparency = 0.1,
+		BackgroundTransparency = 0.22,
+		Size = UDim2.new(1, 0, 0, 54),
 		Parent = self.NotificationHolder,
 	})
-	InstanceUtil.AddCorner(frame, 8)
-	local notifStrokeColor = Color3.fromRGB(0, 22, 85)
-	local stroke = InstanceUtil.AddStroke(frame, notifStrokeColor, 4, 1)
+	InstanceUtil.AddCorner(frame, 10)
+	local stroke = InstanceUtil.AddStroke(frame, Theme.Stroke, 1, 0.6)
+
+	local padding = Instance.new("UIPadding")
+	padding.PaddingLeft = UDim.new(0, 14)
+	padding.PaddingRight = UDim.new(0, 14)
+	padding.PaddingTop = UDim.new(0, 10)
+	padding.PaddingBottom = UDim.new(0, 10)
+	padding.Parent = frame
+
+	local accentBar = InstanceUtil.Create("Frame", {
+		BackgroundColor3 = accentColor,
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		Size = UDim2.new(0, 3, 1, -6),
+		Position = UDim2.new(0, 0, 0, 3),
+		Parent = frame,
+	})
+	InstanceUtil.AddCorner(accentBar, 2)
+
+	local label = Instance.new("TextLabel")
+	label.BackgroundTransparency = 1
+	label.Position = UDim2.new(0, 10, 0, 0)
+	label.Size = UDim2.new(1, -10, 1, 0)
+	label.Font = Enum.Font.GothamMedium
+	label.TextSize = 14
+	label.TextColor3 = Theme.TextPrimary
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.TextYAlignment = Enum.TextYAlignment.Center
+	label.TextWrapped = true
+	label.Text = tostring(text or "")
+	label.Parent = frame
 
 	local scale = Instance.new("UIScale")
-	scale.Scale = 0.72
+	scale.Scale = 1
 	scale.Parent = frame
 
-	local title = Instance.new("TextLabel")
-	title.BackgroundTransparency = 1
-	title.Position = UDim2.new(0, 12, 0, 0)
-	title.Size = UDim2.new(1, -20, 1, 0)
-	title.Font = Enum.Font.GothamBold
-	title.TextSize = 16
-	title.TextColor3 = Theme.TextPrimary
-	title.TextXAlignment = Enum.TextXAlignment.Left
-	title.TextWrapped = true
-	title.Text = text
-	title.Parent = frame
+	local inTweenInfo = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local outTweenInfo = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 
-	frame.Position = UDim2.new(1, 260, 0, 0)
-	frame.Rotation = -2.5
-	frame.BackgroundTransparency = 1
-	title.TextTransparency = 1
+	if not instant then
+		scale.Scale = 0.96
+		frame.BackgroundTransparency = 1
+		label.TextTransparency = 1
+		accentBar.BackgroundTransparency = 1
+		pcall(function()
+			stroke.Transparency = 1
+		end)
 
-	InstanceUtil.Tween(frame, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-		Position = UDim2.new(0, 0, 0, 0),
-		BackgroundTransparency = 0.1,
-		Rotation = 0,
-	})
-	InstanceUtil.Tween(scale, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1.06 })
-	InstanceUtil.Tween(stroke, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Transparency = 0.22,
-		Thickness = 2,
-	})
-	task.delay(0.22, function()
-		if scale and scale.Parent then
-			InstanceUtil.Tween(scale, TweenInfo.new(0.18, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1 })
+		InstanceUtil.Tween(scale, inTweenInfo, { Scale = 1 })
+		InstanceUtil.Tween(frame, inTweenInfo, { BackgroundTransparency = 0.22 })
+		InstanceUtil.Tween(label, inTweenInfo, { TextTransparency = 0 })
+		InstanceUtil.Tween(accentBar, inTweenInfo, { BackgroundTransparency = 0 })
+		pcall(function()
+			InstanceUtil.Tween(stroke, inTweenInfo, { Transparency = 0.6 })
+		end)
+	end
+
+	task.delay(3.6, function()
+		if not (frame and frame.Parent) then
+			return
 		end
-	end)
-	InstanceUtil.Tween(title, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextTransparency = 0 })
 
-	task.delay(4, function()
-		if frame then
-			local t = InstanceUtil.Tween(frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-				BackgroundTransparency = 1,
-				Position = UDim2.new(1, 260, 0, 0),
-				Rotation = 2.5,
-			})
-			InstanceUtil.Tween(scale, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), { Scale = 0.72 })
-			pcall(function()
-				InstanceUtil.Tween(stroke, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-					Transparency = 1,
-				})
-			end)
-			InstanceUtil.Tween(title, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { TextTransparency = 1 })
+		local t = InstanceUtil.Tween(frame, outTweenInfo, { BackgroundTransparency = 1 })
+		InstanceUtil.Tween(scale, outTweenInfo, { Scale = 0.96 })
+		InstanceUtil.Tween(label, outTweenInfo, { TextTransparency = 1 })
+		InstanceUtil.Tween(accentBar, outTweenInfo, { BackgroundTransparency = 1 })
+		pcall(function()
+			InstanceUtil.Tween(stroke, outTweenInfo, { Transparency = 1 })
+		end)
+		pcall(function()
 			t.Completed:Wait()
+		end)
+		pcall(function()
 			frame:Destroy()
-		end
+		end)
 	end)
 end
 
@@ -730,6 +757,15 @@ function Hub:CreateUI()
 		local w = math.max(self.MinWidth, self.LoadedSize.Width)
 		local h = math.max(self.MinHeight, self.LoadedSize.Height)
 		UI.MainFrame.Size = UDim2.new(0, w, 0, h)
+		self.SavedSize = UI.MainFrame.Size
+		self.StoredSize = UI.MainFrame.Size
+	end
+
+	-- Migração simples: se o tamanho salvo for "baixo" demais, usa a altura padrão nova.
+	-- (Ajuda a aplicar o pedido de "mais altura" mesmo com config antiga.)
+	local preferredH = (self.DefaultSize and self.DefaultSize.Y and self.DefaultSize.Y.Offset) or UI.MainFrame.Size.Y.Offset
+	if UI.MainFrame.Size.Y.Offset < preferredH then
+		UI.MainFrame.Size = UDim2.new(0, UI.MainFrame.Size.X.Offset, 0, preferredH)
 		self.SavedSize = UI.MainFrame.Size
 		self.StoredSize = UI.MainFrame.Size
 	end

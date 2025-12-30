@@ -22,7 +22,7 @@ function Window.Create(ctx)
 		BackgroundColor3 = Theme.Background,
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.new(0.5, 0, 0.5, 0),
-		Size = UDim2.new(0, 616, 0, 505),
+		Size = UDim2.new(0, 616, 0, 600),
 		ClipsDescendants = false,
 		Parent = UI.ScreenGui,
 		Visible = false,
