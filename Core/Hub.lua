@@ -657,6 +657,14 @@ function Hub:CreateUI()
 		self.StoredSize = UI.MainFrame.Size
 	end
 
+	-- Migração simples: aplica também a largura mínima preferida (configs antigas podem deixar estreito).
+	local preferredW = (self.DefaultSize and self.DefaultSize.X and self.DefaultSize.X.Offset) or UI.MainFrame.Size.X.Offset
+	if UI.MainFrame.Size.X.Offset < preferredW then
+		UI.MainFrame.Size = UDim2.new(0, preferredW, 0, UI.MainFrame.Size.Y.Offset)
+		self.SavedSize = UI.MainFrame.Size
+		self.StoredSize = UI.MainFrame.Size
+	end
+
 	self.SearchBox = UI.SearchBox
 end
 
