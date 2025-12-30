@@ -665,9 +665,12 @@ function Hub:CreateUI()
 		self.StoredSize = UI.MainFrame.Size
 	end
 
-	-- Se a config salvou exatamente o antigo "default" largo (ex.: após uma atualização),
+	-- Se a config salvou exatamente um "default" antigo (após atualizações),
 	-- volta para o novo padrão para não ficar exageradamente largo.
-	if self.LoadedSize and self.LoadedSize.Width == 720 and self.LoadedSize.Height == 600 then
+	if self.LoadedSize
+		and self.LoadedSize.Height == 600
+		and (self.LoadedSize.Width == 720 or self.LoadedSize.Width == 660)
+	then
 		UI.MainFrame.Size = UDim2.new(0, preferredW, 0, UI.MainFrame.Size.Y.Offset)
 		self.SavedSize = UI.MainFrame.Size
 		self.StoredSize = UI.MainFrame.Size
