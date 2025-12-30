@@ -150,7 +150,7 @@ function Lifecycle.CreateKeySystem(hub)
 	local main = Instance.new("Frame")
 	main.AnchorPoint = Vector2.new(0.5, 0.5)
 	main.Position = UDim2.new(0.5, 0, 0.5, 0)
-	main.Size = UDim2.new(0, 720, 0, 330)
+	main.Size = UDim2.new(0, 760, 0, 360)
 	main.BackgroundColor3 = Theme.Background
 	main.BorderSizePixel = 0
 	main.ClipsDescendants = false
@@ -160,7 +160,7 @@ function Lifecycle.CreateKeySystem(hub)
 	mainScale.Scale = 0
 	mainScale.Parent = main
 
-	InstanceUtil.AddCorner(main, 8)
+	InstanceUtil.AddCorner(main, 12)
 	Acrylic.Enable(main, Theme, InstanceUtil)
 
 	local content = Instance.new("Frame")
@@ -172,14 +172,14 @@ function Lifecycle.CreateKeySystem(hub)
 	local left = Instance.new("Frame")
 	left.BackgroundTransparency = 1
 	left.Position = UDim2.new(0, 0, 0, 0)
-	left.Size = UDim2.new(0, 380, 1, 0)
+	left.Size = UDim2.new(0, 400, 1, 0)
 	left.Parent = content
 
 	local leftPad = Instance.new("UIPadding")
-	leftPad.PaddingLeft = UDim.new(0, 22)
-	leftPad.PaddingRight = UDim.new(0, 22)
-	leftPad.PaddingTop = UDim.new(0, 22)
-	leftPad.PaddingBottom = UDim.new(0, 22)
+	leftPad.PaddingLeft = UDim.new(0, 24)
+	leftPad.PaddingRight = UDim.new(0, 24)
+	leftPad.PaddingTop = UDim.new(0, 24)
+	leftPad.PaddingBottom = UDim.new(0, 24)
 	leftPad.Parent = left
 
 	local leftLayout = Instance.new("UIListLayout")
@@ -191,21 +191,21 @@ function Lifecycle.CreateKeySystem(hub)
 	separator.BackgroundColor3 = Theme.Stroke
 	separator.BackgroundTransparency = 0.45
 	separator.BorderSizePixel = 0
-	separator.Position = UDim2.new(0, 380, 0, 16)
+	separator.Position = UDim2.new(0, 400, 0, 16)
 	separator.Size = UDim2.new(0, 1, 1, -32)
 	separator.Parent = content
 
 	local right = Instance.new("Frame")
 	right.BackgroundTransparency = 1
-	right.Position = UDim2.new(0, 381, 0, 0)
-	right.Size = UDim2.new(1, -381, 1, 0)
+	right.Position = UDim2.new(0, 401, 0, 0)
+	right.Size = UDim2.new(1, -401, 1, 0)
 	right.Parent = content
 
 	local title = Instance.new("TextLabel")
 	title.BackgroundTransparency = 1
 	title.Size = UDim2.new(1, 0, 0, 26)
 	title.Font = Enum.Font.GothamBold
-	title.TextSize = 20
+	title.TextSize = 22
 	title.TextColor3 = Theme.Accent
 	title.Text = "SELENIUS KEY"
 	title.TextXAlignment = Enum.TextXAlignment.Left
@@ -216,7 +216,7 @@ function Lifecycle.CreateKeySystem(hub)
 	sub.BackgroundTransparency = 1
 	sub.Size = UDim2.new(1, 0, 0, 18)
 	sub.Font = Enum.Font.GothamMedium
-	sub.TextSize = 14
+	sub.TextSize = 13
 	sub.TextColor3 = Theme.AccentDark
 	sub.Text = "Authentication Required"
 	sub.TextXAlignment = Enum.TextXAlignment.Left
@@ -225,10 +225,10 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local inputBg = Instance.new("Frame")
 	inputBg.BackgroundColor3 = Theme.Secondary
-	inputBg.Size = UDim2.new(1, 0, 0, 44)
+	inputBg.Size = UDim2.new(1, 0, 0, 48)
 	inputBg.LayoutOrder = 3
 	inputBg.Parent = left
-	InstanceUtil.AddCorner(inputBg, 6)
+	InstanceUtil.AddCorner(inputBg, 8)
 	InstanceUtil.AddStroke(inputBg, Theme.Stroke, 1, 0.55)
 
 	local showKey = false
@@ -245,20 +245,20 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local showBtn = Instance.new("TextButton")
 	showBtn.BackgroundColor3 = Theme.Button
-	showBtn.Position = UDim2.new(1, -92, 0, 6)
-	showBtn.Size = UDim2.new(0, 86, 0, 28)
+	showBtn.Position = UDim2.new(1, -98, 0, 8)
+	showBtn.Size = UDim2.new(0, 90, 0, 32)
 	showBtn.Font = Enum.Font.GothamBold
 	showBtn.TextSize = 12
 	showBtn.TextColor3 = Theme.TextPrimary
 	showBtn.Text = "MOSTRAR"
 	showBtn.AutoButtonColor = false
 	showBtn.Parent = inputBg
-	InstanceUtil.AddCorner(showBtn, 6)
+	InstanceUtil.AddCorner(showBtn, 8)
 
 	local keyBox = Instance.new("TextBox")
 	keyBox.BackgroundTransparency = 1
 	keyBox.Position = UDim2.new(0, 10, 0, 0)
-	keyBox.Size = UDim2.new(1, -112, 1, 0)
+	keyBox.Size = UDim2.new(1, -122, 1, 0)
 	keyBox.Font = Enum.Font.GothamMedium
 	keyBox.TextSize = 16
 	keyBox.TextColor3 = Theme.TextPrimary
@@ -321,7 +321,7 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local btnContainer = Instance.new("Frame")
 	btnContainer.BackgroundTransparency = 1
-	btnContainer.Size = UDim2.new(1, 0, 0, 38)
+	btnContainer.Size = UDim2.new(1, 0, 0, 42)
 	btnContainer.LayoutOrder = 4
 	btnContainer.Parent = left
 
@@ -335,23 +335,23 @@ function Lifecycle.CreateKeySystem(hub)
 	enterBtn.BackgroundColor3 = Theme.Button
 	enterBtn.Size = UDim2.new(0.5, -5, 1, 0)
 	enterBtn.Font = Enum.Font.GothamBold
-	enterBtn.TextSize = 14
+	enterBtn.TextSize = 15
 	enterBtn.TextColor3 = Theme.Accent
 	enterBtn.Text = "CHECK KEY"
 	enterBtn.LayoutOrder = 1
 	enterBtn.Parent = btnContainer
-	InstanceUtil.AddCorner(enterBtn, 6)
+	InstanceUtil.AddCorner(enterBtn, 8)
 
 	local getBtn = Instance.new("TextButton")
 	getBtn.BackgroundColor3 = Theme.Button
 	getBtn.Size = UDim2.new(0.5, -5, 1, 0)
 	getBtn.Font = Enum.Font.GothamBold
-	getBtn.TextSize = 14
+	getBtn.TextSize = 15
 	getBtn.TextColor3 = Theme.TextPrimary
 	getBtn.Text = "GET KEY"
 	getBtn.LayoutOrder = 2
 	getBtn.Parent = btnContainer
-	InstanceUtil.AddCorner(getBtn, 6)
+	InstanceUtil.AddCorner(getBtn, 8)
 
 	local discordRow = Instance.new("Frame")
 	discordRow.BackgroundTransparency = 1
@@ -393,7 +393,7 @@ function Lifecycle.CreateKeySystem(hub)
 	statusText.BackgroundTransparency = 1
 	statusText.Size = UDim2.new(1, 0, 0, 20)
 	statusText.Font = Enum.Font.GothamMedium
-	statusText.TextSize = 12
+	statusText.TextSize = 13
 	statusText.TextColor3 = Theme.Error
 	statusText.TextTransparency = 1
 	statusText.Text = ""
@@ -428,32 +428,54 @@ function Lifecycle.CreateKeySystem(hub)
 		notifyLinkCopied()
 	end)
 
+	local helpCard = Instance.new("Frame")
+	helpCard.BackgroundColor3 = Theme.Secondary
+	helpCard.BackgroundTransparency = 0.12
+	helpCard.BorderSizePixel = 0
+	helpCard.Position = UDim2.new(0, 18, 0, 18)
+	helpCard.Size = UDim2.new(1, -36, 1, -36)
+	helpCard.Parent = right
+	InstanceUtil.AddCorner(helpCard, 10)
+	InstanceUtil.AddStroke(helpCard, Theme.Stroke, 1, 0.6)
+
+	local helpPad = Instance.new("UIPadding")
+	helpPad.PaddingLeft = UDim.new(0, 16)
+	helpPad.PaddingRight = UDim.new(0, 16)
+	helpPad.PaddingTop = UDim.new(0, 16)
+	helpPad.PaddingBottom = UDim.new(0, 16)
+	helpPad.Parent = helpCard
+
+	local helpLayout = Instance.new("UIListLayout")
+	helpLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	helpLayout.Padding = UDim.new(0, 10)
+	helpLayout.Parent = helpCard
+
 	local helpTitle = Instance.new("TextLabel")
 	helpTitle.BackgroundTransparency = 1
-	helpTitle.Position = UDim2.new(0, 16, 0, 18)
-	helpTitle.Size = UDim2.new(1, -32, 0, 18)
+	helpTitle.Size = UDim2.new(1, 0, 0, 20)
 	helpTitle.Font = Enum.Font.GothamBold
-	helpTitle.TextSize = 14
+	helpTitle.TextSize = 15
 	helpTitle.TextColor3 = Theme.TextPrimary
 	helpTitle.TextXAlignment = Enum.TextXAlignment.Left
-	helpTitle.Text = "Como pegar a key:"
-	helpTitle.Parent = right
+	helpTitle.Text = "Como pegar a key"
+	helpTitle.LayoutOrder = 1
+	helpTitle.Parent = helpCard
 
 	local helpBody = Instance.new("TextLabel")
 	helpBody.BackgroundTransparency = 1
-	helpBody.Position = UDim2.new(0, 16, 0, 42)
-	helpBody.Size = UDim2.new(1, -32, 1, -58)
+	helpBody.Size = UDim2.new(1, 0, 1, -30)
 	helpBody.Font = Enum.Font.GothamMedium
-	helpBody.TextSize = 12
+	helpBody.TextSize = 13
 	helpBody.TextColor3 = Theme.AccentDark
 	helpBody.TextXAlignment = Enum.TextXAlignment.Left
 	helpBody.TextYAlignment = Enum.TextYAlignment.Top
 	helpBody.TextWrapped = true
 	helpBody.Text = "1) Clique em GET KEY\n2) Abra o link e complete o processo\n3) Copie a key gerada\n4) Cole aqui e clique CHECK KEY"
-	helpBody.Parent = right
+	helpBody.LayoutOrder = 2
+	helpBody.Parent = helpCard
 
-	-- Animação mais fluida (UI da key um pouco maior)
-	InstanceUtil.Tween(mainScale, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1.15 })
+	-- Animação mais fluida (remake: base maior + leve zoom)
+	InstanceUtil.Tween(mainScale, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1.1 })
 
 	enterBtn.MouseEnter:Connect(function()
 		TweenService:Create(enterBtn, hoverTweenInfo, { BackgroundColor3 = Theme.ButtonHover }):Play()

@@ -22,6 +22,7 @@ local ThemeManager = require(script.Parent.Parent.Theme.ThemeManager)
 local LocaleManager = require(script.Parent.Parent.Locale.LocaleManager)
 
 local Window = require(script.Parent.Parent.UI.Window)
+local Notifications = require(script.Parent.Parent.UI.Notifications)
 
 local Registry = require(script.Parent.Registry)
 local State = require(script.Parent.State)
@@ -388,261 +389,17 @@ function Hub:LoadConfig(name)
 end
 
 function Hub:CreateNotificationSystem()
-	if self.NotificationHolder and self.NotificationHolder.Parent then
+	if not (self.UI and self.UI.ScreenGui) then
 		return
 	end
-
-	local holder = Instance.new("Frame")
-	holder.Name = "Notifications"
-	holder.BackgroundTransparency = 1
-	-- Mantém a posição original (canto inferior direito)
-	holder.Position = UDim2.new(1, -20, 1, -20)
-	holder.AnchorPoint = Vector2.new(1, 1)
-	holder.Size = UDim2.new(0, 340, 1, 0)
-	holder.Parent = self.UI.ScreenGui
-	holder.ClipsDescendants = false
-
-	local layout = Instance.new("UIListLayout")
-	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
-	layout.Padding = UDim.new(0, 10)
-	layout.Parent = holder
-
-	self.NotificationHolder = holder
-	self._NotificationPool = self._NotificationPool or {}
-	self._NotificationSeq = self._NotificationSeq or 0
+	self.NotificationHolder = Notifications.Init(self.UI.ScreenGui)
 end
 
 function Hub:ShowWarning(text, kind, instant)
-	local Theme = self.ThemeManager:GetTheme()
-	kind = kind or "info"
-
-	if not self.NotificationHolder then
-		self:CreateNotificationSystem()
+	if not (self.UI and self.UI.ScreenGui) then
+		return
 	end
-
-	self._NotificationPool = self._NotificationPool or {}
-	self._NotificationSeq = (self._NotificationSeq or 0) + 1
-	local token = self._NotificationSeq
-
-	local accentColor = Theme.Accent
-	local titleText = "INFO"
-	local iconChar = "i"
-	if kind == "error" then
-		accentColor = Theme.Error
-		titleText = "ERRO"
-		iconChar = "×"
-	elseif kind == "warn" then
-		accentColor = Theme.AccentDark
-		titleText = "AVISO"
-		iconChar = "!"
-	elseif kind == "success" or kind == "status" then
-		accentColor = Theme.Status
-		titleText = "SUCESSO"
-		iconChar = "✓"
-	end
-
-	local frame = table.remove(self._NotificationPool)
-	if not frame then
-		frame = InstanceUtil.Create("Frame", {
-			Name = "Notification",
-			ClipsDescendants = true,
-			Size = UDim2.new(1, 0, 0, 58),
-		})
-		InstanceUtil.AddCorner(frame, 12)
-		local stroke = InstanceUtil.AddStroke(frame, Theme.Stroke, 1, 1)
-		stroke.Name = "Stroke"
-
-		local iconBg = InstanceUtil.Create("Frame", {
-			Name = "IconBg",
-			AnchorPoint = Vector2.new(0, 0.5),
-			Position = UDim2.new(0, 12, 0.5, 0),
-			Size = UDim2.new(0, 30, 0, 30),
-			BorderSizePixel = 0,
-			Parent = frame,
-		})
-		InstanceUtil.AddCorner(iconBg, 15)
-
-		local icon = InstanceUtil.Create("TextLabel", {
-			Name = "Icon",
-			BackgroundTransparency = 1,
-			Size = UDim2.new(1, 0, 1, 0),
-			Font = Enum.Font.GothamBold,
-			TextSize = 14,
-			TextXAlignment = Enum.TextXAlignment.Center,
-			TextYAlignment = Enum.TextYAlignment.Center,
-			Parent = iconBg,
-		})
-
-		local title = InstanceUtil.Create("TextLabel", {
-			Name = "Title",
-			BackgroundTransparency = 1,
-			Position = UDim2.new(0, 52, 0, 10),
-			Size = UDim2.new(1, -64, 0, 14),
-			Font = Enum.Font.GothamBold,
-			TextSize = 12,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			TextYAlignment = Enum.TextYAlignment.Center,
-			TextWrapped = false,
-			TextTruncate = Enum.TextTruncate.AtEnd,
-			Parent = frame,
-		})
-
-		local msg = InstanceUtil.Create("TextLabel", {
-			Name = "Message",
-			BackgroundTransparency = 1,
-			Position = UDim2.new(0, 52, 0, 26),
-			Size = UDim2.new(1, -64, 0, 20),
-			Font = Enum.Font.GothamMedium,
-			TextSize = 13,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			TextYAlignment = Enum.TextYAlignment.Top,
-			TextWrapped = true,
-			TextTruncate = Enum.TextTruncate.AtEnd,
-			Parent = frame,
-		})
-
-		local progressBg = InstanceUtil.Create("Frame", {
-			Name = "ProgressBg",
-			AnchorPoint = Vector2.new(0, 1),
-			Position = UDim2.new(0, 0, 1, 0),
-			Size = UDim2.new(1, 0, 0, 3),
-			BorderSizePixel = 0,
-			Parent = frame,
-		})
-
-		local progress = InstanceUtil.Create("Frame", {
-			Name = "Progress",
-			AnchorPoint = Vector2.new(0, 1),
-			Position = UDim2.new(0, 0, 1, 0),
-			Size = UDim2.new(1, 0, 0, 3),
-			BorderSizePixel = 0,
-			Parent = progressBg,
-		})
-
-		local scale = Instance.new("UIScale")
-		scale.Name = "Scale"
-		scale.Scale = 1
-		scale.Parent = frame
-	end
-
-	frame:SetAttribute("NotifToken", token)
-	frame.LayoutOrder = token
-	frame.Parent = self.NotificationHolder
-
-	frame.BackgroundColor3 = Theme.Secondary
-	frame.BackgroundTransparency = 0.12
-	local stroke = frame:FindFirstChild("Stroke")
-	if stroke then
-		stroke.Color = Theme.Stroke
-		stroke.Transparency = 1
-	end
-
-	local iconBg = frame:FindFirstChild("IconBg")
-	local icon = iconBg and iconBg:FindFirstChild("Icon")
-	local title = frame:FindFirstChild("Title")
-	local msg = frame:FindFirstChild("Message")
-	local progressBg = frame:FindFirstChild("ProgressBg")
-	local progress = progressBg and progressBg:FindFirstChild("Progress")
-	local scale = frame:FindFirstChild("Scale")
-
-	if iconBg then
-		iconBg.BackgroundColor3 = accentColor
-		iconBg.BackgroundTransparency = 0.15
-	end
-	if icon then
-		icon.Text = iconChar
-		icon.TextColor3 = Theme.TextPrimary
-		icon.TextTransparency = 0
-	end
-	if title then
-		title.Text = titleText
-		title.TextColor3 = accentColor
-		title.TextTransparency = 1
-	end
-	if msg then
-		msg.Text = tostring(text or "")
-		msg.TextColor3 = Theme.TextPrimary
-		msg.TextTransparency = 1
-	end
-	if progressBg then
-		progressBg.BackgroundColor3 = Theme.Button
-		progressBg.BackgroundTransparency = 0.35
-	end
-	if progress then
-		progress.BackgroundColor3 = accentColor
-		progress.BackgroundTransparency = 1
-		progress.Size = UDim2.new(1, 0, 0, 3)
-	end
-	if scale then
-		scale.Scale = instant and 1 or 0.94
-	end
-	frame.BackgroundTransparency = instant and 0.12 or 1
-
-	local inTween = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	local outTween = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-
-	if not instant then
-		if scale then
-			InstanceUtil.Tween(scale, inTween, { Scale = 1 })
-		end
-		InstanceUtil.Tween(frame, inTween, { BackgroundTransparency = 0.12 })
-		if title then
-			InstanceUtil.Tween(title, inTween, { TextTransparency = 0 })
-		end
-		if msg then
-			InstanceUtil.Tween(msg, inTween, { TextTransparency = 0 })
-		end
-		if progress then
-			InstanceUtil.Tween(progress, inTween, { BackgroundTransparency = 0 })
-		end
-		if stroke then
-			pcall(function()
-				InstanceUtil.Tween(stroke, inTween, { Transparency = 0.55 })
-			end)
-		end
-	end
-
-	local lifetime = 3.4
-	if progress then
-		InstanceUtil.Tween(progress, TweenInfo.new(lifetime, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { Size = UDim2.new(0, 0, 0, 3) })
-	end
-
-	task.delay(lifetime, function()
-		if not (frame and frame.Parent) then
-			return
-		end
-		if frame:GetAttribute("NotifToken") ~= token then
-			return
-		end
-
-		if scale then
-			InstanceUtil.Tween(scale, outTween, { Scale = 0.94 })
-		end
-		local t = InstanceUtil.Tween(frame, outTween, { BackgroundTransparency = 1 })
-		if title then
-			InstanceUtil.Tween(title, outTween, { TextTransparency = 1 })
-		end
-		if msg then
-			InstanceUtil.Tween(msg, outTween, { TextTransparency = 1 })
-		end
-		if progress then
-			InstanceUtil.Tween(progress, outTween, { BackgroundTransparency = 1 })
-		end
-		if stroke then
-			pcall(function()
-				InstanceUtil.Tween(stroke, outTween, { Transparency = 1 })
-			end)
-		end
-		pcall(function()
-			t.Completed:Wait()
-		end)
-		if frame:GetAttribute("NotifToken") ~= token then
-			return
-		end
-		frame.Parent = nil
-		table.insert(self._NotificationPool, frame)
-	end)
+	Notifications.Show(self.UI.ScreenGui, self.ThemeManager, text, kind, instant)
 end
 
 function Hub:ShowConfirmation(text, onConfirm)
@@ -913,7 +670,7 @@ function Hub:CreateTabButton(id, localeKey, iconKey)
 		BackgroundColor3 = Theme.Button,
 		Size = UDim2.new(1, -10, 0, 44),
 		AutoButtonColor = false,
-		Parent = self.UI.Sidebar,
+		Parent = (self.UI.SidebarTop or self.UI.Sidebar),
 	})
 	InstanceUtil.AddCorner(btn, 6)
 

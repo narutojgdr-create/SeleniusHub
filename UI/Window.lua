@@ -3,6 +3,7 @@ local IconPaths = require(script.Parent.Parent.Assets.Icons)
 local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
 
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
 
 local Window = {}
 
@@ -163,13 +164,105 @@ function Window.Create(ctx)
 	ctx.instanceUtil.AddStroke(UI.Sidebar, Theme.Stroke, 1, 0.5)
 	ctx.themeManager:Register(UI.Sidebar, "BackgroundColor3", "Secondary")
 
+	UI.SidebarTop = ctx.instanceUtil.Create("Frame", {
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, 0, 1, -78),
+		Parent = UI.Sidebar,
+	})
+
 	UI.SidebarLayout = ctx.instanceUtil.Create("UIListLayout", {
 		Padding = UDim.new(0, 8),
 		HorizontalAlignment = Enum.HorizontalAlignment.Center,
 		SortOrder = Enum.SortOrder.LayoutOrder,
+		Parent = UI.SidebarTop,
+	})
+	ctx.instanceUtil.Create("UIPadding", { PaddingTop = UDim.new(0, 10), Parent = UI.SidebarTop })
+
+	UI.SidebarBottom = ctx.instanceUtil.Create("Frame", {
+		BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(0, 1),
+		Position = UDim2.new(0, 0, 1, 0),
+		Size = UDim2.new(1, 0, 0, 78),
 		Parent = UI.Sidebar,
 	})
-	ctx.instanceUtil.Create("UIPadding", { PaddingTop = UDim.new(0, 10), Parent = UI.Sidebar })
+	ctx.instanceUtil.Create("UIPadding", {
+		PaddingLeft = UDim.new(0, 5),
+		PaddingRight = UDim.new(0, 5),
+		PaddingBottom = UDim.new(0, 6),
+		Parent = UI.SidebarBottom,
+	})
+
+	UI.UserCard = ctx.instanceUtil.Create("Frame", {
+		Name = "UserCard",
+		BackgroundColor3 = Theme.Button,
+		BackgroundTransparency = 0.2,
+		Size = UDim2.new(1, 0, 0, 62),
+		Position = UDim2.new(0, 0, 1, -62),
+		Parent = UI.SidebarBottom,
+	})
+	ctx.instanceUtil.AddCorner(UI.UserCard, 8)
+	ctx.instanceUtil.AddStroke(UI.UserCard, Theme.Stroke, 1, 0.6)
+	ctx.themeManager:Register(UI.UserCard, "BackgroundColor3", "Button")
+
+	local avatar = ctx.instanceUtil.Create("ImageLabel", {
+		Name = "Avatar",
+		BackgroundColor3 = Theme.Secondary,
+		BackgroundTransparency = 0,
+		Size = UDim2.new(0, 38, 0, 38),
+		Position = UDim2.new(0, 10, 0.5, -19),
+		ImageColor3 = Theme.TextPrimary,
+		Parent = UI.UserCard,
+	})
+	ctx.instanceUtil.AddCorner(avatar, 10)
+	ctx.themeManager:Register(avatar, "BackgroundColor3", "Secondary")
+
+	local name = ctx.instanceUtil.Create("TextLabel", {
+		Name = "DisplayName",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, 56, 0, 12),
+		Size = UDim2.new(1, -66, 0, 16),
+		Font = Enum.Font.GothamBold,
+		TextSize = 13,
+		TextColor3 = Theme.TextPrimary,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		Text = "Usuário",
+		Parent = UI.UserCard,
+	})
+	ctx.themeManager:Register(name, "TextColor3", "TextPrimary")
+
+	local user = ctx.instanceUtil.Create("TextLabel", {
+		Name = "Username",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, 56, 0, 30),
+		Size = UDim2.new(1, -66, 0, 14),
+		Font = Enum.Font.GothamMedium,
+		TextSize = 12,
+		TextColor3 = Theme.AccentDark,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		Text = "@player",
+		Parent = UI.UserCard,
+	})
+	ctx.themeManager:Register(user, "TextColor3", "AccentDark")
+
+	task.spawn(function()
+		local player = Players.LocalPlayer
+		if not player then
+			return
+		end
+		pcall(function()
+			name.Text = tostring(player.DisplayName or player.Name or "Usuário")
+			user.Text = "@" .. tostring(player.Name or "player")
+		end)
+
+		pcall(function()
+			local content = Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+			if type(content) == "string" then
+				avatar.Image = content
+			end
+		end)
+	end)
 
 	UI.PagesContainer = ctx.instanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Secondary,
