@@ -691,6 +691,8 @@ function Hub:CreateTabButton(id, localeKey, iconKey)
 		TextSize = 14,
 		TextColor3 = Theme.AccentDark,
 		TextXAlignment = Enum.TextXAlignment.Left,
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		TextWrapped = false,
 		Text = self:GetText(localeKey),
 		Parent = btn,
 	})

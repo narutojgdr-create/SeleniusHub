@@ -11,6 +11,10 @@ function Window.Create(ctx)
 	local UI = {}
 	local Theme = ctx.themeManager:GetTheme()
 
+	local SIDEBAR_WIDTH = 180
+	local SIDEBAR_MARGIN = 7
+	local SIDEBAR_GAP = 6
+
 	local guiName = ctx.instanceUtil.RandomString(12)
 	UI.ScreenGui = ctx.instanceUtil.Create("ScreenGui", {
 		Name = guiName,
@@ -156,8 +160,8 @@ function Window.Create(ctx)
 	UI.Sidebar = ctx.instanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Secondary,
 		BackgroundTransparency = 0.5,
-		Position = UDim2.new(0, 7, 0, 7),
-		Size = UDim2.new(0, 140, 1, -14),
+		Position = UDim2.new(0, SIDEBAR_MARGIN, 0, SIDEBAR_MARGIN),
+		Size = UDim2.new(0, SIDEBAR_WIDTH, 1, -(SIDEBAR_MARGIN * 2)),
 		Parent = UI.ContentContainer,
 	})
 	ctx.instanceUtil.AddCorner(UI.Sidebar, 6)
@@ -247,13 +251,25 @@ function Window.Create(ctx)
 	ctx.themeManager:Register(user, "TextColor3", "AccentDark")
 
 	task.spawn(function()
+		local function limitChars(s, maxChars)
+			s = tostring(s or "")
+			maxChars = tonumber(maxChars) or 18
+			if #s <= maxChars then
+				return s
+			end
+			if maxChars <= 3 then
+				return string.sub(s, 1, maxChars)
+			end
+			return string.sub(s, 1, maxChars - 3) .. "..."
+		end
+
 		local player = Players.LocalPlayer
 		if not player then
 			return
 		end
 		pcall(function()
-			name.Text = tostring(player.DisplayName or player.Name or "Usuário")
-			user.Text = "@" .. tostring(player.Name or "player")
+			name.Text = limitChars(player.DisplayName or player.Name or "Usuário", 18)
+			user.Text = "@" .. limitChars(player.Name or "player", 18)
 		end)
 
 		pcall(function()
@@ -267,8 +283,8 @@ function Window.Create(ctx)
 	UI.PagesContainer = ctx.instanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Secondary,
 		BackgroundTransparency = 0.5,
-		Position = UDim2.new(0, 153, 0, 7),
-		Size = UDim2.new(1, -160, 1, -14),
+		Position = UDim2.new(0, SIDEBAR_MARGIN + SIDEBAR_WIDTH + SIDEBAR_GAP, 0, SIDEBAR_MARGIN),
+		Size = UDim2.new(1, -(SIDEBAR_MARGIN + SIDEBAR_WIDTH + SIDEBAR_GAP + SIDEBAR_MARGIN), 1, -(SIDEBAR_MARGIN * 2)),
 		ClipsDescendants = true,
 		Parent = UI.ContentContainer,
 	})
