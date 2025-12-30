@@ -459,46 +459,36 @@ local function showBootstrapNotice(text)
 		stroke.Transparency = 1
 		stroke.Parent = card
 
-		local iconBg = Instance.new("Frame")
-		iconBg.Name = "IconBg"
-		iconBg.BackgroundColor3 = Color3.fromRGB(80, 140, 255)
-		iconBg.BackgroundTransparency = 0.15
-		iconBg.BorderSizePixel = 0
-		iconBg.Size = UDim2.new(0, 30, 0, 30)
-		iconBg.Position = UDim2.new(0, 12, 0.5, -15)
-		iconBg.Parent = card
-		local iconCorner = Instance.new("UICorner")
-		iconCorner.CornerRadius = UDim.new(0, 15)
-		iconCorner.Parent = iconBg
-
-		local icon = Instance.new("TextLabel")
-		icon.Name = "Icon"
-		icon.BackgroundTransparency = 1
-		icon.Size = UDim2.new(1, 0, 1, 0)
-		icon.Font = Enum.Font.GothamBold
-		icon.TextSize = 14
-		icon.TextColor3 = Color3.fromRGB(235, 235, 235)
-		icon.Text = "i"
-		icon.Parent = iconBg
+		-- "Pauzinho" (barra de severidade): azul (normal/ativo)
+		local severity = Instance.new("Frame")
+		severity.Name = "Severity"
+		severity.BackgroundColor3 = Color3.fromRGB(45, 105, 250)
+		severity.BorderSizePixel = 0
+		severity.Position = UDim2.new(0, 12, 0, 10)
+		severity.Size = UDim2.new(0, 5, 1, -20)
+		severity.Parent = card
+		local sevCorner = Instance.new("UICorner")
+		sevCorner.CornerRadius = UDim.new(0, 8)
+		sevCorner.Parent = severity
 
 		local title = Instance.new("TextLabel")
 		title.Name = "Title"
 		title.BackgroundTransparency = 1
-		title.Position = UDim2.new(0, 52, 0, 10)
-		title.Size = UDim2.new(1, -64, 0, 14)
+		title.Position = UDim2.new(0, 28, 0, 10)
+		title.Size = UDim2.new(1, -40, 0, 14)
 		title.Font = Enum.Font.GothamBold
 		title.TextSize = 12
-		title.TextColor3 = Color3.fromRGB(160, 190, 255)
+		title.TextColor3 = Color3.fromRGB(160, 165, 185)
 		title.TextXAlignment = Enum.TextXAlignment.Left
-		title.Text = "INFO"
+		title.Text = "ATIVO"
 		title.TextTransparency = 1
 		title.Parent = card
 
 		local msg = Instance.new("TextLabel")
 		msg.Name = "Message"
 		msg.BackgroundTransparency = 1
-		msg.Position = UDim2.new(0, 52, 0, 26)
-		msg.Size = UDim2.new(1, -64, 0, 20)
+		msg.Position = UDim2.new(0, 28, 0, 26)
+		msg.Size = UDim2.new(1, -40, 0, 18)
 		msg.Font = Enum.Font.GothamMedium
 		msg.TextSize = 13
 		msg.TextColor3 = Color3.fromRGB(235, 235, 235)
@@ -509,23 +499,6 @@ local function showBootstrapNotice(text)
 		msg.Text = tostring(text or "Inicializando Selenius...")
 		msg.TextTransparency = 1
 		msg.Parent = card
-
-		local progressBg = Instance.new("Frame")
-		progressBg.Name = "ProgressBg"
-		progressBg.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
-		progressBg.BackgroundTransparency = 0.35
-		progressBg.BorderSizePixel = 0
-		progressBg.Size = UDim2.new(1, 0, 0, 3)
-		progressBg.Position = UDim2.new(0, 0, 1, -3)
-		progressBg.Parent = card
-
-		local progress = Instance.new("Frame")
-		progress.Name = "Progress"
-		progress.BackgroundColor3 = Color3.fromRGB(80, 140, 255)
-		progress.BackgroundTransparency = 1
-		progress.BorderSizePixel = 0
-		progress.Size = UDim2.new(1, 0, 1, 0)
-		progress.Parent = progressBg
 
 		local scale = Instance.new("UIScale")
 		scale.Scale = 0.92
@@ -538,8 +511,6 @@ local function showBootstrapNotice(text)
 			TweenService:Create(stroke, ti, { Transparency = 0.55 }):Play()
 			TweenService:Create(title, ti, { TextTransparency = 0 }):Play()
 			TweenService:Create(msg, ti, { TextTransparency = 0 }):Play()
-			TweenService:Create(progress, TweenInfo.new(2.2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { Size = UDim2.new(0, 0, 1, 0) }):Play()
-			TweenService:Create(progress, ti, { BackgroundTransparency = 0 }):Play()
 		end)
 
 		return g

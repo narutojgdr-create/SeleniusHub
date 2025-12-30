@@ -25,6 +25,7 @@ local function getTheme(themeManager)
 		Accent = Color3.fromRGB(80, 140, 255),
 		AccentDark = Color3.fromRGB(60, 105, 200),
 		Error = Color3.fromRGB(255, 85, 85),
+		Warning = Color3.fromRGB(255, 170, 40),
 		Status = Color3.fromRGB(80, 255, 150),
 	}
 end
@@ -32,24 +33,23 @@ end
 local function getAccent(theme, kind)
 	kind = kind or "info"
 	local accentColor = theme.Accent
-	local titleText = "INFO"
-	local iconChar = "i"
+	local titleText = "NORMAL"
 
 	if kind == "error" then
 		accentColor = theme.Error
-		titleText = "ERRO"
-		iconChar = "×"
+		titleText = "GRAVE"
 	elseif kind == "warn" then
-		accentColor = theme.AccentDark
-		titleText = "AVISO"
-		iconChar = "!"
-	elseif kind == "success" or kind == "status" then
+		accentColor = theme.Warning or theme.AccentDark
+		titleText = "ATENÇÃO"
+	elseif kind == "status" then
+		accentColor = theme.Accent
+		titleText = "ATIVO"
+	elseif kind == "success" then
 		accentColor = theme.Status
-		titleText = "SUCESSO"
-		iconChar = "✓"
+		titleText = "OK"
 	end
 
-	return accentColor, titleText, iconChar
+	return accentColor, titleText
 end
 
 local function buildHolder(screenGui)
@@ -93,38 +93,27 @@ local function buildNotificationFrame(theme)
 	local frame = InstanceUtil.Create("Frame", {
 		Name = "Notification",
 		ClipsDescendants = true,
-		Size = UDim2.new(1, 0, 0, 58),
+		Size = UDim2.new(1, 0, 0, 54),
 	})
 	InstanceUtil.AddCorner(frame, 12)
 	local stroke = InstanceUtil.AddStroke(frame, theme.Stroke, 1, 1)
 	stroke.Name = "Stroke"
 
-	local iconBg = InstanceUtil.Create("Frame", {
-		Name = "IconBg",
-		AnchorPoint = Vector2.new(0, 0.5),
-		Position = UDim2.new(0, 12, 0.5, 0),
-		Size = UDim2.new(0, 30, 0, 30),
+	local severity = InstanceUtil.Create("Frame", {
+		Name = "Severity",
+		BackgroundColor3 = theme.Accent,
 		BorderSizePixel = 0,
+		Position = UDim2.new(0, 12, 0, 10),
+		Size = UDim2.new(0, 5, 1, -20),
 		Parent = frame,
 	})
-	InstanceUtil.AddCorner(iconBg, 15)
-
-	InstanceUtil.Create("TextLabel", {
-		Name = "Icon",
-		BackgroundTransparency = 1,
-		Size = UDim2.new(1, 0, 1, 0),
-		Font = Enum.Font.GothamBold,
-		TextSize = 14,
-		TextXAlignment = Enum.TextXAlignment.Center,
-		TextYAlignment = Enum.TextYAlignment.Center,
-		Parent = iconBg,
-	})
+	InstanceUtil.AddCorner(severity, 8)
 
 	InstanceUtil.Create("TextLabel", {
 		Name = "Title",
 		BackgroundTransparency = 1,
-		Position = UDim2.new(0, 52, 0, 10),
-		Size = UDim2.new(1, -64, 0, 14),
+		Position = UDim2.new(0, 28, 0, 10),
+		Size = UDim2.new(1, -40, 0, 14),
 		Font = Enum.Font.GothamBold,
 		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
@@ -137,8 +126,8 @@ local function buildNotificationFrame(theme)
 	InstanceUtil.Create("TextLabel", {
 		Name = "Message",
 		BackgroundTransparency = 1,
-		Position = UDim2.new(0, 52, 0, 26),
-		Size = UDim2.new(1, -64, 0, 20),
+		Position = UDim2.new(0, 28, 0, 26),
+		Size = UDim2.new(1, -40, 0, 18),
 		Font = Enum.Font.GothamMedium,
 		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Left,
@@ -146,24 +135,6 @@ local function buildNotificationFrame(theme)
 		TextWrapped = true,
 		TextTruncate = Enum.TextTruncate.AtEnd,
 		Parent = frame,
-	})
-
-	local progressBg = InstanceUtil.Create("Frame", {
-		Name = "ProgressBg",
-		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.new(0, 0, 1, 0),
-		Size = UDim2.new(1, 0, 0, 3),
-		BorderSizePixel = 0,
-		Parent = frame,
-	})
-
-	InstanceUtil.Create("Frame", {
-		Name = "Progress",
-		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.new(0, 0, 1, 0),
-		Size = UDim2.new(1, 0, 0, 3),
-		BorderSizePixel = 0,
-		Parent = progressBg,
 	})
 
 	local scale = Instance.new("UIScale")
@@ -189,7 +160,7 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 	end
 
 	local theme = getTheme(themeManager)
-	local accentColor, titleText, iconChar = getAccent(theme, kind)
+	local accentColor, titleText = getAccent(theme, kind)
 
 	state.seq += 1
 	local token = state.seq
@@ -204,7 +175,7 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 	frame.Parent = state.holder
 
 	frame.BackgroundColor3 = theme.Secondary
-	frame.BackgroundTransparency = 0.12
+	frame.BackgroundTransparency = 0.14
 
 	local stroke = frame:FindFirstChild("Stroke")
 	if stroke then
@@ -212,26 +183,18 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 		stroke.Transparency = 1
 	end
 
-	local iconBg = frame:FindFirstChild("IconBg")
-	local icon = iconBg and iconBg:FindFirstChild("Icon")
+	local severity = frame:FindFirstChild("Severity")
 	local title = frame:FindFirstChild("Title")
 	local msg = frame:FindFirstChild("Message")
-	local progressBg = frame:FindFirstChild("ProgressBg")
-	local progress = progressBg and progressBg:FindFirstChild("Progress")
 	local scale = frame:FindFirstChild("Scale")
 
-	if iconBg then
-		iconBg.BackgroundColor3 = accentColor
-		iconBg.BackgroundTransparency = 0.15
-	end
-	if icon then
-		icon.Text = iconChar
-		icon.TextColor3 = theme.TextPrimary
-		icon.TextTransparency = 0
+	if severity then
+		severity.BackgroundColor3 = accentColor
+		severity.BackgroundTransparency = 0
 	end
 	if title then
 		title.Text = titleText
-		title.TextColor3 = accentColor
+		title.TextColor3 = theme.TextSecondary or theme.AccentDark
 		title.TextTransparency = 1
 	end
 	if msg then
@@ -239,19 +202,10 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 		msg.TextColor3 = theme.TextPrimary
 		msg.TextTransparency = 1
 	end
-	if progressBg then
-		progressBg.BackgroundColor3 = theme.Button
-		progressBg.BackgroundTransparency = 0.35
-	end
-	if progress then
-		progress.BackgroundColor3 = accentColor
-		progress.BackgroundTransparency = 1
-		progress.Size = UDim2.new(1, 0, 0, 3)
-	end
 	if scale then
 		scale.Scale = instant and 1 or 0.94
 	end
-	frame.BackgroundTransparency = instant and 0.12 or 1
+	frame.BackgroundTransparency = instant and 0.14 or 1
 
 	local inTween = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	local outTween = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
@@ -260,27 +214,18 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 		if scale then
 			InstanceUtil.Tween(scale, inTween, { Scale = 1 })
 		end
-		InstanceUtil.Tween(frame, inTween, { BackgroundTransparency = 0.12 })
+		InstanceUtil.Tween(frame, inTween, { BackgroundTransparency = 0.14 })
 		if title then
 			InstanceUtil.Tween(title, inTween, { TextTransparency = 0 })
 		end
 		if msg then
 			InstanceUtil.Tween(msg, inTween, { TextTransparency = 0 })
 		end
-		if progress then
-			InstanceUtil.Tween(progress, inTween, { BackgroundTransparency = 0 })
-		end
 		if stroke then
 			pcall(function()
 				InstanceUtil.Tween(stroke, inTween, { Transparency = 0.55 })
 			end)
 		end
-	end
-
-	if progress then
-		InstanceUtil.Tween(progress, TweenInfo.new(lifetime, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {
-			Size = UDim2.new(0, 0, 0, 3),
-		})
 	end
 
 	task.delay(lifetime, function()
@@ -300,9 +245,6 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 		end
 		if msg then
 			InstanceUtil.Tween(msg, outTween, { TextTransparency = 1 })
-		end
-		if progress then
-			InstanceUtil.Tween(progress, outTween, { BackgroundTransparency = 1 })
 		end
 		if stroke then
 			pcall(function()
