@@ -24,7 +24,7 @@ function Keybind.Create(ctx, parent, position, localeKey, defaultKeyCode)
 	local frame = ctx.instanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Button,
 		BackgroundTransparency = 0.3,
-		Size = UDim2.new(0, 260, 0, 40),
+		Size = UDim2.new(0, 260, 0, 48),
 		Position = position,
 		Parent = parent,
 	})
@@ -34,9 +34,9 @@ function Keybind.Create(ctx, parent, position, localeKey, defaultKeyCode)
 	local title = ctx.instanceUtil.Create("TextLabel", {
 		BackgroundTransparency = 1,
 		Position = UDim2.new(0, 8, 0, 0),
-		Size = UDim2.new(0, 150, 1, 0),
+		Size = UDim2.new(0, 130, 1, 0),
 		Font = Enum.Font.GothamMedium,
-		TextSize = 18,
+		TextSize = 20,
 		TextColor3 = Theme.TextPrimary,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Text = ctx.localeManager:GetText(localeKey),
@@ -47,17 +47,17 @@ function Keybind.Create(ctx, parent, position, localeKey, defaultKeyCode)
 
 	local btn = ctx.instanceUtil.Create("TextButton", {
 		BackgroundColor3 = Theme.ButtonHover,
-		Size = UDim2.new(0, 110, 0, 26),
+		Size = UDim2.new(0, 120, 0, 32),
 		AnchorPoint = Vector2.new(1, 0.5),
 		Position = UDim2.new(1, -10, 0.5, 0),
 		Font = Enum.Font.GothamBold,
-		TextSize = 18,
+		TextSize = 20,
 		TextColor3 = Theme.TextPrimary,
 		Text = "[" .. keyName(defaultKeyCode) .. "]",
 		AutoButtonColor = false,
 		Parent = frame,
 	})
-	ctx.instanceUtil.AddCorner(btn, 13)
+	ctx.instanceUtil.AddCorner(btn, 16)
 	ctx.themeManager:Register(btn, "TextColor3", "TextPrimary")
 
 	local btnScale = Instance.new("UIScale")

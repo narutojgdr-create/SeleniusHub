@@ -452,8 +452,8 @@ function Lifecycle.CreateKeySystem(hub)
 	helpBody.Text = "1) Clique em GET KEY\n2) Abra o link e complete o processo\n3) Copie a key gerada\n4) Cole aqui e clique CHECK KEY"
 	helpBody.Parent = right
 
-	-- Animação mais fluida
-	InstanceUtil.Tween(mainScale, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1 })
+	-- Animação mais fluida (UI da key um pouco maior)
+	InstanceUtil.Tween(mainScale, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1.15 })
 
 	enterBtn.MouseEnter:Connect(function()
 		TweenService:Create(enterBtn, hoverTweenInfo, { BackgroundColor3 = Theme.ButtonHover }):Play()
