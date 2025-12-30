@@ -11,7 +11,7 @@ function Window.Create(ctx)
 	local UI = {}
 	local Theme = ctx.themeManager:GetTheme()
 
-	local SIDEBAR_WIDTH = 175
+	local SIDEBAR_WIDTH = 155
 	local SIDEBAR_MARGIN = 7
 	local SIDEBAR_GAP = 6
 
@@ -27,7 +27,7 @@ function Window.Create(ctx)
 		BackgroundColor3 = Theme.Background,
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.new(0.5, 0, 0.5, 0),
-		Size = UDim2.new(0, 630, 0, 600),
+		Size = UDim2.new(0, 580, 0, 600),
 		ClipsDescendants = false,
 		Parent = UI.ScreenGui,
 		Visible = false,

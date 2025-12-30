@@ -669,7 +669,7 @@ function Hub:CreateUI()
 	-- volta para o novo padrão para não ficar exageradamente largo.
 	if self.LoadedSize
 		and self.LoadedSize.Height == 600
-		and (self.LoadedSize.Width == 720 or self.LoadedSize.Width == 660)
+		and (self.LoadedSize.Width == 720 or self.LoadedSize.Width == 660 or self.LoadedSize.Width == 630)
 	then
 		UI.MainFrame.Size = UDim2.new(0, preferredW, 0, UI.MainFrame.Size.Y.Offset)
 		self.SavedSize = UI.MainFrame.Size
