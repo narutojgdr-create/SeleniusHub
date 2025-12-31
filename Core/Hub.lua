@@ -117,8 +117,6 @@ function Hub.new()
 
 	self.Components = Components
 	self._DidFinishInit = false
-	self._LoadedTabs = {}
-	self._TabInstances = {}
 
 	Assets.EnsureFolders()
 	self:LoadConfig("default")
@@ -158,43 +156,9 @@ function Hub:FinishInit()
 	end
 	self._DidFinishInit = true
 
-	-- Mantém o startup leve: Tabs só carregam quando a página for aberta.
+	-- Carrega conteúdo pesado só depois (após Key/Loading)
+	self:LoadTabs()
 	self:StartLogicLoops()
-end
-
-function Hub:_EnsureTabLoaded(pageId)
-	if self._LoadedTabs[pageId] then
-		return
-	end
-
-	local page = self.Pages[pageId]
-	if not page then
-		return
-	end
-
-	local initModule
-	local tabId
-	if pageId == "Combat" then
-		initModule = script.Parent.Parent.Tabs.Combat.init
-		tabId = "Combat"
-	elseif pageId == "Visuals" then
-		initModule = script.Parent.Parent.Tabs.Visual.init
-		tabId = "Visuals"
-	elseif pageId == "Player" then
-		initModule = script.Parent.Parent.Tabs.Player.init
-		tabId = "Player"
-	elseif pageId == "Settings" then
-		initModule = script.Parent.Parent.Tabs.Settings.init
-		tabId = "Settings"
-	else
-		self._LoadedTabs[pageId] = true
-		return
-	end
-
-	local tab = TabClass.new(self, tabId, page)
-	self._TabInstances[pageId] = tab
-	require(initModule)(tab)
-	self._LoadedTabs[pageId] = true
 end
 
 function Hub:_NextDropdownZ()
@@ -924,8 +888,6 @@ function Hub:SwitchPage(id)
 	if self.CurrentPage == id then
 		return
 	end
-
-	self:_EnsureTabLoaded(id)
 
 	local Theme = self.ThemeManager:GetTheme()
 
