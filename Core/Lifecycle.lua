@@ -513,6 +513,9 @@ function Lifecycle.CreateKeySystem(hub)
 				btnContainer.Visible = false
 				discordRow.Visible = false
 				helpCard.Visible = false
+				separator.Visible = false
+				left.Visible = false
+				right.Visible = false
 				title.Visible = false
 				sub.Visible = false
 				statusText.Visible = false
