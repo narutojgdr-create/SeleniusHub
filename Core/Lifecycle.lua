@@ -497,25 +497,68 @@ function Lifecycle.CreateKeySystem(hub)
 			return
 		end
 		submitting = true
-		if keyBox.Text == correctKey then
-			saveKey(keyBox.Text)
+		local enteredKey = tostring(keyBox.Text or "")
+		enteredKey = enteredKey:gsub("^%s+", ""):gsub("%s+$", "")
+		if enteredKey == correctKey then
+			saveKey(enteredKey)
 			pcall(function()
 				if cacheKeyValue then
-					cacheKeyValue.Value = keyBox.Text
+					cacheKeyValue.Value = enteredKey
 				end
 			end)
 
-			inputBg.Visible = false
-			btnContainer.Visible = false
-			title.Visible = false
-			sub.Visible = false
+			-- Tela limpa no sucesso (sem discord/ajuda)
+			pcall(function()
+				inputBg.Visible = false
+				btnContainer.Visible = false
+				discordRow.Visible = false
+				helpCard.Visible = false
+				title.Visible = false
+				sub.Visible = false
+				statusText.Visible = false
+			end)
 
-			statusText.TextColor3 = Theme.Status
-			statusText.Text = "Success! Abrindo Hub..."
-			statusText.Position = UDim2.new(0, 0, 0.5, -10)
-			statusText.TextSize = 18
-			TweenService:Create(statusText, fadeTweenInfo, { TextTransparency = 0 }):Play()
-			task.wait(0.35)
+			local successOverlay = Instance.new("Frame")
+			successOverlay.BackgroundTransparency = 1
+			successOverlay.Size = UDim2.new(1, 0, 1, 0)
+			successOverlay.Parent = main
+
+			local okTitle = Instance.new("TextLabel")
+			okTitle.BackgroundTransparency = 1
+			okTitle.AnchorPoint = Vector2.new(0.5, 0.5)
+			okTitle.Position = UDim2.new(0.5, 0, 0.5, -10)
+			okTitle.Size = UDim2.new(1, -80, 0, 36)
+			okTitle.Font = Enum.Font.GothamBold
+			okTitle.TextSize = 28
+			okTitle.TextColor3 = Theme.Accent
+			okTitle.TextTransparency = 1
+			okTitle.Text = "KEY correta"
+			okTitle.Parent = successOverlay
+
+			local okSub = Instance.new("TextLabel")
+			okSub.BackgroundTransparency = 1
+			okSub.AnchorPoint = Vector2.new(0.5, 0)
+			okSub.Position = UDim2.new(0.5, 0, 0.5, 18)
+			okSub.Size = UDim2.new(1, -80, 0, 20)
+			okSub.Font = Enum.Font.GothamMedium
+			okSub.TextSize = 14
+			okSub.TextColor3 = Theme.AccentDark
+			okSub.TextTransparency = 1
+			okSub.Text = "Abrindo hub..."
+			okSub.Parent = successOverlay
+
+			local okScale = Instance.new("UIScale")
+			okScale.Scale = 0.96
+			okScale.Parent = successOverlay
+
+			TweenService:Create(okScale, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+			TweenService:Create(okTitle, fadeTweenInfo, { TextTransparency = 0 }):Play()
+			TweenService:Create(okSub, fadeTweenInfo, { TextTransparency = 0 }):Play()
+			task.wait(0.55)
+			TweenService:Create(okScale, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Scale = 0.98 }):Play()
+			TweenService:Create(okTitle, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { TextTransparency = 1 }):Play()
+			TweenService:Create(okSub, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { TextTransparency = 1 }):Play()
+			task.wait(0.2)
 			content.Visible = false
 
 			local closeTween = InstanceUtil.Tween(mainScale, TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
@@ -525,6 +568,14 @@ function Lifecycle.CreateKeySystem(hub)
 			gui:Destroy()
 
 			-- Abrir o Hub rápido: mostra primeiro, termina init em paralelo.
+			pcall(function()
+				-- Garante que ao abrir após a key, o hub apareça no tamanho padrão.
+				if hub and hub.UI and hub.UI.MainFrame and hub.DefaultSize then
+					hub.UI.MainFrame.Size = hub.DefaultSize
+					hub.SavedSize = hub.DefaultSize
+					hub.StoredSize = hub.DefaultSize
+				end
+			end)
 			pcall(function()
 				if hub and type(hub.SetVisible) == "function" then
 					hub:SetVisible(true, true)
