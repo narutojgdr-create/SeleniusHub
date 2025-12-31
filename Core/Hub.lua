@@ -84,6 +84,7 @@ function Hub.new()
 	self.MinWidth = 480
 	self.MinHeight = 420
 	self.MinimizedHeight = 46
+	self.ForceMinSizeOnOpen = true
 
 	self.State = State.new()
 	self.Registry = Registry.new()
@@ -649,12 +650,15 @@ function Hub:CreateUI()
 	self.BlurFunction = UI.BlurFunction
 	self.MainStroke = UI.MainStroke
 
+	-- Sempre abrir no tamanho mínimo.
+	UI.MainFrame.Size = UDim2.new(0, self.MinWidth, 0, self.MinHeight)
+
 	self.DefaultSize = UI.MainFrame.Size
 	self.SavedSize = UI.MainFrame.Size
 	self.StoredSize = UI.MainFrame.Size
 	self.StoredPos = UI.MainFrame.Position
 
-	if self.LoadedSize then
+	if self.LoadedSize and not self.ForceMinSizeOnOpen then
 		local w = math.max(self.MinWidth, self.LoadedSize.Width)
 		local h = math.max(self.MinHeight, self.LoadedSize.Height)
 		UI.MainFrame.Size = UDim2.new(0, w, 0, h)

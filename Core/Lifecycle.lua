@@ -572,11 +572,13 @@ function Lifecycle.CreateKeySystem(hub)
 
 			-- Abrir o Hub rápido: mostra primeiro, termina init em paralelo.
 			pcall(function()
-				-- Garante que ao abrir após a key, o hub apareça no tamanho padrão.
-				if hub and hub.UI and hub.UI.MainFrame and hub.DefaultSize then
-					hub.UI.MainFrame.Size = hub.DefaultSize
-					hub.SavedSize = hub.DefaultSize
-					hub.StoredSize = hub.DefaultSize
+				-- Garante que ao abrir após a key, o hub apareça no tamanho mínimo.
+				if hub and hub.UI and hub.UI.MainFrame and hub.MinWidth and hub.MinHeight then
+					local minSize = UDim2.new(0, hub.MinWidth, 0, hub.MinHeight)
+					hub.UI.MainFrame.Size = minSize
+					hub.DefaultSize = minSize
+					hub.SavedSize = minSize
+					hub.StoredSize = minSize
 				end
 			end)
 			pcall(function()
