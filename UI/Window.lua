@@ -33,6 +33,10 @@ function Window.Create(ctx)
 		Visible = false,
 	})
 
+	UI.MainScale = Instance.new("UIScale")
+	UI.MainScale.Scale = 1
+	UI.MainScale.Parent = UI.MainFrame
+
 	local updateBlur, stroke = Acrylic.Enable(UI.MainFrame, Theme, ctx.instanceUtil)
 	UI.BlurFunction = updateBlur
 	UI.MainStroke = stroke

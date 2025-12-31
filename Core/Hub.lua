@@ -896,6 +896,7 @@ function Hub:SwitchPage(id)
 	local Theme = self.ThemeManager:GetTheme()
 
 	if self.CurrentPage then
+		local oldId = self.CurrentPage
 		local oldTab = self.Tabs[self.CurrentPage]
 		if oldTab then
 			oldTab.Indicator.BackgroundColor3 = Theme.IndicatorOff
@@ -904,7 +905,19 @@ function Hub:SwitchPage(id)
 		end
 		local oldPage = self.Pages[self.CurrentPage]
 		if oldPage then
-			oldPage.Visible = false
+			pcall(function()
+				oldPage.ScrollBarImageTransparency = 1
+			end)
+			InstanceUtil.Tween(oldPage, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				Position = UDim2.new(0, 0, 0, -8),
+			})
+			task.delay(0.17, function()
+				if self.CurrentPage ~= oldId then
+					pcall(function()
+						oldPage.Visible = false
+					end)
+				end
+			end)
 		end
 	end
 
@@ -917,10 +930,17 @@ function Hub:SwitchPage(id)
 	local newPage = self.Pages[id]
 	if newPage then
 		newPage.Visible = true
-		newPage.Position = UDim2.new(0, 0, 0, 20)
+		newPage.Position = UDim2.new(0, 0, 0, 12)
 		newPage.BackgroundTransparency = 1
-		local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-		InstanceUtil.Tween(newPage, tweenInfo, { Position = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1 })
+		pcall(function()
+			newPage.ScrollBarImageTransparency = 1
+		end)
+		local tweenInfo = TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+		InstanceUtil.Tween(newPage, tweenInfo, {
+			Position = UDim2.new(0, 0, 0, 0),
+			BackgroundTransparency = 1,
+			ScrollBarImageTransparency = 0,
+		})
 	end
 	self.CurrentPage = id
 end
@@ -1084,15 +1104,34 @@ function Hub:SetupSmoothDrag()
 	local dragging = false
 	local dragInput, dragStart, startPos
 	local frame = self.UI.MainFrame
+	local scale = self.UI.MainScale
+	local liftTween
+	local function setLift(isLifted)
+		if not scale then
+			return
+		end
+		pcall(function()
+			if liftTween then
+				liftTween:Cancel()
+			end
+			local target = isLifted and 1.015 or 1
+			local ti = isLifted and TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+				or TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+			liftTween = TweenService:Create(scale, ti, { Scale = target })
+			liftTween:Play()
+		end)
+	end
 
 	self:AddConnection(self.UI.TitleBar.InputBegan, function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = true
 			dragStart = input.Position
 			startPos = frame.Position
+			setLift(true)
 			input.Changed:Connect(function()
 				if input.UserInputState == Enum.UserInputState.End then
 					dragging = false
+					setLift(false)
 				end
 			end)
 		end
@@ -1104,16 +1143,18 @@ function Hub:SetupSmoothDrag()
 		end
 	end)
 
-	self:AddConnection(RunService.RenderStepped, function()
+	self:AddConnection(RunService.RenderStepped, function(dt)
 		if dragging and dragInput then
 			local delta = dragInput.Position - dragStart
 			local targetX = startPos.X.Offset + delta.X
 			local targetY = startPos.Y.Offset + delta.Y
+			local a = 1 - math.exp(-(dt or 1 / 60) * 22)
+			a = math.clamp(a, 0, 1)
 			frame.Position = UDim2.new(
 				startPos.X.Scale,
-				MathUtil.Lerp(frame.Position.X.Offset, targetX, 0.25),
+				MathUtil.Lerp(frame.Position.X.Offset, targetX, a),
 				startPos.Y.Scale,
-				MathUtil.Lerp(frame.Position.Y.Offset, targetY, 0.25)
+				MathUtil.Lerp(frame.Position.Y.Offset, targetY, a)
 			)
 			self.StoredPos = frame.Position
 		end
