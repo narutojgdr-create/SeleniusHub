@@ -88,8 +88,8 @@ function Window.Create(ctx)
 
 	UI.SearchBox = ctx.instanceUtil.Create("TextBox", {
 		BackgroundColor3 = Theme.Button,
-		Position = UDim2.new(0, 200, 0, 10),
-		Size = UDim2.new(0, 160, 0, 26),
+		Position = UDim2.new(0, 175, 0, 10),
+		Size = UDim2.new(0, 130, 0, 26),
 		PlaceholderText = ctx.localeManager:GetText("label_search"),
 		Text = "",
 		Font = Enum.Font.GothamMedium,
@@ -157,6 +157,48 @@ function Window.Create(ctx)
 		ZIndex = 2,
 	})
 
+	UI.UserCard = ctx.instanceUtil.Create("Frame", {
+		Name = "UserCard",
+		BackgroundColor3 = Theme.Button,
+		BackgroundTransparency = 0.2,
+		Size = UDim2.new(0, 140, 0, 29),
+		Position = UDim2.new(1, -(75 + 8 + 140), 0, 8),
+		Parent = UI.TitleBar,
+		ZIndex = 3,
+	})
+	ctx.instanceUtil.AddCorner(UI.UserCard, 6)
+	ctx.instanceUtil.AddStroke(UI.UserCard, Theme.Stroke, 1, 0.6)
+	ctx.themeManager:Register(UI.UserCard, "BackgroundColor3", "Button")
+
+	local avatar = ctx.instanceUtil.Create("ImageLabel", {
+		Name = "Avatar",
+		BackgroundColor3 = Theme.Secondary,
+		BackgroundTransparency = 0,
+		Size = UDim2.new(0, 22, 0, 22),
+		Position = UDim2.new(0, 4, 0.5, -11),
+		ImageColor3 = Theme.TextPrimary,
+		Parent = UI.UserCard,
+		ZIndex = 4,
+	})
+	ctx.instanceUtil.AddCorner(avatar, 11)
+	ctx.themeManager:Register(avatar, "BackgroundColor3", "Secondary")
+
+	local userText = ctx.instanceUtil.Create("TextLabel", {
+		Name = "UserText",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, 30, 0, 0),
+		Size = UDim2.new(1, -34, 1, 0),
+		Font = Enum.Font.GothamSemibold,
+		TextSize = 12,
+		TextColor3 = Theme.TextPrimary,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		Text = "Usuário (@player)",
+		Parent = UI.UserCard,
+		ZIndex = 4,
+	})
+	ctx.themeManager:Register(userText, "TextColor3", "TextPrimary")
+
 	UI.Sidebar = ctx.instanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Secondary,
 		BackgroundTransparency = 0.5,
@@ -170,7 +212,7 @@ function Window.Create(ctx)
 
 	UI.SidebarTop = ctx.instanceUtil.Create("Frame", {
 		BackgroundTransparency = 1,
-		Size = UDim2.new(1, 0, 1, -78),
+		Size = UDim2.new(1, 0, 1, 0),
 		Parent = UI.Sidebar,
 	})
 
@@ -182,94 +224,28 @@ function Window.Create(ctx)
 	})
 	ctx.instanceUtil.Create("UIPadding", { PaddingTop = UDim.new(0, 10), Parent = UI.SidebarTop })
 
-	UI.SidebarBottom = ctx.instanceUtil.Create("Frame", {
-		BackgroundTransparency = 1,
-		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.new(0, 0, 1, 0),
-		Size = UDim2.new(1, 0, 0, 78),
-		Parent = UI.Sidebar,
-	})
-	ctx.instanceUtil.Create("UIPadding", {
-		PaddingLeft = UDim.new(0, 5),
-		PaddingRight = UDim.new(0, 5),
-		PaddingBottom = UDim.new(0, 6),
-		Parent = UI.SidebarBottom,
-	})
-
-	UI.UserCard = ctx.instanceUtil.Create("Frame", {
-		Name = "UserCard",
-		BackgroundColor3 = Theme.Button,
-		BackgroundTransparency = 0.2,
-		Size = UDim2.new(1, 0, 0, 62),
-		Position = UDim2.new(0, 0, 1, -62),
-		Parent = UI.SidebarBottom,
-	})
-	ctx.instanceUtil.AddCorner(UI.UserCard, 8)
-	ctx.instanceUtil.AddStroke(UI.UserCard, Theme.Stroke, 1, 0.6)
-	ctx.themeManager:Register(UI.UserCard, "BackgroundColor3", "Button")
-
-	local avatar = ctx.instanceUtil.Create("ImageLabel", {
-		Name = "Avatar",
-		BackgroundColor3 = Theme.Secondary,
-		BackgroundTransparency = 0,
-		Size = UDim2.new(0, 38, 0, 38),
-		Position = UDim2.new(0, 10, 0.5, -19),
-		ImageColor3 = Theme.TextPrimary,
-		Parent = UI.UserCard,
-	})
-	ctx.instanceUtil.AddCorner(avatar, 10)
-	ctx.themeManager:Register(avatar, "BackgroundColor3", "Secondary")
-
-	local name = ctx.instanceUtil.Create("TextLabel", {
-		Name = "DisplayName",
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0, 56, 0, 12),
-		Size = UDim2.new(1, -66, 0, 16),
-		Font = Enum.Font.GothamBold,
-		TextSize = 13,
-		TextColor3 = Theme.TextPrimary,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextTruncate = Enum.TextTruncate.AtEnd,
-		Text = "Usuário",
-		Parent = UI.UserCard,
-	})
-	ctx.themeManager:Register(name, "TextColor3", "TextPrimary")
-
-	local user = ctx.instanceUtil.Create("TextLabel", {
-		Name = "Username",
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0, 56, 0, 30),
-		Size = UDim2.new(1, -66, 0, 14),
-		Font = Enum.Font.GothamMedium,
-		TextSize = 12,
-		TextColor3 = Theme.AccentDark,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextTruncate = Enum.TextTruncate.AtEnd,
-		Text = "@player",
-		Parent = UI.UserCard,
-	})
-	ctx.themeManager:Register(user, "TextColor3", "AccentDark")
+	local function limitChars(s, maxChars)
+		s = tostring(s or "")
+		maxChars = tonumber(maxChars) or 18
+		if #s <= maxChars then
+			return s
+		end
+		if maxChars <= 3 then
+			return string.sub(s, 1, maxChars)
+		end
+		return string.sub(s, 1, maxChars - 3) .. "..."
+	end
 
 	task.spawn(function()
-		local function limitChars(s, maxChars)
-			s = tostring(s or "")
-			maxChars = tonumber(maxChars) or 18
-			if #s <= maxChars then
-				return s
-			end
-			if maxChars <= 3 then
-				return string.sub(s, 1, maxChars)
-			end
-			return string.sub(s, 1, maxChars - 3) .. "..."
-		end
-
 		local player = Players.LocalPlayer
 		if not player then
 			return
 		end
+
 		pcall(function()
-			name.Text = limitChars(player.DisplayName or player.Name or "Usuário", 18)
-			user.Text = "@" .. limitChars(player.Name or "player", 18)
+			local display = limitChars(player.DisplayName or player.Name or "Usuário", 14)
+			local uname = "@" .. limitChars(player.Name or "player", 14)
+			userText.Text = display .. " (" .. uname .. ")"
 		end)
 
 		pcall(function()
