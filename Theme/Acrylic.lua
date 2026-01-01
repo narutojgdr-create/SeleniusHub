@@ -1,61 +1,117 @@
 -- Módulo Acrylic v11.0 & NO Stroke System (Adaptado)
 
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+
 local Acrylic = {}
 
-local function ensureCorner(target, radiusPx)
-	local existing = target:FindFirstChildWhichIsA("UICorner")
-	if existing then
-		return existing
+local BLUR_NAME = "SeleniusHub_Blur"
+local _blurUsers = 0
+local _blurTween = nil
+
+local function getOrCreateBlur()
+	local blur = Lighting:FindFirstChild(BLUR_NAME)
+	if blur and blur:IsA("BlurEffect") then
+		return blur
 	end
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, radiusPx or 8)
-	corner.Parent = target
-	return corner
+	blur = Instance.new("BlurEffect")
+	blur.Name = BLUR_NAME
+	blur.Size = 0
+	blur.Enabled = false
+	blur.Parent = Lighting
+	return blur
 end
 
-local function ensureFrost(frame, theme, radiusPx)
-	if frame:FindFirstChild("AcrylicFrost") then
-		return
+local function getQualityLevel()
+	local okSettings, q = pcall(function()
+		return settings().Rendering.QualityLevel
+	end)
+	if okSettings and typeof(q) == "EnumItem" then
+		if q == Enum.QualityLevel.Automatic then
+			return nil, true
+		end
+		local n = tonumber((q.Name or ""):match("Level(%d+)$"))
+		if n then
+			return n, false
+		end
 	end
 
-	local frost = Instance.new("Frame")
-	frost.Name = "AcrylicFrost"
-	frost.BackgroundColor3 = Color3.new(1, 1, 1)
-	frost.BackgroundTransparency = tonumber(theme and theme.AcrylicFrostTransparency) or 0.88
-	frost.BorderSizePixel = 0
-	frost.Size = UDim2.new(1, 0, 1, 0)
-	frost.Position = UDim2.new(0, 0, 0, 0)
-	frost.Active = false
-	frost.ZIndex = frame.ZIndex
-	frost.Parent = frame
+	local okUGS, ugs = pcall(function()
+		return UserSettings():GetService("UserGameSettings")
+	end)
+	if okUGS and ugs then
+		local saved = ugs.SavedQualityLevel
+		if typeof(saved) == "EnumItem" and saved == Enum.SavedQualitySetting.Automatic then
+			return nil, true
+		end
+		if typeof(saved) == "EnumItem" then
+			local n = tonumber((saved.Name or ""):match("QualityLevel(%d+)$"))
+			if n then
+				return n, false
+			end
+		end
+	end
 
-	ensureCorner(frost, radiusPx)
-
-	local frostGradient = Instance.new("UIGradient")
-	frostGradient.Name = "AcrylicFrostGradient"
-	frostGradient.Rotation = 35
-	frostGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-		ColorSequenceKeypoint.new(1, Color3.new(0.90, 0.92, 1)),
-	})
-	frostGradient.Parent = frost
+	return nil, true
 end
 
-function Acrylic.Enable(frame, theme, instanceUtil, opts)
-	opts = opts or {}
+local function canUseRobloxBlur(theme)
+	local minQ = tonumber(theme and theme.BlurMinQuality) or 7
+	local allowAuto = (theme and theme.BlurAllowAutomatic) == true
+	local level, isAuto = getQualityLevel()
+	if isAuto then
+		return allowAuto
+	end
+	return level ~= nil and level >= minQ
+end
 
+function Acrylic.RequestBlur(visible, theme)
+	if visible then
+		_blurUsers = _blurUsers + 1
+	else
+		_blurUsers = math.max(0, _blurUsers - 1)
+	end
+
+	local blur = getOrCreateBlur()
+	local targetSize = tonumber(theme and theme.BlurSize) or 18
+	local shouldEnable = (_blurUsers > 0) and canUseRobloxBlur(theme)
+
+	if _blurTween then
+		pcall(function()
+			_blurTween:Cancel()
+		end)
+		_blurTween = nil
+	end
+
+	if shouldEnable then
+		blur.Enabled = true
+		_blurTween = TweenService:Create(blur, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Size = targetSize,
+		})
+		_blurTween:Play()
+	else
+		_blurTween = TweenService:Create(blur, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			Size = 0,
+		})
+		_blurTween:Play()
+		task.delay(0.24, function()
+			if blur and blur.Parent and (_blurUsers == 0 or not canUseRobloxBlur(theme)) then
+				blur.Enabled = false
+			end
+		end)
+	end
+end
+
+function Acrylic.Enable(frame, theme, instanceUtil)
 	frame.BackgroundTransparency = tonumber(theme and theme.AcrylicTransparency) or 0.10
 	frame.BackgroundColor3 = theme.Background
 
-	local corner = frame:FindFirstChildWhichIsA("UICorner")
-	local radiusPx = 8
-	if corner and corner.CornerRadius then
-		radiusPx = corner.CornerRadius.Offset
-	else
-		ensureCorner(frame, radiusPx)
-	end
-
-	ensureFrost(frame, theme, radiusPx)
+	pcall(function()
+		local oldFrost = frame:FindFirstChild("AcrylicFrost")
+		if oldFrost then
+			oldFrost:Destroy()
+		end
+	end)
 
 	if not frame:FindFirstChild("AcrylicGradient") then
 		local gradient = Instance.new("UIGradient")
@@ -68,11 +124,12 @@ function Acrylic.Enable(frame, theme, instanceUtil, opts)
 		gradient.Parent = frame
 	end
 
-	if (not opts.NoStroke) and instanceUtil and instanceUtil.AddStroke then
+	if instanceUtil and instanceUtil.AddStroke then
 		instanceUtil.AddStroke(frame, theme.Stroke, 1.5, 0)
 	end
 
-	local function updateBlur(_visible)
+	local function updateBlur(visible)
+		Acrylic.RequestBlur(visible, theme)
 	end
 
 	return updateBlur, nil

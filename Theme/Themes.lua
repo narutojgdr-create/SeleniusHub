@@ -16,7 +16,11 @@ local Themes = {
 		PageTransparency = 0.60,
 		FloatingButtonTransparency = 0.50,
 		SeparatorTransparency = 0.45,
-		AcrylicFrostTransparency = 0.88,
+		-- Blur nativo do Roblox (Lighting.BlurEffect)
+		-- Só ativa quando Quality >= BlurMinQuality (ex: 7+)
+		BlurSize = 18,
+		BlurMinQuality = 7,
+		BlurAllowAutomatic = false,
 		Separator = Color3.fromRGB(30, 30, 42),
 		Accent = Color3.fromRGB(45, 105, 250),
 		AccentDark = Color3.fromRGB(85, 90, 120),

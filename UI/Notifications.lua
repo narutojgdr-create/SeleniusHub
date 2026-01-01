@@ -97,11 +97,6 @@ local function buildNotificationFrame(theme)
 		Size = UDim2.new(1, 0, 0, 54),
 	})
 	InstanceUtil.AddCorner(frame, 12)
-	pcall(function()
-		if Acrylic and Acrylic.Enable then
-			Acrylic.Enable(frame, theme, InstanceUtil, { NoStroke = true })
-		end
-	end)
 	local stroke = InstanceUtil.AddStroke(frame, theme.Stroke, 1, 1)
 	stroke.Name = "Stroke"
 
@@ -167,6 +162,12 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 
 	local theme = getTheme(themeManager)
 	local accentColor, titleText = getAccent(theme, kind)
+
+	pcall(function()
+		if Acrylic and Acrylic.RequestBlur then
+			Acrylic.RequestBlur(true, theme)
+		end
+	end)
 
 	state.seq = state.seq + 1
 	local token = state.seq
@@ -237,9 +238,19 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 
 	task.delay(lifetime, function()
 		if not (frame and frame.Parent) then
+			pcall(function()
+				if Acrylic and Acrylic.RequestBlur then
+					Acrylic.RequestBlur(false, theme)
+				end
+			end)
 			return
 		end
 		if frame:GetAttribute("NotifToken") ~= token then
+			pcall(function()
+				if Acrylic and Acrylic.RequestBlur then
+					Acrylic.RequestBlur(false, theme)
+				end
+			end)
 			return
 		end
 
@@ -262,11 +273,21 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 			t.Completed:Wait()
 		end)
 		if frame:GetAttribute("NotifToken") ~= token then
+			pcall(function()
+				if Acrylic and Acrylic.RequestBlur then
+					Acrylic.RequestBlur(false, theme)
+				end
+			end)
 			return
 		end
 
 		frame.Parent = nil
 		table.insert(state.pool, frame)
+		pcall(function()
+			if Acrylic and Acrylic.RequestBlur then
+				Acrylic.RequestBlur(false, theme)
+			end
+		end)
 	end)
 end
 

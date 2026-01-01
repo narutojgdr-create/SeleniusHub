@@ -161,7 +161,12 @@ function Lifecycle.CreateKeySystem(hub)
 	mainScale.Parent = main
 
 	InstanceUtil.AddCorner(main, 12)
-	Acrylic.Enable(main, Theme, InstanceUtil)
+	local updateBlur = Acrylic.Enable(main, Theme, InstanceUtil)
+	pcall(function()
+		if updateBlur then
+			updateBlur(true)
+		end
+	end)
 
 	local content = Instance.new("Frame")
 	content.Size = UDim2.new(1, 0, 1, 0)
@@ -572,6 +577,11 @@ function Lifecycle.CreateKeySystem(hub)
 				Scale = 0,
 			})
 			closeTween.Completed:Wait()
+			pcall(function()
+				if updateBlur then
+					updateBlur(false)
+				end
+			end)
 			gui:Destroy()
 
 			-- Abrir o Hub rápido: mostra primeiro, termina init em paralelo.
