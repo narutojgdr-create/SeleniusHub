@@ -446,7 +446,7 @@ local function showBootstrapNotice(text)
 		local card = Instance.new("Frame")
 		card.Name = "Card"
 		card.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
-		card.BackgroundTransparency = 0.16
+		card.BackgroundTransparency = 0.22
 		card.Size = UDim2.new(1, 0, 1, 0)
 		card.ClipsDescendants = true
 		card.Parent = holder
