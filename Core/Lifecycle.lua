@@ -232,6 +232,7 @@ function Lifecycle.CreateKeySystem(hub)
 	inputBg.BackgroundColor3 = Theme.Secondary
 	inputBg.BackgroundTransparency = tonumber(Theme.SurfaceTransparency) or 0.12
 	inputBg.Size = UDim2.new(1, 0, 0, 48)
+	inputBg.ClipsDescendants = true
 	inputBg.LayoutOrder = 3
 	inputBg.Parent = left
 	InstanceUtil.AddCorner(inputBg, 8)
@@ -284,7 +285,7 @@ function Lifecycle.CreateKeySystem(hub)
 	maskLbl.TextColor3 = keyBox.TextColor3
 	maskLbl.TextXAlignment = Enum.TextXAlignment.Left
 	maskLbl.TextWrapped = false
-	maskLbl.TextTruncate = Enum.TextTruncate.None
+	maskLbl.TextTruncate = Enum.TextTruncate.AtEnd
 	maskLbl.Text = maskKey(keyBox.Text)
 	maskLbl.Parent = inputBg
 	maskLbl.Active = false
