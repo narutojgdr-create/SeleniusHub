@@ -449,6 +449,7 @@ function Hub:ShowConfirmation(text, onConfirm)
 	}):Play()
 
 	local lbl = Instance.new("TextLabel")
+	lbl.AutoLocalize = false
 	lbl.BackgroundTransparency = 1
 	lbl.Position = UDim2.new(0, 10, 0, 10)
 	lbl.Size = UDim2.new(1, -20, 0, 60)
@@ -463,6 +464,7 @@ function Hub:ShowConfirmation(text, onConfirm)
 	TweenService:Create(lbl, tweenInfo, { TextTransparency = 0 }):Play()
 
 	local yesBtn = Instance.new("TextButton")
+	yesBtn.AutoLocalize = false
 	yesBtn.Text = self:GetText("label_apply")
 	yesBtn.Size = UDim2.new(0.4, -10, 0, 32)
 	yesBtn.Position = UDim2.new(0.1, 0, 1, -50)
@@ -477,6 +479,7 @@ function Hub:ShowConfirmation(text, onConfirm)
 	TweenService:Create(yesBtn, tweenInfo, { BackgroundTransparency = 0, TextTransparency = 0 }):Play()
 
 	local noBtn = Instance.new("TextButton")
+	noBtn.AutoLocalize = false
 	noBtn.Text = self:GetText("label_cancel")
 	noBtn.Size = UDim2.new(0.4, -10, 0, 32)
 	noBtn.Position = UDim2.new(0.5, 10, 1, -50)

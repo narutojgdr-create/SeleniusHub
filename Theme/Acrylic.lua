@@ -3,7 +3,7 @@
 
 local Acrylic = {}
 
-local GlassmorphicUI = require(script.Parent.Parent.ThirdParty.GlassmorphicUI)
+local GlassmorphicUI = require(script.Parent.Parent.ThirdParty.GlassmorphicUI.init)
 
 local clamp = math.clamp
 if type(clamp) ~= "function" then

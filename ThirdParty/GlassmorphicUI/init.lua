@@ -6,8 +6,8 @@ local RunService = game:GetService("RunService")
 local CollectionService = game:GetService("CollectionService")
 
 -- Dependências esperadas ao lado de ThirdParty
-local EditableImageBlur = require(script.Parent.Parent.EditableImageBlur)
-local PixelColorApproximation = require(script.Parent.Parent.PixelColorApproximation)
+local EditableImageBlur = require(script.Parent.Parent.EditableImageBlur.init)
+local PixelColorApproximation = require(script.Parent.Parent.PixelColorApproximation.init)
 
 local EMPTY_TABLE = {}
 

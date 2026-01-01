@@ -1,7 +1,7 @@
 local PlayerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui", math.huge)
 
-local GetGuiColor = require(script.GetGuiColor)
-local GetWorldColor = require(script.GetWorldColor)
+local GetGuiColor = require(script.GetGuiColor.init)
+local GetWorldColor = require(script.GetWorldColor.init)
 
 local PixelColorApproximation = {}
 

@@ -482,6 +482,7 @@ local function showBootstrapNotice(text)
 		sevCorner.Parent = severity
 
 		local title = Instance.new("TextLabel")
+		title.AutoLocalize = false
 		title.Name = "Title"
 		title.BackgroundTransparency = 1
 		title.Position = UDim2.new(0, 28, 0, 10)
@@ -495,6 +496,7 @@ local function showBootstrapNotice(text)
 		title.Parent = card
 
 		local msg = Instance.new("TextLabel")
+		msg.AutoLocalize = false
 		msg.Name = "Message"
 		msg.BackgroundTransparency = 1
 		msg.Position = UDim2.new(0, 28, 0, 26)
