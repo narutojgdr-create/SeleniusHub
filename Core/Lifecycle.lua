@@ -161,12 +161,7 @@ function Lifecycle.CreateKeySystem(hub)
 	mainScale.Parent = main
 
 	InstanceUtil.AddCorner(main, 12)
-	local updateBlur = Acrylic.Enable(main, Theme, InstanceUtil)
-	pcall(function()
-		if updateBlur then
-			updateBlur(true)
-		end
-	end)
+	Acrylic.Enable(main, Theme, InstanceUtil)
 
 	local content = Instance.new("Frame")
 	content.Size = UDim2.new(1, 0, 1, 0)
@@ -207,7 +202,6 @@ function Lifecycle.CreateKeySystem(hub)
 	right.Parent = content
 
 	local title = Instance.new("TextLabel")
-	title.AutoLocalize = false
 	title.BackgroundTransparency = 1
 	title.Size = UDim2.new(1, 0, 0, 26)
 	title.Font = Enum.Font.GothamBold
@@ -219,7 +213,6 @@ function Lifecycle.CreateKeySystem(hub)
 	title.Parent = left
 
 	local sub = Instance.new("TextLabel")
-	sub.AutoLocalize = false
 	sub.BackgroundTransparency = 1
 	sub.Size = UDim2.new(1, 0, 0, 18)
 	sub.Font = Enum.Font.GothamMedium
@@ -251,7 +244,6 @@ function Lifecycle.CreateKeySystem(hub)
 	end
 
 	local showBtn = Instance.new("TextButton")
-	showBtn.AutoLocalize = false
 	showBtn.BackgroundColor3 = Theme.Button
 	showBtn.Position = UDim2.new(1, -98, 0, 8)
 	showBtn.Size = UDim2.new(0, 90, 0, 32)
@@ -264,7 +256,6 @@ function Lifecycle.CreateKeySystem(hub)
 	InstanceUtil.AddCorner(showBtn, 8)
 
 	local keyBox = Instance.new("TextBox")
-	keyBox.AutoLocalize = false
 	keyBox.BackgroundTransparency = 1
 	keyBox.Position = UDim2.new(0, 10, 0, 0)
 	keyBox.Size = UDim2.new(1, -122, 1, 0)
@@ -278,7 +269,6 @@ function Lifecycle.CreateKeySystem(hub)
 	keyBox.Parent = inputBg
 
 	local maskLbl = Instance.new("TextLabel")
-	maskLbl.AutoLocalize = false
 	maskLbl.BackgroundTransparency = 1
 	maskLbl.Position = keyBox.Position
 	maskLbl.Size = keyBox.Size
@@ -342,7 +332,6 @@ function Lifecycle.CreateKeySystem(hub)
 	btnLayout.Parent = btnContainer
 
 	local enterBtn = Instance.new("TextButton")
-	enterBtn.AutoLocalize = false
 	enterBtn.BackgroundColor3 = Theme.Button
 	enterBtn.Size = UDim2.new(0.5, -5, 1, 0)
 	enterBtn.Font = Enum.Font.GothamBold
@@ -354,7 +343,6 @@ function Lifecycle.CreateKeySystem(hub)
 	InstanceUtil.AddCorner(enterBtn, 8)
 
 	local getBtn = Instance.new("TextButton")
-	getBtn.AutoLocalize = false
 	getBtn.BackgroundColor3 = Theme.Button
 	getBtn.Size = UDim2.new(0.5, -5, 1, 0)
 	getBtn.Font = Enum.Font.GothamBold
@@ -377,7 +365,6 @@ function Lifecycle.CreateKeySystem(hub)
 	discordLayout.Parent = discordRow
 
 	local discordLabel = Instance.new("TextLabel")
-	discordLabel.AutoLocalize = false
 	discordLabel.BackgroundTransparency = 1
 	discordLabel.Size = UDim2.new(1, 0, 0, 16)
 	discordLabel.Font = Enum.Font.GothamMedium
@@ -391,7 +378,6 @@ function Lifecycle.CreateKeySystem(hub)
 	discordLabel.Parent = discordRow
 
 	local discordBtn = Instance.new("TextButton")
-	discordBtn.AutoLocalize = false
 	discordBtn.BackgroundTransparency = 1
 	discordBtn.AutoButtonColor = false
 	discordBtn.Size = UDim2.new(1, 0, 0, 18)
@@ -404,7 +390,6 @@ function Lifecycle.CreateKeySystem(hub)
 	discordBtn.Parent = discordRow
 
 	local statusText = Instance.new("TextLabel")
-	statusText.AutoLocalize = false
 	statusText.BackgroundTransparency = 1
 	statusText.Size = UDim2.new(1, 0, 0, 20)
 	statusText.Font = Enum.Font.GothamMedium
@@ -466,7 +451,6 @@ function Lifecycle.CreateKeySystem(hub)
 	helpLayout.Parent = helpCard
 
 	local helpTitle = Instance.new("TextLabel")
-	helpTitle.AutoLocalize = false
 	helpTitle.BackgroundTransparency = 1
 	helpTitle.Size = UDim2.new(1, 0, 0, 20)
 	helpTitle.Font = Enum.Font.GothamBold
@@ -478,7 +462,6 @@ function Lifecycle.CreateKeySystem(hub)
 	helpTitle.Parent = helpCard
 
 	local helpBody = Instance.new("TextLabel")
-	helpBody.AutoLocalize = false
 	helpBody.BackgroundTransparency = 1
 	helpBody.Size = UDim2.new(1, 0, 1, -30)
 	helpBody.Font = Enum.Font.GothamMedium
@@ -544,7 +527,6 @@ function Lifecycle.CreateKeySystem(hub)
 			successOverlay.Parent = main
 
 			local okTitle = Instance.new("TextLabel")
-			okTitle.AutoLocalize = false
 			okTitle.BackgroundTransparency = 1
 			okTitle.AnchorPoint = Vector2.new(0.5, 0.5)
 			okTitle.Position = UDim2.new(0.5, 0, 0.5, -10)
@@ -557,7 +539,6 @@ function Lifecycle.CreateKeySystem(hub)
 			okTitle.Parent = successOverlay
 
 			local okSub = Instance.new("TextLabel")
-			okSub.AutoLocalize = false
 			okSub.BackgroundTransparency = 1
 			okSub.AnchorPoint = Vector2.new(0.5, 0)
 			okSub.Position = UDim2.new(0.5, 0, 0.5, 18)
@@ -587,11 +568,6 @@ function Lifecycle.CreateKeySystem(hub)
 				Scale = 0,
 			})
 			closeTween.Completed:Wait()
-			pcall(function()
-				if updateBlur then
-					updateBlur(false)
-				end
-			end)
 			gui:Destroy()
 
 			-- Abrir o Hub rápido: mostra primeiro, termina init em paralelo.

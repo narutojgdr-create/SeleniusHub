@@ -1,7 +1,6 @@
 local TweenService = game:GetService("TweenService")
 
 local InstanceUtil = require(script.Parent.Parent.Utils.Instance)
-local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
 
 local Notifications = {}
 
@@ -96,11 +95,6 @@ local function buildNotificationFrame(theme)
 		ClipsDescendants = true,
 		Size = UDim2.new(1, 0, 0, 54),
 	})
-	Acrylic.Stylize(frame, theme, InstanceUtil, {
-		BackgroundColor3 = theme.Secondary,
-		BackgroundTransparency = 0.14,
-		AddStroke = false,
-	})
 	InstanceUtil.AddCorner(frame, 12)
 	local stroke = InstanceUtil.AddStroke(frame, theme.Stroke, 1, 1)
 	stroke.Name = "Stroke"
@@ -168,17 +162,7 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 	local theme = getTheme(themeManager)
 	local accentColor, titleText = getAccent(theme, kind)
 
-	-- Glass blur também nas notificações (por padrão ligado)
-	local notifGlassTransparency = opts.GlassTransparency
-	if notifGlassTransparency == nil then
-		notifGlassTransparency = theme.NotifGlassTransparency or theme.GlassTransparency
-	end
-	local notifBlurRadius = opts.BlurRadius
-	if notifBlurRadius == nil then
-		notifBlurRadius = theme.NotifBlurRadius or theme.GlassBlurRadius
-	end
-
-	state.seq = state.seq + 1
+	state.seq += 1
 	local token = state.seq
 
 	local frame = table.remove(state.pool)
@@ -191,13 +175,7 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 	frame.Parent = state.holder
 
 	frame.BackgroundColor3 = theme.Secondary
-	frame.BackgroundTransparency = 1
-	Acrylic.Stylize(frame, theme, InstanceUtil, {
-		BackgroundColor3 = theme.Secondary,
-		GlassTransparency = notifGlassTransparency,
-		BlurRadius = notifBlurRadius,
-		AddStroke = false,
-	})
+	frame.BackgroundTransparency = 0.14
 
 	local stroke = frame:FindFirstChild("Stroke")
 	if stroke then
@@ -227,12 +205,7 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 	if scale then
 		scale.Scale = instant and 1 or 0.94
 	end
-	frame.BackgroundTransparency = 1
-	local glassBg = frame:FindFirstChild("GlassBackground")
-	local targetGlassTransparency = tonumber(notifGlassTransparency) or 0.14
-	if glassBg and glassBg:IsA("ImageLabel") then
-		glassBg.BackgroundTransparency = instant and targetGlassTransparency or 1
-	end
+	frame.BackgroundTransparency = instant and 0.14 or 1
 
 	local inTween = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	local outTween = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
@@ -241,9 +214,7 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 		if scale then
 			InstanceUtil.Tween(scale, inTween, { Scale = 1 })
 		end
-		if glassBg and glassBg:IsA("ImageLabel") then
-			InstanceUtil.Tween(glassBg, inTween, { BackgroundTransparency = targetGlassTransparency })
-		end
+		InstanceUtil.Tween(frame, inTween, { BackgroundTransparency = 0.14 })
 		if title then
 			InstanceUtil.Tween(title, inTween, { TextTransparency = 0 })
 		end
@@ -268,12 +239,7 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 		if scale then
 			InstanceUtil.Tween(scale, outTween, { Scale = 0.94 })
 		end
-		local t
-		if glassBg and glassBg:IsA("ImageLabel") then
-			t = InstanceUtil.Tween(glassBg, outTween, { BackgroundTransparency = 1 })
-		else
-			t = InstanceUtil.Tween(frame, outTween, { BackgroundTransparency = 1 })
-		end
+		local t = InstanceUtil.Tween(frame, outTween, { BackgroundTransparency = 1 })
 		if title then
 			InstanceUtil.Tween(title, outTween, { TextTransparency = 1 })
 		end
@@ -286,9 +252,7 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 			end)
 		end
 		pcall(function()
-			if t then
-				t.Completed:Wait()
-			end
+			t.Completed:Wait()
 		end)
 		if frame:GetAttribute("NotifToken") ~= token then
 			return

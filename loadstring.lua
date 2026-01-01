@@ -86,16 +86,6 @@ local MANIFEST = {
 	"Theme/Acrylic.lua",
 	"Theme/ThemeManager.lua",
 	"Theme/Themes.lua",
-	"ThirdParty/GlassmorphicUI/init.lua",
-	"ThirdParty/EditableImageBlur/init.lua",
-	"ThirdParty/PixelColorApproximation/init.lua",
-	"ThirdParty/PixelColorApproximation/Utils.lua",
-	"ThirdParty/PixelColorApproximation/GetGuiColor/init.lua",
-	"ThirdParty/PixelColorApproximation/GetGuiColor/ClassHandlers/init.lua",
-	"ThirdParty/PixelColorApproximation/GetGuiColor/ClassHandlers/default.lua",
-	"ThirdParty/PixelColorApproximation/GetGuiColor/ClassHandlers/image.lua",
-	"ThirdParty/PixelColorApproximation/GetGuiColor/ClassHandlers/text.lua",
-	"ThirdParty/PixelColorApproximation/GetWorldColor/init.lua",
 	"UI/Builder.lua",
 	"UI/Drag.lua",
 	"UI/Footer.lua",
@@ -217,79 +207,11 @@ local function stripExt(filename)
 	return filename:gsub("%.lua$", "")
 end
 
-local NODE_METHODS = {}
-
-function NODE_METHODS:IsA(className)
-	return self.ClassName == className
-end
-
-function NODE_METHODS:FindFirstChild(name)
-	if type(name) ~= "string" then
-		return nil
-	end
-	return self._children and self._children[name] or nil
-end
-
-function NODE_METHODS:GetChildren()
-	local out = {}
-	local children = self._children
-	if type(children) ~= "table" then
-		return out
-	end
-	for _, child in pairs(children) do
-		out[#out + 1] = child
-	end
-	return out
-end
-
-function NODE_METHODS:GetDescendants()
-	local out = {}
-	local queue = self:GetChildren()
-	local i = 1
-	while queue[i] do
-		local node = queue[i]
-		i = i + 1
-		out[#out + 1] = node
-		if type(node) == "table" and type(node.GetChildren) == "function" then
-			local kids = node:GetChildren()
-			for _, k in ipairs(kids) do
-				queue[#queue + 1] = k
-			end
-		end
-	end
-	return out
-end
-
-function NODE_METHODS:WaitForChild(name, timeout)
-	local t0 = (os and os.clock and os.clock()) or 0
-	local limit = tonumber(timeout)
-	while true do
-		local child = self:FindFirstChild(name)
-		if child then
-			return child
-		end
-		if limit and limit >= 0 then
-			local now = (os and os.clock and os.clock()) or 0
-			if (now - t0) >= limit then
-				return nil
-			end
-		end
-		if _task and type(_task.wait) == "function" then
-			_task.wait()
-		elseif type(wait) == "function" then
-			wait()
-		else
-			-- sem scheduler disponível; evita loop travado
-			return nil
-		end
-	end
-end
-
 local function newNode(name, className)
 	local node = { Name = name, ClassName = className, Parent = nil, _children = {}, _path = nil }
 	setmetatable(node, {
 		__index = function(self, key)
-			return rawget(self, key) or NODE_METHODS[key] or self._children[key]
+			return rawget(self, key) or self._children[key]
 		end,
 	})
 	return node
@@ -550,7 +472,6 @@ local function showBootstrapNotice(text)
 		sevCorner.Parent = severity
 
 		local title = Instance.new("TextLabel")
-		title.AutoLocalize = false
 		title.Name = "Title"
 		title.BackgroundTransparency = 1
 		title.Position = UDim2.new(0, 28, 0, 10)
@@ -564,7 +485,6 @@ local function showBootstrapNotice(text)
 		title.Parent = card
 
 		local msg = Instance.new("TextLabel")
-		msg.AutoLocalize = false
 		msg.Name = "Message"
 		msg.BackgroundTransparency = 1
 		msg.Position = UDim2.new(0, 28, 0, 26)
