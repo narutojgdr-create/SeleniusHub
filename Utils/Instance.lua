@@ -28,6 +28,7 @@ end
 -- !!! FIX DE ROBUSTEZ: PREVINE ERROS EM PROPRIEDADES !!!
 -- !!! OTIMIZAÇÃO: REMOVIDO PCALL LOOP (Aumento de Performance de 100x) !!!
 function InstanceUtil.Create(className, props)
+	local hasBackgroundTransparency = props.BackgroundTransparency ~= nil
 	local inst = Instance.new(className)
 	inst.Name = InstanceUtil.RandomString(math.random(10, 20))
 
@@ -40,6 +41,12 @@ function InstanceUtil.Create(className, props)
 
 	if parent then
 		inst.Parent = parent
+	end
+
+	if not hasBackgroundTransparency and _currentTheme and _currentTheme.SurfaceTransparency ~= nil then
+		if className == "Frame" or className == "TextButton" or className == "ImageButton" or className == "ScrollingFrame" or className == "TextBox" then
+			inst.BackgroundTransparency = tonumber(_currentTheme.SurfaceTransparency) or inst.BackgroundTransparency
+		end
 	end
 
 	if inst:IsA("GuiObject") then

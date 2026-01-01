@@ -16,7 +16,7 @@ function Slider.Create(ctx, parent, position, localeKey, minValue, maxValue, def
 
 	local frame = ctx.instanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Button,
-		BackgroundTransparency = 0.3,
+		BackgroundTransparency = tonumber(Theme.ControlTransparency) or 0.34,
 		Size = size or UDim2.new(0, 260, 0, 52),
 		Position = position,
 		Parent = parent,

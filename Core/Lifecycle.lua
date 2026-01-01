@@ -189,7 +189,7 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local separator = Instance.new("Frame")
 	separator.BackgroundColor3 = Theme.Stroke
-	separator.BackgroundTransparency = 0.45
+	separator.BackgroundTransparency = tonumber(Theme.SeparatorTransparency) or 0.49
 	separator.BorderSizePixel = 0
 	separator.Position = UDim2.new(0, 400, 0, 16)
 	separator.Size = UDim2.new(0, 1, 1, -32)
@@ -225,6 +225,7 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local inputBg = Instance.new("Frame")
 	inputBg.BackgroundColor3 = Theme.Secondary
+	inputBg.BackgroundTransparency = tonumber(Theme.SurfaceTransparency) or 0.12
 	inputBg.Size = UDim2.new(1, 0, 0, 48)
 	inputBg.LayoutOrder = 3
 	inputBg.Parent = left
@@ -245,6 +246,7 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local showBtn = Instance.new("TextButton")
 	showBtn.BackgroundColor3 = Theme.Button
+	showBtn.BackgroundTransparency = tonumber(Theme.SurfaceTransparency) or 0.12
 	showBtn.Position = UDim2.new(1, -98, 0, 8)
 	showBtn.Size = UDim2.new(0, 90, 0, 32)
 	showBtn.Font = Enum.Font.GothamBold
@@ -333,6 +335,7 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local enterBtn = Instance.new("TextButton")
 	enterBtn.BackgroundColor3 = Theme.Button
+	enterBtn.BackgroundTransparency = tonumber(Theme.SurfaceTransparency) or 0.12
 	enterBtn.Size = UDim2.new(0.5, -5, 1, 0)
 	enterBtn.Font = Enum.Font.GothamBold
 	enterBtn.TextSize = 15
@@ -344,6 +347,7 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local getBtn = Instance.new("TextButton")
 	getBtn.BackgroundColor3 = Theme.Button
+	getBtn.BackgroundTransparency = tonumber(Theme.SurfaceTransparency) or 0.12
 	getBtn.Size = UDim2.new(0.5, -5, 1, 0)
 	getBtn.Font = Enum.Font.GothamBold
 	getBtn.TextSize = 15
@@ -430,7 +434,7 @@ function Lifecycle.CreateKeySystem(hub)
 
 	local helpCard = Instance.new("Frame")
 	helpCard.BackgroundColor3 = Theme.Secondary
-	helpCard.BackgroundTransparency = 0.12
+	helpCard.BackgroundTransparency = tonumber(Theme.CardTransparency) or 0.16
 	helpCard.BorderSizePixel = 0
 	helpCard.Position = UDim2.new(0, 18, 0, 18)
 	helpCard.Size = UDim2.new(1, -36, 1, -36)

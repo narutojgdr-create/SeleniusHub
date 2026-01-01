@@ -791,7 +791,7 @@ function Hub:AddPage(id, localeKey, iconKey)
 	local page = Instance.new("ScrollingFrame")
 	page.Name = InstanceUtil.RandomString(8)
 	page.BackgroundColor3 = Theme.Secondary
-	page.BackgroundTransparency = 0.6
+	page.BackgroundTransparency = tonumber(Theme.PageTransparency) or 0.64
 	page.Size = UDim2.new(1, 0, 1, 0)
 	page.Visible = false
 	page.Parent = self.UI.PagesContainer
@@ -1065,7 +1065,7 @@ function Hub:SetupMobileSupport()
 		local mobileBtn = InstanceUtil.Create("ImageButton", {
 			Name = "SeleniusMobileButton",
 			Image = IconPaths.Logo,
-			BackgroundTransparency = 0.5,
+			BackgroundTransparency = tonumber(Theme.FloatingButtonTransparency) or 0.54,
 			BackgroundColor3 = Theme.Background,
 			Position = UDim2.new(0.9, -50, 0.1, 0),
 			Size = UDim2.new(0, 50, 0, 50),

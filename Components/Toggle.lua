@@ -9,7 +9,7 @@ function Toggle.Create(ctx, parent, position, localeKey, default, size)
 
 	local frame = ctx.instanceUtil.Create("TextButton", {
 		BackgroundColor3 = Theme.Button,
-		BackgroundTransparency = 0.3,
+		BackgroundTransparency = tonumber(Theme.ControlTransparency) or 0.34,
 		Size = size or UDim2.new(0, 260, 0, 36),
 		Position = position,
 		AutoButtonColor = false,

@@ -175,7 +175,8 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 	frame.Parent = state.holder
 
 	frame.BackgroundColor3 = theme.Secondary
-	frame.BackgroundTransparency = 0.14
+	local notifTransparency = tonumber(theme.NotificationTransparency) or 0.18
+	frame.BackgroundTransparency = notifTransparency
 
 	local stroke = frame:FindFirstChild("Stroke")
 	if stroke then
@@ -205,7 +206,7 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 	if scale then
 		scale.Scale = instant and 1 or 0.94
 	end
-	frame.BackgroundTransparency = instant and 0.14 or 1
+	frame.BackgroundTransparency = instant and notifTransparency or 1
 
 	local inTween = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	local outTween = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
@@ -214,7 +215,7 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 		if scale then
 			InstanceUtil.Tween(scale, inTween, { Scale = 1 })
 		end
-		InstanceUtil.Tween(frame, inTween, { BackgroundTransparency = 0.14 })
+		InstanceUtil.Tween(frame, inTween, { BackgroundTransparency = notifTransparency })
 		if title then
 			InstanceUtil.Tween(title, inTween, { TextTransparency = 0 })
 		end
