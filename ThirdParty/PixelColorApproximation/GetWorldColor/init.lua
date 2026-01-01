@@ -1,7 +1,7 @@
 local Terrain = workspace.Terrain
 local Lighting = game:GetService("Lighting")
 
-local Utils = require(script.Parent.Utils)
+local Utils = require(script.Parent.Parent.Utils)
 
 local currentSkybox = Lighting:FindFirstChildWhichIsA("Sky")
 Lighting.ChildAdded:Connect(function(child)
