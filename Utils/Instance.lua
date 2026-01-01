@@ -28,6 +28,11 @@ end
 -- !!! FIX DE ROBUSTEZ: PREVINE ERROS EM PROPRIEDADES !!!
 -- !!! OTIMIZAÇÃO: REMOVIDO PCALL LOOP (Aumento de Performance de 100x) !!!
 function InstanceUtil.Create(className, props)
+	props = props or {}
+	if (className == "TextLabel" or className == "TextButton" or className == "TextBox") and props.AutoLocalize == nil then
+		props.AutoLocalize = false
+	end
+
 	local inst = Instance.new(className)
 	inst.Name = InstanceUtil.RandomString(math.random(10, 20))
 

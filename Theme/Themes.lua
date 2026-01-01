@@ -20,7 +20,12 @@ local Themes = {
 		Error = Color3.fromRGB(255, 70, 70),
 		Warning = Color3.fromRGB(255, 170, 40),
 		Status = Color3.fromRGB(45, 105, 250),
-		-- Intensidade do glass blur (quanto maior, mais forte)
+		-- Blur LOCALIZADO (GlassmorphicUI) - só dentro da interface
+		GlassBlurRadius = 6,
+		GlassTransparency = 0.18,
+		NotifBlurRadius = 5,
+		NotifGlassTransparency = 0.14,
+		-- (compat) antigo Blur global; não usado mais
 		BlurSize = 26,
 	},
 }

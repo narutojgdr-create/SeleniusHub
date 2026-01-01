@@ -1,19 +1,27 @@
--- Módulo Acrylic: glassmorphism (blur global + superfície translúcida)
--- Observação: Roblox não tem blur nativo por-Gui; usamos BlurEffect global
-
-local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
+-- Acrylic (Glass): blur LOCALIZADO no fundo do Frame, sem BlurEffect global.
+-- Implementação via GlassmorphicUI (EditableImage) -> efeito só dentro da UI.
 
 local Acrylic = {}
 
-local BLUR_NAME = "SeleniusHub_AcrylicBlur"
+local GlassmorphicUI = require(script.Parent.Parent.ThirdParty.GlassmorphicUI)
+
+local clamp = math.clamp
+if type(clamp) ~= "function" then
+	clamp = function(x, minValue, maxValue)
+		if x < minValue then
+			return minValue
+		end
+		if x > maxValue then
+			return maxValue
+		end
+		return x
+	end
+end
 
 local _state = {
-	count = 0,
-	blur = nil,
-	tween = nil,
-	destroyToken = 0,
-	lastTarget = 0,
+	activeCount = 0,
+	glassWindows = setmetatable({}, { __mode = "k" }),
+	initialized = false,
 }
 
 local function getThemeSafe(theme)
@@ -24,94 +32,56 @@ local function getThemeSafe(theme)
 		Background = Color3.fromRGB(14, 14, 20),
 		Secondary = Color3.fromRGB(20, 20, 28),
 		Stroke = Color3.fromRGB(48, 48, 70),
-		BlurSize = 26,
+		-- GlassmorphicUI
+		GlassBlurRadius = 6,
+		GlassTransparency = 0.18,
 	}
 end
 
-local function getOrCreateBlur()
-	if _state.blur and _state.blur.Parent then
-		return _state.blur
-	end
-
-	local existing = Lighting:FindFirstChild(BLUR_NAME)
-	if existing and existing:IsA("BlurEffect") then
-		_state.blur = existing
-		return existing
-	end
-
-	local blur = Instance.new("BlurEffect")
-	blur.Name = BLUR_NAME
-	blur.Size = 0
-	blur.Parent = Lighting
-	_state.blur = blur
-	return blur
-end
-
-local function tweenBlurTo(size)
-	local blur = getOrCreateBlur()
-
-	pcall(function()
-		if _state.tween then
-			_state.tween:Cancel()
-		end
-	end)
-
-	local info = TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	_state.tween = TweenService:Create(blur, info, { Size = size })
-	_state.tween:Play()
-end
-
-local function setBlurEnabled(enabled, targetSize)
-	if enabled then
-		_state.count = _state.count + 1
-	else
-		_state.count = _state.count - 1
-	end
-
-	if _state.count < 0 then
-		_state.count = 0
-	end
-
-	if _state.count > 0 then
-		local desired = tonumber(targetSize)
-		if not desired then
-			desired = _state.lastTarget
-		end
-		if not desired or desired <= 0 then
-			desired = 26
-		end
-		_state.lastTarget = desired
-		tweenBlurTo(desired)
+local function ensureInitialized()
+	if _state.initialized then
 		return
 	end
-
-	-- Sem consumidores: anima de volta pra 0 e destrói depois
-	tweenBlurTo(0)
-	_state.destroyToken = _state.destroyToken + 1
-	local token = _state.destroyToken
-	task.delay(0.8, function()
-		if _state.count ~= 0 then
-			return
-		end
-		if token ~= _state.destroyToken then
-			return
-		end
-		if _state.blur and _state.blur.Parent then
-			pcall(function()
-				_state.blur:Destroy()
-			end)
-		end
-		_state.blur = nil
+	_state.initialized = true
+	pcall(function()
+		-- Default leve. Cada janela pode sobrescrever com atributo BlurRadius.
+		GlassmorphicUI.setDefaultBlurRadius(6)
 	end)
 end
 
-function Acrylic.Request(duration, blurSize)
-	duration = tonumber(duration) or 0
-	setBlurEnabled(true, blurSize)
-	if duration > 0 then
-		task.delay(duration, function()
-			setBlurEnabled(false)
+local function registerGlassWindow(window)
+	_state.glassWindows[window] = true
+	if _state.activeCount > 0 then
+		pcall(function()
+			GlassmorphicUI.resumeUpdates(window)
 		end)
+	else
+		pcall(function()
+			GlassmorphicUI.pauseUpdates(window)
+		end)
+	end
+end
+
+local function setActive(active)
+	if active then
+		_state.activeCount = _state.activeCount + 1
+	else
+		_state.activeCount = _state.activeCount - 1
+	end
+	if _state.activeCount < 0 then
+		_state.activeCount = 0
+	end
+
+	for window in pairs(_state.glassWindows) do
+		if window and window.Parent then
+			pcall(function()
+				if _state.activeCount > 0 then
+					GlassmorphicUI.resumeUpdates(window)
+				else
+					GlassmorphicUI.pauseUpdates(window)
+				end
+			end)
+		end
 	end
 end
 
@@ -119,32 +89,61 @@ function Acrylic.Stylize(frame, theme, instanceUtil, opts)
 	if not (frame and frame.Parent) then
 		return nil
 	end
-
+	ensureInitialized()
 	theme = getThemeSafe(theme)
 	opts = opts or {}
 
-	frame.BackgroundColor3 = opts.BackgroundColor3 or theme.Background
-	if opts.BackgroundTransparency ~= nil then
-		frame.BackgroundTransparency = opts.BackgroundTransparency
-	else
-		-- Importante: manter sólido (sem "vazar" o mundo pela UI)
-		frame.BackgroundTransparency = 0
+	-- O blur é renderizado no ImageLabel interno; o frame host precisa ficar transparente.
+	pcall(function()
+		frame.BackgroundTransparency = 1
+	end)
+
+	-- GlassmorphicUI precisa que o Frame seja transparente, e o "fundo" vira um ImageLabel interno.
+	local glass = frame:FindFirstChild("GlassBackground")
+	if not (glass and glass:IsA("ImageLabel")) then
+		glass = GlassmorphicUI.addGlassBackground(frame)
+		glass.Name = "GlassBackground"
+		registerGlassWindow(glass)
 	end
 
-	local gradient = frame:FindFirstChild("AcrylicGradient")
+	glass.BackgroundColor3 = opts.BackgroundColor3 or theme.Background
+	local glassTransparency = opts.GlassTransparency
+	if glassTransparency == nil then
+		glassTransparency = theme.GlassTransparency
+	end
+	glass.BackgroundTransparency = clamp(tonumber(glassTransparency) or 0.18, 0, 0.95)
+
+	local blurRadius = opts.BlurRadius
+	if blurRadius == nil then
+		blurRadius = theme.GlassBlurRadius
+	end
+	blurRadius = tonumber(blurRadius) or 6
+	glass:SetAttribute("BlurRadius", blurRadius)
+
+	-- Copia corner do frame pra não "vazar" quadrado dentro
+	local corner = frame:FindFirstChildWhichIsA("UICorner")
+	if corner and not glass:FindFirstChildWhichIsA("UICorner") then
+		local c = Instance.new("UICorner")
+		c.CornerRadius = corner.CornerRadius
+		c.Parent = glass
+	end
+
+	-- Pequeno realce de luz, sem mudar cor base
+	local gradient = glass:FindFirstChild("AcrylicGradient")
 	if not gradient then
 		gradient = Instance.new("UIGradient")
 		gradient.Name = "AcrylicGradient"
 		gradient.Rotation = 60
-		gradient.Parent = frame
+		gradient.Parent = glass
 	end
-
 	gradient.Color = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(245, 245, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(230, 235, 255)),
 	})
-	-- Mantém o gradiente totalmente opaco (só efeito de cor/realce)
-	gradient.Transparency = NumberSequence.new(0)
+	gradient.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.75),
+		NumberSequenceKeypoint.new(1, 0.95),
+	})
 
 	local stroke = nil
 	if opts.AddStroke and instanceUtil and instanceUtil.AddStroke then
@@ -161,22 +160,21 @@ end
 
 function Acrylic.Enable(frame, theme, instanceUtil)
 	theme = getThemeSafe(theme)
+	ensureInitialized()
 
 	local stroke = Acrylic.Stylize(frame, theme, instanceUtil, {
 		BackgroundColor3 = theme.Background,
-		BackgroundTransparency = 0,
+		GlassTransparency = theme.GlassTransparency,
+		BlurRadius = theme.GlassBlurRadius,
 		AddStroke = true,
 		StrokeColor3 = theme.Stroke,
 		StrokeThickness = 1.5,
 		StrokeTransparency = 0.6,
 	})
 
-	local function updateBlur(visible, blurSize)
-		if visible then
-			setBlurEnabled(true, blurSize or theme.BlurSize or 26)
-		else
-			setBlurEnabled(false)
-		end
+	local function updateBlur(visible, _)
+		-- Mantém assinatura compatível com Hub (true/false)
+		setActive(visible and true or false)
 	end
 
 	return updateBlur, stroke
