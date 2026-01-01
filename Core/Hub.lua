@@ -929,6 +929,7 @@ function Hub:SwitchPage(id)
 	end
 	local newPage = self.Pages[id]
 	if newPage then
+		local targetTransparency = tonumber(Theme.PageTransparency) or newPage.BackgroundTransparency
 		newPage.Visible = true
 		newPage.Position = UDim2.new(0, 0, 0, 12)
 		newPage.BackgroundTransparency = 1
@@ -938,7 +939,7 @@ function Hub:SwitchPage(id)
 		local tweenInfo = TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 		InstanceUtil.Tween(newPage, tweenInfo, {
 			Position = UDim2.new(0, 0, 0, 0),
-			BackgroundTransparency = 1,
+			BackgroundTransparency = targetTransparency,
 			ScrollBarImageTransparency = 0,
 		})
 	end
