@@ -191,10 +191,10 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 	frame.Parent = state.holder
 
 	frame.BackgroundColor3 = theme.Secondary
-	frame.BackgroundTransparency = 0.10
+	frame.BackgroundTransparency = 0
 	Acrylic.Stylize(frame, theme, InstanceUtil, {
 		BackgroundColor3 = theme.Secondary,
-		BackgroundTransparency = 0.10,
+		BackgroundTransparency = 0,
 		AddStroke = false,
 	})
 

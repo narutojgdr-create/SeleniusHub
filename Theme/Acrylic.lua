@@ -127,7 +127,8 @@ function Acrylic.Stylize(frame, theme, instanceUtil, opts)
 	if opts.BackgroundTransparency ~= nil then
 		frame.BackgroundTransparency = opts.BackgroundTransparency
 	else
-		frame.BackgroundTransparency = 0.06
+		-- Importante: manter sólido (sem "vazar" o mundo pela UI)
+		frame.BackgroundTransparency = 0
 	end
 
 	local gradient = frame:FindFirstChild("AcrylicGradient")
@@ -142,10 +143,8 @@ function Acrylic.Stylize(frame, theme, instanceUtil, opts)
 		ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
 		ColorSequenceKeypoint.new(1, Color3.fromRGB(245, 245, 255)),
 	})
-	gradient.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.45),
-		NumberSequenceKeypoint.new(1, 0.86),
-	})
+	-- Mantém o gradiente totalmente opaco (só efeito de cor/realce)
+	gradient.Transparency = NumberSequence.new(0)
 
 	local stroke = nil
 	if opts.AddStroke and instanceUtil and instanceUtil.AddStroke then
@@ -165,7 +164,7 @@ function Acrylic.Enable(frame, theme, instanceUtil)
 
 	local stroke = Acrylic.Stylize(frame, theme, instanceUtil, {
 		BackgroundColor3 = theme.Background,
-		BackgroundTransparency = 0.05,
+		BackgroundTransparency = 0,
 		AddStroke = true,
 		StrokeColor3 = theme.Stroke,
 		StrokeThickness = 1.5,
