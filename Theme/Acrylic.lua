@@ -1,6 +1,17 @@
 -- Módulo Acrylic v11.0 & NO Stroke System (Adaptado)
 
+local Lighting = game:GetService("Lighting")
+
 local Acrylic = {}
+
+pcall(function()
+	local old = Lighting:FindFirstChild("SeleniusHub_Blur")
+	if old and old:IsA("BlurEffect") then
+		old.Enabled = false
+		old.Size = 0
+		old:Destroy()
+	end
+end)
 
 function Acrylic.Enable(frame, theme, instanceUtil)
 	frame.BackgroundTransparency = tonumber(theme and theme.AcrylicTransparency) or 0.10
