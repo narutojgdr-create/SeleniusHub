@@ -162,7 +162,7 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 	local theme = getTheme(themeManager)
 	local accentColor, titleText = getAccent(theme, kind)
 
-	state.seq += 1
+	state.seq = state.seq + 1
 	local token = state.seq
 
 	local frame = table.remove(state.pool)
