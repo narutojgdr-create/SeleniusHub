@@ -424,6 +424,9 @@ function Hub:ShowConfirmation(text, onConfirm)
 		return
 	end
 
+	local panelTransparency = tonumber(Theme.PanelTransparency or Theme.SurfaceTransparency or Theme.AcrylicTransparency) or 0.08
+	local controlTransparency = tonumber(Theme.ControlTransparency) or panelTransparency
+
 	local overlay = Instance.new("Frame")
 	overlay.BackgroundColor3 = Color3.new(0, 0, 0)
 	overlay.BackgroundTransparency = 1
@@ -445,7 +448,7 @@ function Hub:ShowConfirmation(text, onConfirm)
 	box.BackgroundTransparency = 1
 	TweenService:Create(box, tweenInfo, {
 		Position = UDim2.new(0.5, 0, 0.5, 0),
-		BackgroundTransparency = 0,
+		BackgroundTransparency = panelTransparency,
 	}):Play()
 
 	local lbl = Instance.new("TextLabel")
@@ -474,7 +477,7 @@ function Hub:ShowConfirmation(text, onConfirm)
 	yesBtn.ZIndex = 102
 	yesBtn.AutoButtonColor = false
 	InstanceUtil.AddCorner(yesBtn, 6)
-	TweenService:Create(yesBtn, tweenInfo, { BackgroundTransparency = 0, TextTransparency = 0 }):Play()
+	TweenService:Create(yesBtn, tweenInfo, { BackgroundTransparency = controlTransparency, TextTransparency = 0 }):Play()
 
 	local noBtn = Instance.new("TextButton")
 	noBtn.Text = self:GetText("label_cancel")
@@ -488,7 +491,7 @@ function Hub:ShowConfirmation(text, onConfirm)
 	noBtn.ZIndex = 102
 	noBtn.AutoButtonColor = false
 	InstanceUtil.AddCorner(noBtn, 6)
-	TweenService:Create(noBtn, tweenInfo, { BackgroundTransparency = 0, TextTransparency = 0 }):Play()
+	TweenService:Create(noBtn, tweenInfo, { BackgroundTransparency = controlTransparency, TextTransparency = 0 }):Play()
 
 	local function Close()
 		TweenService:Create(box, tweenInfo, { Position = UDim2.new(0.5, 0, 0.5, 50), BackgroundTransparency = 1 }):Play()
