@@ -1,6 +1,7 @@
 local TweenService = game:GetService("TweenService")
 
 local InstanceUtil = require(script.Parent.Parent.Utils.Instance)
+local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
 
 local Notifications = {}
 
@@ -162,6 +163,12 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 	local theme = getTheme(themeManager)
 	local accentColor, titleText = getAccent(theme, kind)
 
+	pcall(function()
+		if Acrylic and Acrylic.RequestBlur then
+			Acrylic.RequestBlur(true, theme)
+		end
+	end)
+
 	state.seq = state.seq + 1
 	local token = state.seq
 
@@ -231,9 +238,19 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 
 	task.delay(lifetime, function()
 		if not (frame and frame.Parent) then
+			pcall(function()
+				if Acrylic and Acrylic.RequestBlur then
+					Acrylic.RequestBlur(false, theme)
+				end
+			end)
 			return
 		end
 		if frame:GetAttribute("NotifToken") ~= token then
+			pcall(function()
+				if Acrylic and Acrylic.RequestBlur then
+					Acrylic.RequestBlur(false, theme)
+				end
+			end)
 			return
 		end
 
@@ -256,11 +273,21 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 			t.Completed:Wait()
 		end)
 		if frame:GetAttribute("NotifToken") ~= token then
+			pcall(function()
+				if Acrylic and Acrylic.RequestBlur then
+					Acrylic.RequestBlur(false, theme)
+				end
+			end)
 			return
 		end
 
 		frame.Parent = nil
 		table.insert(state.pool, frame)
+		pcall(function()
+			if Acrylic and Acrylic.RequestBlur then
+				Acrylic.RequestBlur(false, theme)
+			end
+		end)
 	end)
 end
 
