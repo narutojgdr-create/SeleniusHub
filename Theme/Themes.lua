@@ -6,6 +6,9 @@ local Themes = {
 		-- Escuro, porém um pouco mais claro (mais "premium" e legível)
 		Background = Color3.fromRGB(14, 14, 20),
 		Secondary = Color3.fromRGB(20, 20, 28),
+		-- Transparências (sem blur)
+		AcrylicTransparency = 0.10,
+		PanelTransparency = 0.12,
 		Separator = Color3.fromRGB(30, 30, 42),
 		Accent = Color3.fromRGB(45, 105, 250),
 		AccentDark = Color3.fromRGB(85, 90, 120),

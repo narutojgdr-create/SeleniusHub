@@ -163,7 +163,7 @@ function Window.Create(ctx)
 
 	UI.Sidebar = ctx.instanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Secondary,
-		BackgroundTransparency = 0.5,
+		BackgroundTransparency = tonumber(Theme.PanelTransparency) or 0.12,
 		Position = UDim2.new(0, SIDEBAR_MARGIN, 0, SIDEBAR_MARGIN),
 		Size = UDim2.new(0, SIDEBAR_WIDTH, 1, -(SIDEBAR_MARGIN * 2)),
 		Parent = UI.ContentContainer,
@@ -190,7 +190,7 @@ function Window.Create(ctx)
 
 	UI.PagesContainer = ctx.instanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.Secondary,
-		BackgroundTransparency = 0.5,
+		BackgroundTransparency = tonumber(Theme.PanelTransparency) or 0.12,
 		Position = UDim2.new(0, SIDEBAR_MARGIN + SIDEBAR_WIDTH + SIDEBAR_GAP, 0, SIDEBAR_MARGIN),
 		Size = UDim2.new(1, -(SIDEBAR_MARGIN + SIDEBAR_WIDTH + SIDEBAR_GAP + SIDEBAR_MARGIN), 1, -(SIDEBAR_MARGIN * 2)),
 		ClipsDescendants = true,

@@ -3,7 +3,7 @@
 local Acrylic = {}
 
 function Acrylic.Enable(frame, theme, instanceUtil)
-	frame.BackgroundTransparency = 0.05
+	frame.BackgroundTransparency = tonumber(theme and theme.AcrylicTransparency) or 0.10
 	frame.BackgroundColor3 = theme.Background
 
 	local gradient = Instance.new("UIGradient")
