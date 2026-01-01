@@ -1,6 +1,7 @@
 local TweenService = game:GetService("TweenService")
 
 local InstanceUtil = require(script.Parent.Parent.Utils.Instance)
+local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
 
 local Notifications = {}
 
@@ -96,6 +97,11 @@ local function buildNotificationFrame(theme)
 		Size = UDim2.new(1, 0, 0, 54),
 	})
 	InstanceUtil.AddCorner(frame, 12)
+	pcall(function()
+		if Acrylic and Acrylic.Enable then
+			Acrylic.Enable(frame, theme, InstanceUtil, { NoStroke = true })
+		end
+	end)
 	local stroke = InstanceUtil.AddStroke(frame, theme.Stroke, 1, 1)
 	stroke.Name = "Stroke"
 
