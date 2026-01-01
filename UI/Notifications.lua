@@ -1,6 +1,7 @@
 local TweenService = game:GetService("TweenService")
 
 local InstanceUtil = require(script.Parent.Parent.Utils.Instance)
+local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
 
 local Notifications = {}
 
@@ -95,6 +96,11 @@ local function buildNotificationFrame(theme)
 		ClipsDescendants = true,
 		Size = UDim2.new(1, 0, 0, 54),
 	})
+	Acrylic.Stylize(frame, theme, InstanceUtil, {
+		BackgroundColor3 = theme.Secondary,
+		BackgroundTransparency = 0.14,
+		AddStroke = false,
+	})
 	InstanceUtil.AddCorner(frame, 12)
 	local stroke = InstanceUtil.AddStroke(frame, theme.Stroke, 1, 1)
 	stroke.Name = "Stroke"
@@ -162,7 +168,17 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 	local theme = getTheme(themeManager)
 	local accentColor, titleText = getAccent(theme, kind)
 
-	state.seq += 1
+	-- Glass blur também nas notificações (por padrão ligado)
+	if opts.Blur ~= false then
+		local blurSize = opts.BlurSize or theme.NotifBlurSize or theme.BlurSize or 18
+		blurSize = tonumber(blurSize) or 18
+		if blurSize > 20 then
+			blurSize = 20
+		end
+		Acrylic.Request(lifetime + 0.4, blurSize)
+	end
+
+	state.seq = state.seq + 1
 	local token = state.seq
 
 	local frame = table.remove(state.pool)
@@ -175,7 +191,12 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 	frame.Parent = state.holder
 
 	frame.BackgroundColor3 = theme.Secondary
-	frame.BackgroundTransparency = 0.14
+	frame.BackgroundTransparency = 0.10
+	Acrylic.Stylize(frame, theme, InstanceUtil, {
+		BackgroundColor3 = theme.Secondary,
+		BackgroundTransparency = 0.10,
+		AddStroke = false,
+	})
 
 	local stroke = frame:FindFirstChild("Stroke")
 	if stroke then

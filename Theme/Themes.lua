@@ -20,6 +20,8 @@ local Themes = {
 		Error = Color3.fromRGB(255, 70, 70),
 		Warning = Color3.fromRGB(255, 170, 40),
 		Status = Color3.fromRGB(45, 105, 250),
+		-- Intensidade do glass blur (quanto maior, mais forte)
+		BlurSize = 26,
 	},
 }
 
