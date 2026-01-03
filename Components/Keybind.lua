@@ -85,8 +85,16 @@ function Keybind.Create(ctx, parent, position, localeKey, defaultKeyCode)
 		capturing = true
 		btn.Text = "..."
 		game:GetService("TweenService"):Create(btnScale, PopTween, { Scale = 1.15 }):Play()
-		task.delay(PopTween.Time, function()
-			game:GetService("TweenService"):Create(btnScale, PopReturnTween, { Scale = 1 }):Play()
+		pcall(function()
+			if type(task) == "table" and type(task.delay) == "function" then
+				task.delay(PopTween.Time, function()
+					game:GetService("TweenService"):Create(btnScale, PopReturnTween, { Scale = 1 }):Play()
+				end)
+			elseif type(delay) == "function" then
+				delay(PopTween.Time, function()
+					game:GetService("TweenService"):Create(btnScale, PopReturnTween, { Scale = 1 }):Play()
+				end)
+			end
 		end)
 
 		captureConn = ctx.addConnection(UserInputService.InputBegan, function(input, gp)

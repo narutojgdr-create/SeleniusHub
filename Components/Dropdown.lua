@@ -109,9 +109,19 @@ function Dropdown.Create(ctx, parent, position, localeKey, options, defaultIndex
 		Theme = ctx.themeManager:GetTheme()
 		ctx.instanceUtil.Tween(arrow, DropdownTween, { Rotation = 0, TextColor3 = Theme.TextPrimary })
 		arrow.Text = "▼"
-		task.delay(DropdownTween.Time, function()
-			if not isOpen then
-				listFrame.Visible = false
+		pcall(function()
+			if type(task) == "table" and type(task.delay) == "function" then
+				task.delay(DropdownTween.Time, function()
+					if not isOpen then
+						listFrame.Visible = false
+					end
+				end)
+			elseif type(delay) == "function" then
+				delay(DropdownTween.Time, function()
+					if not isOpen then
+						listFrame.Visible = false
+					end
+				end)
 			end
 		end)
 	end

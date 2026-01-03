@@ -60,7 +60,18 @@ function ThemeManager:SetTheme(name)
 	end
 
 	for _, callback in ipairs(self._callbacks) do
-		task.spawn(callback)
+		pcall(function()
+			if type(task) == "table" and type(task.spawn) == "function" then
+				task.spawn(callback)
+			elseif type(spawn) == "function" then
+				spawn(callback)
+			elseif type(coroutine) == "table" then
+				local co = coroutine.create(callback)
+				coroutine.resume(co)
+			else
+				pcall(callback)
+			end
+		end)
 	end
 end
 

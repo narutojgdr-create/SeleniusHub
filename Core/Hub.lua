@@ -80,7 +80,7 @@ function Hub.new()
 	if gv and gv.SeleniusHubInstance then
 		local old = gv.SeleniusHubInstance
 		if old and old.ShowWarning then
-			task.spawn(function()
+			Safe.Spawn(function()
 				old:ShowWarning("Hub already opened!", "warn")
 			end)
 		end
@@ -138,29 +138,30 @@ function Hub.new()
 	self._SidebarSubItemStyleCallbacks = {}
 	self._ErrorOnce = {}
 
-	Assets.EnsureFolders()
-	self:LoadConfig("default")
+	-- Protege toda a inicialização com pcall pra não crashar em nenhum executor
+	pcall(function() Assets.EnsureFolders() end)
+	pcall(function() self:LoadConfig("default") end)
 
-	self:CreateUI()
-	self:CreateNotificationSystem()
-	self:SetupSmoothDrag()
-	self:SetupResizing()
-	self:SetupButtons()
-	self:SetupMobileSupport()
+	pcall(function() self:CreateUI() end)
+	pcall(function() self:CreateNotificationSystem() end)
+	pcall(function() self:SetupSmoothDrag() end)
+	pcall(function() self:SetupResizing() end)
+	pcall(function() self:SetupButtons() end)
+	pcall(function() self:SetupMobileSupport() end)
 
-	self:AddPage("Home", "tab_Home", "Home")
-	self:AddPage("Combat", "tab_Combat", "Combat")
-	self:AddPage("Visuals", "tab_Visuals", "Visuals")
-	self:AddPage("Player", "tab_Player", "Player")
-	self:AddPage("World", "tab_World", "Home")
-	self:AddPage("Settings", "tab_Settings", "Settings")
-	self:SwitchPage("Home")
+	pcall(function() self:AddPage("Home", "tab_Home", "Home") end)
+	pcall(function() self:AddPage("Combat", "tab_Combat", "Combat") end)
+	pcall(function() self:AddPage("Visuals", "tab_Visuals", "Visuals") end)
+	pcall(function() self:AddPage("Player", "tab_Player", "Player") end)
+	pcall(function() self:AddPage("World", "tab_World", "Home") end)
+	pcall(function() self:AddPage("Settings", "tab_Settings", "Settings") end)
+	pcall(function() self:SwitchPage("Home") end)
 
-	self:SetTheme(self.CurrentThemeName)
-	self:SetLanguage(self.Locale)
-	self:SetupKeybindSystem()
-	self:OnKeybindChanged()
-	self:SetupSearch()
+	pcall(function() self:SetTheme(self.CurrentThemeName) end)
+	pcall(function() self:SetLanguage(self.Locale) end)
+	pcall(function() self:SetupKeybindSystem() end)
+	pcall(function() self:OnKeybindChanged() end)
+	pcall(function() self:SetupSearch() end)
 
 	-- IMPORTANTE: não carregar Tabs/loops aqui.
 	-- Isso reduz o tempo até o KeySystem aparecer e deixa o Loading cuidar do resto.
@@ -203,7 +204,7 @@ function Hub:_ReportError(context, err)
 	if shouldLog then
 		st.lastLogAt = now
 		Logger.Error("[SeleniusHub] " ..
-		ctx .. ": " .. msg .. (st.count > 1 and (" (x" .. tostring(st.count) .. ")") or ""))
+			ctx .. ": " .. msg .. (st.count > 1 and (" (x" .. tostring(st.count) .. ")") or ""))
 	end
 
 	-- Copia automaticamente pro clipboard (se disponível) pra você me mandar.
@@ -213,7 +214,7 @@ function Hub:_ReportError(context, err)
 			return
 		end
 		local canCopy = (type(typeof) == "function" and typeof(setclipboard) == "function") or
-		(type(setclipboard) == "function")
+			(type(setclipboard) == "function")
 		if not canCopy then
 			return
 		end
@@ -735,9 +736,9 @@ function Hub:ShowConfirmation(text, onConfirm)
 		TweenService:Create(lbl, tweenInfo, { TextTransparency = 1 }):Play()
 		TweenService:Create(yesBtn, tweenInfo, { BackgroundTransparency = 1, TextTransparency = 1 }):Play()
 		TweenService:Create(noBtn, tweenInfo, { BackgroundTransparency = 1, TextTransparency = 1 }):Play()
-		task.wait(0.3)
+		Safe.Wait(0.3)
 		if overlay then
-			overlay:Destroy()
+			Safe.Destroy(overlay)
 		end
 	end
 
@@ -806,7 +807,7 @@ function Hub:CreateKeybindControl(parent, position)
 		self.CapturingKeybind = true
 		btn.Text = "..."
 		TweenService:Create(btnScale, PopTween, { Scale = 1.15 }):Play()
-		task.delay(PopTween.Time, function()
+		Safe.Delay(PopTween.Time, function()
 			TweenService:Create(btnScale, PopReturnTween, { Scale = 1 }):Play()
 		end)
 	end)
@@ -1223,7 +1224,7 @@ function Hub:SwitchPage(id)
 			InstanceUtil.Tween(oldPage, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 				Position = UDim2.new(0, 0, 0, -8),
 			})
-			task.delay(0.17, function()
+			Safe.Delay(0.17, function()
 				if self.CurrentPage ~= oldId then
 					pcall(function()
 						oldPage.Visible = false
@@ -1578,7 +1579,7 @@ function Hub:SetupButtons()
 					finalYOffset),
 			})
 
-			task.delay(0.1, function()
+			Safe.Delay(0.1, function()
 				UI.ContentContainer.Visible = true
 				if UI.Separator then
 					UI.Separator.Visible = true

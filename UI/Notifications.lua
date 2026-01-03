@@ -229,7 +229,19 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 		end
 	end
 
-	task.delay(lifetime, function()
+	local function safeDelay(t, fn)
+		pcall(function()
+			if type(task) == "table" and type(task.delay) == "function" then
+				task.delay(t, fn)
+			elseif type(delay) == "function" then
+				delay(t, fn)
+			else
+				pcall(fn)
+			end
+		end)
+	end
+
+	safeDelay(lifetime, function()
 		if not (frame and frame.Parent) then
 			return
 		end
@@ -252,8 +264,10 @@ function Notifications.Show(screenGui, themeManager, text, kind, instant, opts)
 				InstanceUtil.Tween(stroke, outTween, { Transparency = 1 })
 			end)
 		end
+		-- Safe wait instead of t.Completed:Wait()
 		pcall(function()
-			t.Completed:Wait()
+			local w = (type(task) == "table" and task.wait) or wait
+			if w then w(0.2) end
 		end)
 		if frame:GetAttribute("NotifToken") ~= token then
 			return

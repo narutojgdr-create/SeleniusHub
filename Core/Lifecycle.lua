@@ -425,7 +425,7 @@ function Lifecycle.CreateKeySystem(hub)
 			statusText.TextColor3 = Theme.Accent
 			statusText.Text = "Link copiado"
 			TweenService:Create(statusText, fadeTweenInfo, { TextTransparency = 0 }):Play()
-			task.delay(2, function()
+			Safe.Delay(2, function()
 				pcall(function()
 					TweenService:Create(statusText, TweenInfo.new(0.5), { TextTransparency = 1 }):Play()
 				end)
@@ -571,27 +571,28 @@ function Lifecycle.CreateKeySystem(hub)
 				{ Scale = 1 }):Play()
 			TweenService:Create(okTitle, fadeTweenInfo, { TextTransparency = 0 }):Play()
 			TweenService:Create(okSub, fadeTweenInfo, { TextTransparency = 0 }):Play()
-			task.wait(0.55)
+			Safe.Wait(0.55)
 			TweenService:Create(okScale, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
 				{ Scale = 0.98 }):Play()
 			TweenService:Create(okTitle, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
 				{ TextTransparency = 1 }):Play()
 			TweenService:Create(okSub, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-			{ TextTransparency = 1 }):Play()
-			task.wait(0.2)
+				{ TextTransparency = 1 }):Play()
+			Safe.Wait(0.2)
 			content.Visible = false
 
 			local closeTween = InstanceUtil.Tween(mainScale,
 				TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
-				Scale = 0,
-			})
-			closeTween.Completed:Wait()
+					Scale = 0,
+				})
+			-- Usa Safe.WaitForTween em vez de Completed:Wait() que pode crashar
+			Safe.WaitForTween(closeTween, 1)
 			pcall(function()
 				if updateBlur then
 					updateBlur(false)
 				end
 			end)
-			gui:Destroy()
+			Safe.Destroy(gui)
 
 			-- Abrir o Hub rápido: mostra primeiro, termina init em paralelo.
 			pcall(function()
@@ -609,7 +610,7 @@ function Lifecycle.CreateKeySystem(hub)
 					hub:SetVisible(true, true)
 				end
 			end)
-			task.spawn(function()
+			Safe.Spawn(function()
 				pcall(function()
 					if hub and type(hub.FinishInit) == "function" then
 						hub:FinishInit()
@@ -624,7 +625,7 @@ function Lifecycle.CreateKeySystem(hub)
 			local y = inputBg.Position.Y.Scale
 			for _ = 1, 6 do
 				inputBg.Position = UDim2.new(x, math.random(-3, 3), y, 0)
-				task.wait(0.05)
+				Safe.Wait(0.05)
 			end
 			inputBg.Position = UDim2.new(x, 0, y, 0)
 			submitting = false
