@@ -47,4 +47,7 @@ return {
 	confirm_destroy = "Completely destroy Hub?",
 	confirm_reinject = "Reload script?",
 	confirm_reset = "Reset all settings?",
+
+	sub_combat_aim = "Aim",
+	sub_combat_dashboard = "Dashboard",
 }

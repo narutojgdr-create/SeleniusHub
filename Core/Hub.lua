@@ -80,6 +80,7 @@ function Hub.new()
 	self.Connections = {}
 	self.Pages = {}
 	self.Tabs = {}
+	self.TabInstances = {}
 	self.Minimized = false
 	self.MinWidth = 480
 	self.MinHeight = 420
@@ -118,6 +119,7 @@ function Hub.new()
 
 	self.Components = Components
 	self._DidFinishInit = false
+	self._SidebarSubItemStyleCallbacks = {}
 
 	Assets.EnsureFolders()
 	self:LoadConfig("default")
@@ -183,26 +185,149 @@ function Hub:LoadTabs()
 	local combat = self.Pages.Combat
 	if combat then
 		local tab = TabClass.new(self, "Combat", combat)
+		self.TabInstances.Combat = tab
 		require(script.Parent.Parent.Tabs.Combat.init)(tab)
 	end
 
 	local visuals = self.Pages.Visuals
 	if visuals then
 		local tab = TabClass.new(self, "Visuals", visuals)
+		self.TabInstances.Visuals = tab
 		require(script.Parent.Parent.Tabs.Visual.init)(tab)
 	end
 
 	local player = self.Pages.Player
 	if player then
 		local tab = TabClass.new(self, "Player", player)
+		self.TabInstances.Player = tab
 		require(script.Parent.Parent.Tabs.Player.init)(tab)
 	end
 
 	local settings = self.Pages.Settings
 	if settings then
 		local tab = TabClass.new(self, "Settings", settings)
+		self.TabInstances.Settings = tab
 		require(script.Parent.Parent.Tabs.Settings.init)(tab)
 	end
+end
+
+function Hub:_SetTabExpanded(id, expanded)
+	local tab = self.Tabs[id]
+	if not tab then
+		return
+	end
+	tab.Expanded = (expanded == true)
+	if tab.ChildrenHolder then
+		tab.ChildrenHolder.Visible = tab.Expanded
+	end
+	if tab.Toggle then
+		tab.Toggle.Text = tab.Expanded and "-" or "+"
+	end
+end
+
+function Hub:_UpdateSidebarSubItemStyles(id)
+	local tabRec = self.Tabs[id]
+	if not tabRec or not tabRec.SubItems then
+		return
+	end
+	local tabInstance = self.TabInstances[id]
+	local currentSub = tabInstance and tabInstance.CurrentSubTabId or nil
+	for subId, rec in pairs(tabRec.SubItems) do
+		local selected = (self.CurrentPage == id) and (currentSub == subId)
+		local Theme = self.ThemeManager:GetTheme()
+		if rec.Button then
+			rec.Button.BackgroundColor3 = selected and Theme.ButtonHover or Theme.Button
+		end
+		if rec.Label then
+			rec.Label.TextColor3 = selected and Theme.Accent or Theme.AccentDark
+		end
+		if rec.Dot then
+			rec.Dot.BackgroundColor3 = selected and Theme.Accent or Theme.AccentDark
+		end
+	end
+end
+
+function Hub:_OnSubTabChanged(tabId, subId)
+	self:_UpdateSidebarSubItemStyles(tabId)
+end
+
+function Hub:RegisterSidebarSubTab(tabId, subId, localeKey)
+	local tabRec = self.Tabs[tabId]
+	if not tabRec or not tabRec.ChildrenHolder then
+		return
+	end
+	tabRec.SubItems = tabRec.SubItems or {}
+	if tabRec.SubItems[subId] then
+		return
+	end
+
+	local Theme = self.ThemeManager:GetTheme()
+
+	local btn = InstanceUtil.Create("TextButton", {
+		Text = "",
+		Font = Enum.Font.GothamMedium,
+		TextSize = 14,
+		TextColor3 = Theme.AccentDark,
+		BackgroundColor3 = Theme.Button,
+		BackgroundTransparency = tonumber(Theme.ControlTransparency) or 0.34,
+		Size = UDim2.new(1, -10, 0, 28),
+		AutoButtonColor = false,
+		Parent = tabRec.ChildrenHolder,
+	})
+	InstanceUtil.AddCorner(btn, 6)
+	InstanceUtil.AddStroke(btn, Theme.Stroke, 1, 0.5)
+
+	local dot = InstanceUtil.Create("Frame", {
+		BackgroundColor3 = Theme.AccentDark,
+		Size = UDim2.new(0, 6, 0, 6),
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 10, 0.5, 0),
+		Parent = btn,
+	})
+	InstanceUtil.AddCorner(dot, 10)
+
+	local label = InstanceUtil.Create("TextLabel", {
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0, 22, 0, 0),
+		Size = UDim2.new(1, -28, 1, 0),
+		Font = Enum.Font.GothamMedium,
+		TextSize = 13,
+		TextColor3 = Theme.AccentDark,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		TextWrapped = false,
+		Text = (localeKey and self:GetText(localeKey)) or tostring(subId),
+		Parent = btn,
+	})
+	if localeKey then
+		self:RegisterLocale(label, localeKey)
+	end
+
+	self:AddConnection(btn.MouseButton1Click, function()
+		self:SwitchPage(tabId)
+		local inst = self.TabInstances[tabId]
+		if inst and inst.SwitchSubTab then
+			inst:SwitchSubTab(subId)
+		end
+		self:_SetTabExpanded(tabId, true)
+		self:_UpdateSidebarSubItemStyles(tabId)
+	end)
+
+	tabRec.SubItems[subId] = {
+		Button = btn,
+		Label = label,
+		Dot = dot,
+	}
+
+	self.ThemeManager:AddCallback(function()
+		self:_UpdateSidebarSubItemStyles(tabId)
+	end)
+
+	-- Se for o primeiro item, deixa o toggle aparecer e começa fechado.
+	if tabRec.Toggle then
+		tabRec.Toggle.Visible = true
+	end
+	self:_UpdateSidebarSubItemStyles(tabId)
 end
 
 function Hub:RegisterKeybind(id, keyCode, callback)
@@ -424,7 +549,7 @@ function Hub:ShowConfirmation(text, onConfirm)
 		return
 	end
 
-	local panelTransparency = tonumber(Theme.PanelTransparency or Theme.SurfaceTransparency or Theme.AcrylicTransparency) or 0.08
+	local panelTransparency = tonumber(Theme.PanelTransparency or Theme.SurfaceTransparency or Theme.AcrylicTransparency) or 0
 	local controlTransparency = tonumber(Theme.ControlTransparency) or panelTransparency
 
 	local overlay = Instance.new("Frame")
@@ -708,6 +833,20 @@ end
 
 function Hub:CreateTabButton(id, localeKey, iconKey)
 	local Theme = self.ThemeManager:GetTheme()
+	local container = InstanceUtil.Create("Frame", {
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		Parent = (self.UI.SidebarTop or self.UI.Sidebar),
+	})
+	local containerLayout = InstanceUtil.Create("UIListLayout", {
+		Padding = UDim.new(0, 4),
+		HorizontalAlignment = Enum.HorizontalAlignment.Center,
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Parent = container,
+	})
+	containerLayout:GetPropertyChangedSignal("AbsoluteContentSize")
+
 	local btn = InstanceUtil.Create("TextButton", {
 		Text = "",
 		Font = Enum.Font.GothamMedium,
@@ -716,7 +855,7 @@ function Hub:CreateTabButton(id, localeKey, iconKey)
 		BackgroundColor3 = Theme.Button,
 		Size = UDim2.new(1, -10, 0, 44),
 		AutoButtonColor = false,
-		Parent = (self.UI.SidebarTop or self.UI.Sidebar),
+		Parent = container,
 	})
 	InstanceUtil.AddCorner(btn, 6)
 
@@ -744,11 +883,43 @@ function Hub:CreateTabButton(id, localeKey, iconKey)
 	})
 	self:RegisterLocale(label, localeKey)
 
+	local toggle = InstanceUtil.Create("TextButton", {
+		Text = "+",
+		Font = Enum.Font.GothamBold,
+		TextSize = 18,
+		TextColor3 = Theme.AccentDark,
+		BackgroundTransparency = 1,
+		Size = UDim2.new(0, 20, 0, 20),
+		Position = UDim2.new(1, -26, 0.5, -10),
+		AutoButtonColor = false,
+		Visible = true,
+		Parent = btn,
+	})
+
 	local indicator = InstanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.IndicatorOff,
 		Size = UDim2.new(0, 5, 1, 0),
 		Position = UDim2.new(0, 0, 0, 0),
 		Parent = btn,
+	})
+
+	local childrenHolder = InstanceUtil.Create("Frame", {
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		Visible = false,
+		Parent = container,
+	})
+	local childrenLayout = InstanceUtil.Create("UIListLayout", {
+		Padding = UDim.new(0, 4),
+		HorizontalAlignment = Enum.HorizontalAlignment.Center,
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Parent = childrenHolder,
+	})
+	childrenLayout:GetPropertyChangedSignal("AbsoluteContentSize")
+	InstanceUtil.Create("UIPadding", {
+		PaddingLeft = UDim.new(0, 12),
+		Parent = childrenHolder,
 	})
 
 	self:AddConnection(btn.MouseEnter, function()
@@ -763,6 +934,16 @@ function Hub:CreateTabButton(id, localeKey, iconKey)
 	end)
 	self:AddConnection(btn.MouseButton1Click, function()
 		self:SwitchPage(id)
+		-- auto expand ao selecionar
+		self:_SetTabExpanded(id, true)
+	end)
+	self:AddConnection(toggle.MouseButton1Click, function()
+		local rec = self.Tabs[id]
+		local nextState = true
+		if rec and rec.Expanded ~= nil then
+			nextState = not rec.Expanded
+		end
+		self:_SetTabExpanded(id, nextState)
 	end)
 
 	self.ThemeManager:AddCallback(function()
@@ -773,15 +954,27 @@ function Hub:CreateTabButton(id, localeKey, iconKey)
 			btn.BackgroundColor3 = T.ButtonHover
 			label.TextColor3 = T.Accent
 			icon.ImageColor3 = T.Accent
+			toggle.TextColor3 = T.Accent
 		else
 			indicator.BackgroundColor3 = T.IndicatorOff
 			btn.BackgroundColor3 = T.Button
 			label.TextColor3 = T.AccentDark
 			icon.ImageColor3 = T.AccentDark
+			toggle.TextColor3 = T.AccentDark
 		end
 	end)
 
-	return btn, indicator, label
+	return {
+		Container = container,
+		Button = btn,
+		Indicator = indicator,
+		Label = label,
+		Icon = icon,
+		Toggle = toggle,
+		ChildrenHolder = childrenHolder,
+		Expanded = false,
+		SubItems = {},
+	}
 end
 
 function Hub:AddPage(id, localeKey, iconKey)
@@ -807,8 +1000,8 @@ function Hub:AddPage(id, localeKey, iconKey)
 	InstanceUtil.AddCorner(page, 6)
 	self:RegisterTheme(page, "BackgroundColor3", "Secondary")
 
-	local btn, indicator, label = self:CreateTabButton(id, localeKey, iconKey)
-	self.Tabs[id] = { Button = btn, Indicator = indicator, Label = label }
+	local tabRec = self:CreateTabButton(id, localeKey, iconKey)
+	self.Tabs[id] = tabRec
 	self.Pages[id] = page
 
 	if id == "Home" then
@@ -947,6 +1140,11 @@ function Hub:SwitchPage(id)
 		})
 	end
 	self.CurrentPage = id
+
+	-- Atualiza seleção visual dos subitens
+	for tabId, _ in pairs(self.Tabs) do
+		self:_UpdateSidebarSubItemStyles(tabId)
+	end
 end
 
 function Hub:IsVisible()

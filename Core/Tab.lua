@@ -126,6 +126,13 @@ function Tab:_SwitchSubTab(id)
 	end
 
 	self.CurrentSubTabId = id
+	if self.Hub and self.Hub._OnSubTabChanged then
+		self.Hub:_OnSubTabChanged(self.Id, id)
+	end
+end
+
+function Tab:SwitchSubTab(id)
+	self:_SwitchSubTab(id)
 end
 
 -- Cria/ativa uma SubAba para o Tab atual.
@@ -202,6 +209,10 @@ function Tab:SubTab(id, localeKey)
 			Label = label,
 			Page = page,
 		}
+
+		if self.Hub and self.Hub.RegisterSidebarSubTab then
+			self.Hub:RegisterSidebarSubTab(self.Id, id, localeKey)
+		end
 	end
 
 	-- Se for a primeira SubAba, seleciona automaticamente.
