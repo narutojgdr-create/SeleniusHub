@@ -62,7 +62,7 @@ local State = safeRequire(script.Parent.State)
 local TabClass = safeRequire(script.Parent.Tab)
 local Safe = safeRequire(script.Parent.Safe) or {}
 local Logger = safeRequire(script.Parent.Parent.Utils.Logger) or
-{ Error = function() end, Warn = function() end, Info = function() end }
+	{ Error = function() end, Warn = function() end, Info = function() end }
 
 local Components = setmetatable({}, {
 	__index = function(self, key)
@@ -477,28 +477,49 @@ function Hub:UnregisterKeybind(id)
 end
 
 function Hub:StartLogicLoops()
-	self:AddConnection(LocalPlayer.Idled, function()
-		if self.State.Settings.AntiAFK then
-			VirtualUser:CaptureController()
-			VirtualUser:ClickButton2(Vector2.new())
+	-- VOLT FIX: LocalPlayer.Idled pode crashar em alguns executors
+	pcall(function()
+		if LocalPlayer and LocalPlayer.Idled then
+			self:AddConnection(LocalPlayer.Idled, function()
+				pcall(function()
+					if self.State and self.State.Settings and self.State.Settings.AntiAFK then
+						if VirtualUser then
+							pcall(function()
+								VirtualUser:CaptureController()
+								VirtualUser:ClickButton2(Vector2.new())
+							end)
+						end
+					end
+				end)
+			end)
 		end
 	end)
 
-	self:AddConnection(UserInputService.InputEnded, function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			if self.UI and self.UI.MainFrame and self.UI.MainFrame.Visible then
-				if not self.Minimized then
-					local frame = self.UI.MainFrame
-					if frame.AbsolutePosition.Y < 0 then
-						local safeY = 20
-						local halfHeight = frame.AbsoluteSize.Y / 2
-						local newCenterYOffset = safeY + halfHeight
-						InstanceUtil.Tween(frame, Defaults.Tween.AnimConfig, {
-							Position = UDim2.new(frame.Position.X.Scale, frame.Position.X.Offset, 0, newCenterYOffset),
-						})
+	-- VOLT FIX: UserInputService.InputEnded pode crashar
+	pcall(function()
+		if UserInputService and UserInputService.InputEnded then
+			self:AddConnection(UserInputService.InputEnded, function(input)
+				pcall(function()
+					if input and input.UserInputType == Enum.UserInputType.MouseButton1 then
+						if self.UI and self.UI.MainFrame and self.UI.MainFrame.Visible then
+							if not self.Minimized then
+								local frame = self.UI.MainFrame
+								if frame and frame.AbsolutePosition and frame.AbsolutePosition.Y < 0 then
+									local safeY = 20
+									local halfHeight = (frame.AbsoluteSize and frame.AbsoluteSize.Y or 300) / 2
+									local newCenterYOffset = safeY + halfHeight
+									pcall(function()
+										InstanceUtil.Tween(frame, Defaults.Tween.AnimConfig, {
+											Position = UDim2.new(frame.Position.X.Scale, frame.Position.X.Offset, 0,
+												newCenterYOffset),
+										})
+									end)
+								end
+							end
+						end
 					end
-				end
-			end
+				end)
+			end)
 		end
 	end)
 end
@@ -1513,23 +1534,35 @@ function Hub:SetupSmoothDrag()
 		end
 	end)
 
-	self:AddConnection(RunService.RenderStepped, function(dt)
-		if dragging and dragInput then
-			local delta = dragInput.Position - dragStart
-			local targetX = startPos.X.Offset + delta.X
-			local targetY = startPos.Y.Offset + delta.Y
-			local dtSafe = dt or (1 / 60)
-			local a = 1 - math.exp(-(dtSafe * 22))
-			a = math.clamp(a, 0, 1)
-			frame.Position = UDim2.new(
-				startPos.X.Scale,
-				MathUtil.Lerp(frame.Position.X.Offset, targetX, a),
-				startPos.Y.Scale,
-				MathUtil.Lerp(frame.Position.Y.Offset, targetY, a)
-			)
-			self.StoredPos = frame.Position
+	-- VOLT FIX: Use Heartbeat instead of RenderStepped (more compatible)
+	local dragSignal = nil
+	pcall(function()
+		if RunService then
+			dragSignal = RunService.Heartbeat or RunService.RenderStepped
 		end
 	end)
+
+	if dragSignal then
+		self:AddConnection(dragSignal, function(dt)
+			pcall(function()
+				if dragging and dragInput then
+					local delta = dragInput.Position - dragStart
+					local targetX = startPos.X.Offset + delta.X
+					local targetY = startPos.Y.Offset + delta.Y
+					local dtSafe = dt or (1 / 60)
+					local a = 1 - math.exp(-(dtSafe * 22))
+					a = math.clamp(a, 0, 1)
+					frame.Position = UDim2.new(
+						startPos.X.Scale,
+						MathUtil.Lerp(frame.Position.X.Offset, targetX, a),
+						startPos.Y.Scale,
+						MathUtil.Lerp(frame.Position.Y.Offset, targetY, a)
+					)
+					self.StoredPos = frame.Position
+				end
+			end)
+		end)
+	end
 end
 
 function Hub:SetupResizing()
@@ -1597,7 +1630,14 @@ function Hub:SetupButtons()
 			self.Minimized = false
 			local targetSize = self.SavedSize or self.DefaultSize
 
-			local viewport = Camera.ViewportSize
+			-- VOLT FIX: Camera pode não existir
+			local viewport = Vector2.new(1920, 1080) -- fallback
+			pcall(function()
+				if Camera and Camera.ViewportSize then
+					viewport = Camera.ViewportSize
+				end
+			end)
+
 			local halfHeight = targetSize.Y.Offset / 2
 			local currentAbsY = (viewport.Y * frame.Position.Y.Scale) + frame.Position.Y.Offset
 			local futureTop = currentAbsY - halfHeight

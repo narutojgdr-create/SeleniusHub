@@ -39,6 +39,9 @@ function Safe.Wait(seconds)
         return true
     end
 
+    -- Limite máximo para evitar loops infinitos
+    seconds = math.min(seconds, 30)
+
     local ok = pcall(function()
         local t = Safe.Task
         if t and type(t.wait) == "function" then
@@ -52,20 +55,27 @@ function Safe.Wait(seconds)
         -- Último recurso: yield via RunService se disponível
         local rs
         pcall(function() rs = game:GetService("RunService") end)
-        if rs then
+        if rs and rs.Heartbeat then
             local elapsed = 0
+            local maxIterations = math.ceil(seconds / 0.016) + 100 -- ~60 FPS + margem
+            local iterations = 0
             local conn
-            conn = rs.Heartbeat:Connect(function(dt)
-                elapsed = elapsed + dt
-                if elapsed >= seconds and conn then
-                    conn:Disconnect()
-                end
+
+            local connOk = pcall(function()
+                conn = rs.Heartbeat:Connect(function(dt)
+                    elapsed = elapsed + (dt or 0.016)
+                end)
             end)
-            while elapsed < seconds do
-                pcall(function()
-                    if rs.Heartbeat then
+
+            if connOk and conn then
+                while elapsed < seconds and iterations < maxIterations do
+                    iterations = iterations + 1
+                    pcall(function()
                         rs.Heartbeat:Wait()
-                    end
+                    end)
+                end
+                pcall(function()
+                    if conn then conn:Disconnect() end
                 end)
             end
         end
