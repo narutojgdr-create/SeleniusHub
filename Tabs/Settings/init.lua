@@ -16,7 +16,6 @@ return function(Tab)
 	-- =====================
 	-- Geral
 	-- =====================
-	Tab:SubTab("general", "sub_settings_general")
 	Tab:AddSectionTitle({
 		LocaleKey = "section_settings_general",
 		Text = "Geral",
@@ -30,7 +29,6 @@ return function(Tab)
 		table.insert(themeNames, tostring(name))
 	end
 	table.sort(themeNames)
-	-- mantém Midnight primeiro por padrão
 	for i, n in ipairs(themeNames) do
 		if n == "Midnight" then
 			table.remove(themeNames, i)
@@ -91,7 +89,7 @@ return function(Tab)
 		end,
 	})
 
-	-- Anti-AFK (já integrado ao State)
+	-- Anti-AFK
 	Tab:AddToggle({
 		Id = "settings_antiafk",
 		LocaleKey = "label_antiafk",
@@ -107,11 +105,10 @@ return function(Tab)
 	-- =====================
 	-- Configs
 	-- =====================
-	Tab:SubTab("config", "sub_settings_config")
 	Tab:AddSectionTitle({
 		LocaleKey = "label_config_system",
-		Text = "Sistema",
-		Position = UDim2.new(0, 10, 0, 10),
+		Text = "Sistema de Configs",
+		Position = UDim2.new(0, 10, 0, 290),
 	})
 
 	local selectedConfig = Hub.SelectedConfig or "default"
@@ -127,7 +124,7 @@ return function(Tab)
 	local cfgDropdown = Tab:AddDropdown({
 		Id = "settings_cfg_select",
 		LocaleKey = "label_select_cfg",
-		Position = P(60),
+		Position = P(340),
 		Options = cfgList,
 		DefaultIndex = defaultIdx,
 		Callback = function(text)
@@ -141,7 +138,7 @@ return function(Tab)
 	Tab:AddButton({
 		Id = "settings_cfg_refresh",
 		LocaleKey = "label_refresh",
-		Position = P(110),
+		Position = P(390),
 		Callback = function()
 			local list = Assets.GetConfigList()
 			if cfgDropdown and cfgDropdown.UpdateOptions then
@@ -153,7 +150,7 @@ return function(Tab)
 	Tab:AddButton({
 		Id = "settings_cfg_load",
 		LocaleKey = "label_load",
-		Position = P(156),
+		Position = P(436),
 		Callback = function()
 			Hub:LoadConfig(selectedConfig)
 		end,
@@ -162,7 +159,7 @@ return function(Tab)
 	Tab:AddButton({
 		Id = "settings_cfg_save",
 		LocaleKey = "label_save",
-		Position = P(202),
+		Position = P(482),
 		Callback = function()
 			Hub:SaveConfig(selectedConfig)
 		end,
@@ -171,17 +168,16 @@ return function(Tab)
 	-- =====================
 	-- Sobre
 	-- =====================
-	Tab:SubTab("about", "sub_settings_about")
 	Tab:AddSectionTitle({
 		LocaleKey = "section_settings_about",
 		Text = "Sobre",
-		Position = UDim2.new(0, 10, 0, 10),
+		Position = UDim2.new(0, 10, 0, 552),
 	})
 
 	Tab:AddButton({
 		Id = "about_credit",
 		LocaleKey = "label_home_credit",
-		Position = P(60),
+		Position = P(602),
 		Callback = function()
 			Hub:ShowWarning(Hub:GetText("label_home_credit"), "info")
 		end,
@@ -190,7 +186,7 @@ return function(Tab)
 	Tab:AddButton({
 		Id = "about_discord",
 		LocaleKey = "label_home_discord",
-		Position = P(106),
+		Position = P(648),
 		Callback = function()
 			Hub:ShowWarning(Hub:GetText("label_home_discord"), "info")
 		end,

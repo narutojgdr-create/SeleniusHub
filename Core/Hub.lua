@@ -1,127 +1,3 @@
---[[
-    Hub.lua - Main Hub Controller
-    ULTRA PROTECTED: Every single call is wrapped in pcall to prevent crashes
-]]
-
--- Safe service getter that NEVER crashes
-local function safeGetService(name)
-	local ok, service = pcall(function()
-		return game:GetService(name)
-	end)
-	if ok and service then
-		return service
-	end
-	return nil
-end
-
--- Safe require that NEVER crashes
-local function safeRequire(module)
-	local ok, result = pcall(function()
-		return require(module)
-	end)
-	if ok then
-		return result
-	end
-	return nil
-end
-
--- Services (all protected)
-local Players = safeGetService("Players")
-local TweenService = safeGetService("TweenService")
-local UserInputService = safeGetService("UserInputService")
-local HttpService = safeGetService("HttpService")
-local RunService = safeGetService("RunService")
-local Workspace = safeGetService("Workspace")
-local VirtualUser = safeGetService("VirtualUser")
-
--- Safe property access
-local LocalPlayer = nil
-pcall(function() LocalPlayer = Players and Players.LocalPlayer end)
-
-local Camera = nil
-pcall(function() Camera = Workspace and Workspace.CurrentCamera end)
-
--- Modules (all protected)
-local Defaults = safeRequire(script.Parent.Parent.Assets.Defaults) or {}
-local IconPaths = safeRequire(script.Parent.Parent.Assets.Icons) or {}
-
-local Assets = safeRequire(script.Parent.Parent.Utils.Assets) or {}
-local InstanceUtil = safeRequire(script.Parent.Parent.Utils.Instance) or {}
-local MathUtil = safeRequire(script.Parent.Parent.Utils.Math) or {}
-
-local Acrylic = safeRequire(script.Parent.Parent.Theme.Acrylic) or {}
-
-local ThemeManager = safeRequire(script.Parent.Parent.Theme.ThemeManager)
-local LocaleManager = safeRequire(script.Parent.Parent.Locale.LocaleManager)
-
-local Window = safeRequire(script.Parent.Parent.UI.Window)
-local Notifications = safeRequire(script.Parent.Parent.UI.Notifications)
-
-local Registry = safeRequire(script.Parent.Registry)
-local State = safeRequire(script.Parent.State)
-local TabClass = safeRequire(script.Parent.Tab)
-local Safe = safeRequire(script.Parent.Safe) or {}
-local Logger = safeRequire(script.Parent.Parent.Utils.Logger) or
-	{ Error = function() end, Warn = function() end, Info = function() end }
-
-local Components = setmetatable({}, {
-	__index = function(self, key)
-		local module
-		local ok = pcall(function()
-			if key == "Toggle" then
-				module = safeRequire(script.Parent.Parent.Components.Toggle)
-			elseif key == "Checkbox" then
-				module = safeRequire(script.Parent.Parent.Components.Checkbox)
-			elseif key == "Slider" then
-				module = safeRequire(script.Parent.Parent.Components.Slider)
-			elseif key == "Dropdown" then
-				module = safeRequire(script.Parent.Parent.Components.Dropdown)
-			elseif key == "MultiDropdown" then
-				module = safeRequire(script.Parent.Parent.Components.MultiDropdown)
-			elseif key == "ColorPicker" then
-				module = safeRequire(script.Parent.Parent.Components.ColorPicker)
-			elseif key == "Button" then
-				module = safeRequire(script.Parent.Parent.Components.Button)
-			elseif key == "Keybind" then
-				module = safeRequire(script.Parent.Parent.Components.Keybind)
-			end
-		end)
-		if module then
-			rawset(self, key, module)
-		end
-		return module
-	end,
-})
-
-local Hub = {}
-Hub.__index = Hub
-
-local function getGlobalEnv()
-	local ok, gv = pcall(function()
-		if type(getgenv) == "function" then
-			return getgenv()
-		end
-		return nil
-	end)
-	if ok and type(gv) == "table" then
-		return gv
-	end
-	return _G
-end
-
--- Version identifier
-Hub.Version = "Stable"
-
-function Hub.new()
-	-- [V2.0] Single Instance Protection
-	local gv = getGlobalEnv()
-	if gv and gv.SeleniusHubInstance then
-		local old = gv.SeleniusHubInstance
-		if old and old.ShowWarning then
-			Safe.Spawn(function()
-				old:ShowWarning("Hub already opened!", "warn")
-			end)
-		end
 		if old and old.UI and old.UI.MainFrame then
 			old.UI.MainFrame.Visible = true
 		end
@@ -173,7 +49,6 @@ function Hub.new()
 
 	self.Components = Components
 	self._DidFinishInit = false
-	self._SidebarSubItemStyleCallbacks = {}
 	self._ErrorOnce = {}
 
 	-- Protege toda a inicialização com pcall pra não crashar em nenhum executor
@@ -338,129 +213,6 @@ function Hub:LoadTabs()
 	safeInit("Player", self.Pages.Player, script.Parent.Parent.Tabs.Player.init)
 	safeInit("World", self.Pages.World, script.Parent.Parent.Tabs.World.init)
 	safeInit("Settings", self.Pages.Settings, script.Parent.Parent.Tabs.Settings.init)
-end
-
-function Hub:_SetTabExpanded(id, expanded)
-	local tab = self.Tabs[id]
-	if not tab then
-		return
-	end
-	tab.Expanded = (expanded == true)
-	if tab.ChildrenHolder then
-		tab.ChildrenHolder.Visible = tab.Expanded
-	end
-	if tab.Toggle then
-		tab.Toggle.Text = tab.Expanded and "-" or "+"
-	end
-end
-
-function Hub:_UpdateSidebarSubItemStyles(id)
-	local tabRec = self.Tabs[id]
-	if not tabRec or not tabRec.SubItems then
-		return
-	end
-	local tabInstance = self.TabInstances[id]
-	local currentSub = tabInstance and tabInstance.CurrentSubTabId or nil
-	for subId, rec in pairs(tabRec.SubItems) do
-		local selected = (self.CurrentPage == id) and (currentSub == subId)
-		local Theme = self.ThemeManager:GetTheme()
-		if rec.Button then
-			rec.Button.BackgroundColor3 = selected and Theme.ButtonHover or Theme.Button
-		end
-		if rec.Label then
-			rec.Label.TextColor3 = selected and Theme.Accent or Theme.AccentDark
-		end
-		if rec.Dot then
-			rec.Dot.BackgroundColor3 = selected and Theme.Accent or Theme.AccentDark
-		end
-	end
-end
-
-function Hub:_OnSubTabChanged(tabId, subId)
-	self:_UpdateSidebarSubItemStyles(tabId)
-end
-
-function Hub:RegisterSidebarSubTab(tabId, subId, localeKey)
-	local tabRec = self.Tabs[tabId]
-	if not tabRec or not tabRec.ChildrenHolder then
-		return
-	end
-	tabRec.SubItems = tabRec.SubItems or {}
-	if tabRec.SubItems[subId] then
-		return
-	end
-
-	local Theme = self.ThemeManager:GetTheme()
-
-	local btn = InstanceUtil.Create("TextButton", {
-		Text = "",
-		Font = Enum.Font.GothamMedium,
-		TextSize = 14,
-		TextColor3 = Theme.AccentDark,
-		BackgroundColor3 = Theme.Button,
-		BackgroundTransparency = tonumber(Theme.ControlTransparency) or 0.34,
-		Size = UDim2.new(1, -10, 0, 28),
-		AutoButtonColor = false,
-		Parent = tabRec.ChildrenHolder,
-	})
-	InstanceUtil.AddCorner(btn, 6)
-	InstanceUtil.AddStroke(btn, Theme.Stroke, 1, 0.5)
-
-	local dot = InstanceUtil.Create("Frame", {
-		BackgroundColor3 = Theme.AccentDark,
-		Size = UDim2.new(0, 6, 0, 6),
-		AnchorPoint = Vector2.new(0, 0.5),
-		Position = UDim2.new(0, 10, 0.5, 0),
-		Parent = btn,
-	})
-	InstanceUtil.AddCorner(dot, 10)
-
-	local label = InstanceUtil.Create("TextLabel", {
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0, 22, 0, 0),
-		Size = UDim2.new(1, -28, 1, 0),
-		Font = Enum.Font.GothamMedium,
-		TextSize = 13,
-		TextColor3 = Theme.AccentDark,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextTruncate = Enum.TextTruncate.AtEnd,
-		TextWrapped = false,
-		Text = (localeKey and self:GetText(localeKey)) or tostring(subId),
-		Parent = btn,
-	})
-	if localeKey then
-		self:RegisterLocale(label, localeKey)
-	end
-
-	self:AddConnection(btn.MouseButton1Click, function()
-		self:SwitchPage(tabId)
-		local inst = self.TabInstances[tabId]
-		if inst and inst.SwitchSubTab then
-			inst:SwitchSubTab(subId)
-		end
-		self:_SetTabExpanded(tabId, true)
-		self:_UpdateSidebarSubItemStyles(tabId)
-	end)
-
-	tabRec.SubItems[subId] = {
-		Button = btn,
-		Label = label,
-		Dot = dot,
-	}
-
-	-- Registra 1 callback de tema por "pasta" (evita acumular callbacks por subitem).
-	if not tabRec._SidebarThemeHooked then
-		tabRec._SidebarThemeHooked = true
-		self.ThemeManager:AddCallback(function()
-			self:_UpdateSidebarSubItemStyles(tabId)
-		end)
-	end
-
-	-- Se for o primeiro item, deixa o toggle aparecer.
-	if tabRec.Toggle then
-		tabRec.Toggle.Visible = true
-	end
-	self:_UpdateSidebarSubItemStyles(tabId)
 end
 
 function Hub:RegisterKeybind(id, keyCode, callback)
@@ -1058,44 +810,11 @@ function Hub:CreateTabButton(id, localeKey, iconKey)
 	})
 	self:RegisterLocale(label, localeKey)
 
-	local toggle = InstanceUtil.Create("TextButton", {
-		Text = "+",
-		Font = Enum.Font.GothamBold,
-		TextSize = 18,
-		TextColor3 = Theme.AccentDark,
-		BackgroundTransparency = 1,
-		Size = UDim2.new(0, 20, 0, 20),
-		Position = UDim2.new(1, -26, 0.5, -10),
-		AutoButtonColor = false,
-		Visible = false,
-		Parent = btn,
-	})
-
 	local indicator = InstanceUtil.Create("Frame", {
 		BackgroundColor3 = Theme.IndicatorOff,
 		Size = UDim2.new(0, 5, 1, 0),
 		Position = UDim2.new(0, 0, 0, 0),
 		Parent = btn,
-	})
-
-	local childrenHolder = InstanceUtil.Create("Frame", {
-		BackgroundTransparency = 1,
-		Size = UDim2.new(1, 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		Visible = false,
-		ClipsDescendants = true,
-		Parent = container,
-	})
-	local childrenLayout = InstanceUtil.Create("UIListLayout", {
-		Padding = UDim.new(0, 4),
-		HorizontalAlignment = Enum.HorizontalAlignment.Center,
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		Parent = childrenHolder,
-	})
-	childrenLayout:GetPropertyChangedSignal("AbsoluteContentSize")
-	InstanceUtil.Create("UIPadding", {
-		PaddingLeft = UDim.new(0, 12),
-		Parent = childrenHolder,
 	})
 
 	self:AddConnection(btn.MouseEnter, function()
@@ -1110,16 +829,6 @@ function Hub:CreateTabButton(id, localeKey, iconKey)
 	end)
 	self:AddConnection(btn.MouseButton1Click, function()
 		self:SwitchPage(id)
-		-- auto expand ao selecionar
-		self:_SetTabExpanded(id, true)
-	end)
-	self:AddConnection(toggle.MouseButton1Click, function()
-		local rec = self.Tabs[id]
-		local nextState = true
-		if rec and rec.Expanded ~= nil then
-			nextState = not rec.Expanded
-		end
-		self:_SetTabExpanded(id, nextState)
 	end)
 
 	self.ThemeManager:AddCallback(function()
@@ -1130,13 +839,11 @@ function Hub:CreateTabButton(id, localeKey, iconKey)
 			btn.BackgroundColor3 = T.ButtonHover
 			label.TextColor3 = T.Accent
 			icon.ImageColor3 = T.Accent
-			toggle.TextColor3 = T.Accent
 		else
 			indicator.BackgroundColor3 = T.IndicatorOff
 			btn.BackgroundColor3 = T.Button
 			label.TextColor3 = T.AccentDark
 			icon.ImageColor3 = T.AccentDark
-			toggle.TextColor3 = T.AccentDark
 		end
 	end)
 
@@ -1146,11 +853,7 @@ function Hub:CreateTabButton(id, localeKey, iconKey)
 		Indicator = indicator,
 		Label = label,
 		Icon = icon,
-		Toggle = toggle,
-		ChildrenHolder = childrenHolder,
 		Expanded = false,
-		SubItems = {},
-		_SidebarThemeHooked = false,
 	}
 end
 
@@ -1317,11 +1020,6 @@ function Hub:SwitchPage(id)
 		})
 	end
 	self.CurrentPage = id
-
-	-- Atualiza seleção visual dos subitens
-	for tabId, _ in pairs(self.Tabs) do
-		self:_UpdateSidebarSubItemStyles(tabId)
-	end
 end
 
 function Hub:IsVisible()
