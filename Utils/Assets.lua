@@ -1,10 +1,20 @@
-local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
-local MarketplaceService = game:GetService("MarketplaceService")
+-- !!! ULTRA PROTEÇÃO !!!
+local function safeGetService(name)
+	local ok, svc = pcall(function() return game:GetService(name) end)
+	if ok and svc then return svc end
+	return nil
+end
+local function safeRequire(mod)
+	local ok, result = pcall(function() return require(mod) end)
+	if ok and result then return result end
+	return {}
+end
 
-local Defaults = require(script.Parent.Parent.Assets.Defaults)
-
-local LocalPlayer = Players.LocalPlayer
+local Players = safeGetService("Players")
+local CoreGui = safeGetService("CoreGui")
+local MarketplaceService = safeGetService("MarketplaceService")
+local Defaults = safeRequire(script.Parent.Parent.Assets.Defaults)
+local LocalPlayer = Players and Players.LocalPlayer or nil
 
 local Assets = {}
 

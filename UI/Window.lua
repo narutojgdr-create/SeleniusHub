@@ -1,9 +1,26 @@
-local Defaults = require(script.Parent.Parent.Assets.Defaults)
-local IconPaths = require(script.Parent.Parent.Assets.Icons)
-local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
+-- !!! ULTRA PROTEÇÃO: SAFE REQUIRE E GETSERVICE !!!
+local function safeRequire(mod)
+	local ok, result = pcall(function()
+		return require(mod)
+	end)
+	if ok and result then return result end
+	return {}
+end
 
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
+local function safeGetService(name)
+	local ok, svc = pcall(function()
+		return game:GetService(name)
+	end)
+	if ok and svc then return svc end
+	return nil
+end
+
+local Defaults = safeRequire(script.Parent.Parent.Assets.Defaults)
+local IconPaths = safeRequire(script.Parent.Parent.Assets.Icons)
+local Acrylic = safeRequire(script.Parent.Parent.Theme.Acrylic)
+
+local TweenService = safeGetService("TweenService")
+local Players = safeGetService("Players")
 
 local Window = {}
 
@@ -210,12 +227,12 @@ function Window.Create(ctx)
 	})
 	UI.ResizeDots = {}
 	local dots = {
-		{ offX = -3, offY = -3 },
-		{ offX = -7, offY = -3 },
+		{ offX = -3,  offY = -3 },
+		{ offX = -7,  offY = -3 },
 		{ offX = -11, offY = -3 },
-		{ offX = -3, offY = -7 },
-		{ offX = -7, offY = -7 },
-		{ offX = -3, offY = -11 },
+		{ offX = -3,  offY = -7 },
+		{ offX = -7,  offY = -7 },
+		{ offX = -3,  offY = -11 },
 	}
 	for _, d in ipairs(dots) do
 		local dot = ctx.instanceUtil.Create("Frame", {

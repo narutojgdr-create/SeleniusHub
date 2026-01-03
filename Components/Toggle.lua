@@ -1,5 +1,12 @@
-local Signal = require(script.Parent.Parent.Utils.Signal)
-local Defaults = require(script.Parent.Parent.Assets.Defaults)
+-- !!! ULTRA PROTEÇÃO !!!
+local function safeRequire(mod)
+	local ok, result = pcall(function() return require(mod) end)
+	if ok and result then return result end
+	return {}
+end
+
+local Signal = safeRequire(script.Parent.Parent.Utils.Signal)
+local Defaults = safeRequire(script.Parent.Parent.Assets.Defaults)
 
 local Toggle = {}
 

@@ -1,6 +1,12 @@
 -- Módulo Acrylic v11.0 & NO Stroke System (Adaptado)
+-- !!! ULTRA PROTEÇÃO !!!
+local function safeGetService(name)
+	local ok, svc = pcall(function() return game:GetService(name) end)
+	if ok and svc then return svc end
+	return nil
+end
 
-local Lighting = game:GetService("Lighting")
+local Lighting = safeGetService("Lighting")
 
 local Acrylic = {}
 

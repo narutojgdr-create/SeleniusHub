@@ -1,7 +1,18 @@
-local UserInputService = game:GetService("UserInputService")
+-- !!! ULTRA PROTEÇÃO !!!
+local function safeGetService(name)
+	local ok, svc = pcall(function() return game:GetService(name) end)
+	if ok and svc then return svc end
+	return nil
+end
+local function safeRequire(mod)
+	local ok, result = pcall(function() return require(mod) end)
+	if ok and result then return result end
+	return {}
+end
 
-local Signal = require(script.Parent.Parent.Utils.Signal)
-local Defaults = require(script.Parent.Parent.Assets.Defaults)
+local UserInputService = safeGetService("UserInputService")
+local Signal = safeRequire(script.Parent.Parent.Utils.Signal)
+local Defaults = safeRequire(script.Parent.Parent.Assets.Defaults)
 
 local Keybind = {}
 
@@ -84,15 +95,15 @@ function Keybind.Create(ctx, parent, position, localeKey, defaultKeyCode)
 		end
 		capturing = true
 		btn.Text = "..."
-		game:GetService("TweenService"):Create(btnScale, PopTween, { Scale = 1.15 }):Play()
+		pcall(function() safeGetService("TweenService"):Create(btnScale, PopTween, { Scale = 1.15 }):Play() end)
 		pcall(function()
 			if type(task) == "table" and type(task.delay) == "function" then
 				task.delay(PopTween.Time, function()
-					game:GetService("TweenService"):Create(btnScale, PopReturnTween, { Scale = 1 }):Play()
+					pcall(function() safeGetService("TweenService"):Create(btnScale, PopReturnTween, { Scale = 1 }):Play() end)
 				end)
 			elseif type(delay) == "function" then
 				delay(PopTween.Time, function()
-					game:GetService("TweenService"):Create(btnScale, PopReturnTween, { Scale = 1 }):Play()
+					pcall(function() safeGetService("TweenService"):Create(btnScale, PopReturnTween, { Scale = 1 }):Play() end)
 				end)
 			end
 		end)

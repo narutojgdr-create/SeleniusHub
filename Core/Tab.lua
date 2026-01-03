@@ -1,7 +1,13 @@
-local Option = require(script.Parent.Option)
+-- !!! ULTRA PROTEÇÃO !!!
+local function safeRequire(mod)
+	local ok, result = pcall(function() return require(mod) end)
+	if ok and result then return result end
+	return {}
+end
 
-local Defaults = require(script.Parent.Parent.Assets.Defaults)
-local InstanceUtil = require(script.Parent.Parent.Utils.Instance)
+local Option = safeRequire(script.Parent.Option)
+local Defaults = safeRequire(script.Parent.Parent.Assets.Defaults)
+local InstanceUtil = safeRequire(script.Parent.Parent.Utils.Instance)
 
 local Tab = {}
 Tab.__index = Tab

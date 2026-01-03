@@ -1,4 +1,11 @@
-local Assets = require(script.Parent.Parent.Parent.Utils.Assets)
+-- !!! ULTRA PROTEÇÃO !!!
+local function safeRequire(mod)
+	local ok, result = pcall(function() return require(mod) end)
+	if ok and result then return result end
+	return {}
+end
+
+local Assets = safeRequire(script.Parent.Parent.Parent.Utils.Assets)
 
 return function(Tab)
 	local Hub = Tab.Hub

@@ -528,18 +528,38 @@ end
 
 -- Marca para o Lifecycle não tentar duplicar uma notificação "antes de tudo".
 gvSet("SELENIUS_BOOT_NOTIFIED", true)
-local bootstrapGui = showBootstrapNotice("Inicializando Selenius...")
+local bootstrapGui = nil
+pcall(function()
+	bootstrapGui = showBootstrapNotice("Inicializando Selenius...")
+end)
 
 -- Deixa renderizar pelo menos 1 frame antes de carregar o resto.
 pcall(function()
-	_task.wait(0.05)
+	if _task and _task.wait then
+		_task.wait(0.05)
+	elseif type(wait) == "function" then
+		wait(0.05)
+	end
 end)
 
--- Carrega a library (init.lua)
-local lib = customRequire(ROOT["init"])
+-- Carrega a library (init.lua) com proteção total
+local lib = nil
+local libOk = pcall(function()
+	lib = customRequire(ROOT["init"])
+end)
 
--- Cria o hub
-local hub = lib.Init()
+if not lib or not libOk then
+	pcall(function()
+		warn("[SeleniusHub] Falha ao carregar library principal")
+	end)
+	return nil
+end
+
+-- Cria o hub com proteção
+local hub = nil
+pcall(function()
+	hub = lib.Init()
+end)
 
 pcall(function()
 	if bootstrapGui and bootstrapGui.Parent then
@@ -548,32 +568,64 @@ pcall(function()
 end)
 
 -- Inicia KeySystem primeiro e, ao concluir, Loading mostra o Hub
-lib.Lifecycle.CreateKeySystem(hub)
+pcall(function()
+	if lib and lib.Lifecycle and type(lib.Lifecycle.CreateKeySystem) == "function" then
+		lib.Lifecycle.CreateKeySystem(hub)
+	end
+end)
 
 -- Reload compatível com o monólito
-rawset(_G, "SeleniusHubReload", function()
-	local boot2 = showBootstrapNotice("Inicializando Selenius...")
-	pcall(function()
-		_task.wait(0.05)
+pcall(function()
+	rawset(_G, "SeleniusHubReload", function()
+		local boot2 = nil
+		pcall(function()
+			boot2 = showBootstrapNotice("Inicializando Selenius...")
+		end)
+		pcall(function()
+			if _task and _task.wait then
+				_task.wait(0.05)
+			elseif type(wait) == "function" then
+				wait(0.05)
+			end
+		end)
+		pcall(function()
+			if hub and type(hub.Destroy) == "function" then
+				hub:Destroy()
+			end
+		end)
+		pcall(function()
+			if _task and _task.wait then
+				_task.wait(0.1)
+			elseif type(wait) == "function" then
+				wait(0.1)
+			end
+		end)
+		local lib2 = nil
+		pcall(function()
+			lib2 = customRequire(ROOT["init"])
+		end)
+		pcall(function()
+			if lib2 and lib2.Init then
+				hub = lib2.Init()
+			end
+		end)
+		pcall(function()
+			if boot2 and boot2.Parent then
+				boot2:Destroy()
+			end
+		end)
+		pcall(function()
+			if lib2 and lib2.Lifecycle and type(lib2.Lifecycle.CreateKeySystem) == "function" then
+				lib2.Lifecycle.CreateKeySystem(hub)
+			end
+		end)
+		gvSet("SeleniusHubInstance", hub)
+		rawset(_G, "SeleniusHubInstance", hub)
 	end)
-	pcall(function()
-		if hub and type(hub.Destroy) == "function" then
-			hub:Destroy()
-		end
-	end)
-	_task.wait(0.1)
-	local lib2 = customRequire(ROOT["init"])
-	hub = lib2.Init()
-	pcall(function()
-		if boot2 and boot2.Parent then
-			boot2:Destroy()
-		end
-	end)
-	lib2.Lifecycle.CreateKeySystem(hub)
-	gvSet("SeleniusHubInstance", hub)
-	rawset(_G, "SeleniusHubInstance", hub)
 end)
 
 gvSet("SeleniusHubInstance", hub)
-rawset(_G, "SeleniusHubInstance", hub)
+pcall(function()
+	rawset(_G, "SeleniusHubInstance", hub)
+end)
 return hub

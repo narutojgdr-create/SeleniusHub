@@ -1,11 +1,38 @@
-local TweenService = game:GetService("TweenService")
-local Workspace = game:GetService("Workspace")
+--[[
+    Lifecycle.lua - Key System and Loading
+    ULTRA PROTECTED: Every single call is wrapped in pcall to prevent crashes
+]]
 
-local Safe = require(script.Parent.Safe)
+-- Safe service getter
+local function safeGetService(name)
+	local ok, service = pcall(function()
+		return game:GetService(name)
+	end)
+	if ok and service then
+		return service
+	end
+	return nil
+end
 
-local Assets = require(script.Parent.Parent.Utils.Assets)
-local InstanceUtil = require(script.Parent.Parent.Utils.Instance)
-local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
+-- Safe require
+local function safeRequire(module)
+	local ok, result = pcall(function()
+		return require(module)
+	end)
+	if ok then
+		return result
+	end
+	return nil
+end
+
+local TweenService = safeGetService("TweenService")
+local Workspace = safeGetService("Workspace")
+
+local Safe = safeRequire(script.Parent.Safe) or {}
+
+local Assets = safeRequire(script.Parent.Parent.Utils.Assets) or {}
+local InstanceUtil = safeRequire(script.Parent.Parent.Utils.Instance) or {}
+local Acrylic = safeRequire(script.Parent.Parent.Theme.Acrylic) or {}
 
 local Lifecycle = {}
 

@@ -1,56 +1,94 @@
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local HttpService = game:GetService("HttpService")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local VirtualUser = game:GetService("VirtualUser")
+--[[
+    Hub.lua - Main Hub Controller
+    ULTRA PROTECTED: Every single call is wrapped in pcall to prevent crashes
+]]
 
-local LocalPlayer = Players.LocalPlayer
-local Camera = Workspace.CurrentCamera
+-- Safe service getter that NEVER crashes
+local function safeGetService(name)
+	local ok, service = pcall(function()
+		return game:GetService(name)
+	end)
+	if ok and service then
+		return service
+	end
+	return nil
+end
 
-local Defaults = require(script.Parent.Parent.Assets.Defaults)
-local IconPaths = require(script.Parent.Parent.Assets.Icons)
+-- Safe require that NEVER crashes
+local function safeRequire(module)
+	local ok, result = pcall(function()
+		return require(module)
+	end)
+	if ok then
+		return result
+	end
+	return nil
+end
 
-local Assets = require(script.Parent.Parent.Utils.Assets)
-local InstanceUtil = require(script.Parent.Parent.Utils.Instance)
-local MathUtil = require(script.Parent.Parent.Utils.Math)
+-- Services (all protected)
+local Players = safeGetService("Players")
+local TweenService = safeGetService("TweenService")
+local UserInputService = safeGetService("UserInputService")
+local HttpService = safeGetService("HttpService")
+local RunService = safeGetService("RunService")
+local Workspace = safeGetService("Workspace")
+local VirtualUser = safeGetService("VirtualUser")
 
-local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
+-- Safe property access
+local LocalPlayer = nil
+pcall(function() LocalPlayer = Players and Players.LocalPlayer end)
 
-local ThemeManager = require(script.Parent.Parent.Theme.ThemeManager)
-local LocaleManager = require(script.Parent.Parent.Locale.LocaleManager)
+local Camera = nil
+pcall(function() Camera = Workspace and Workspace.CurrentCamera end)
 
-local Window = require(script.Parent.Parent.UI.Window)
-local Notifications = require(script.Parent.Parent.UI.Notifications)
+-- Modules (all protected)
+local Defaults = safeRequire(script.Parent.Parent.Assets.Defaults) or {}
+local IconPaths = safeRequire(script.Parent.Parent.Assets.Icons) or {}
 
-local Registry = require(script.Parent.Registry)
-local State = require(script.Parent.State)
-local TabClass = require(script.Parent.Tab)
-local Safe = require(script.Parent.Safe)
-local Logger = require(script.Parent.Parent.Utils.Logger)
+local Assets = safeRequire(script.Parent.Parent.Utils.Assets) or {}
+local InstanceUtil = safeRequire(script.Parent.Parent.Utils.Instance) or {}
+local MathUtil = safeRequire(script.Parent.Parent.Utils.Math) or {}
+
+local Acrylic = safeRequire(script.Parent.Parent.Theme.Acrylic) or {}
+
+local ThemeManager = safeRequire(script.Parent.Parent.Theme.ThemeManager)
+local LocaleManager = safeRequire(script.Parent.Parent.Locale.LocaleManager)
+
+local Window = safeRequire(script.Parent.Parent.UI.Window)
+local Notifications = safeRequire(script.Parent.Parent.UI.Notifications)
+
+local Registry = safeRequire(script.Parent.Registry)
+local State = safeRequire(script.Parent.State)
+local TabClass = safeRequire(script.Parent.Tab)
+local Safe = safeRequire(script.Parent.Safe) or {}
+local Logger = safeRequire(script.Parent.Parent.Utils.Logger) or
+{ Error = function() end, Warn = function() end, Info = function() end }
 
 local Components = setmetatable({}, {
 	__index = function(self, key)
 		local module
-		if key == "Toggle" then
-			module = require(script.Parent.Parent.Components.Toggle)
-		elseif key == "Checkbox" then
-			module = require(script.Parent.Parent.Components.Checkbox)
-		elseif key == "Slider" then
-			module = require(script.Parent.Parent.Components.Slider)
-		elseif key == "Dropdown" then
-			module = require(script.Parent.Parent.Components.Dropdown)
-		elseif key == "MultiDropdown" then
-			module = require(script.Parent.Parent.Components.MultiDropdown)
-		elseif key == "ColorPicker" then
-			module = require(script.Parent.Parent.Components.ColorPicker)
-		elseif key == "Button" then
-			module = require(script.Parent.Parent.Components.Button)
-		elseif key == "Keybind" then
-			module = require(script.Parent.Parent.Components.Keybind)
+		local ok = pcall(function()
+			if key == "Toggle" then
+				module = safeRequire(script.Parent.Parent.Components.Toggle)
+			elseif key == "Checkbox" then
+				module = safeRequire(script.Parent.Parent.Components.Checkbox)
+			elseif key == "Slider" then
+				module = safeRequire(script.Parent.Parent.Components.Slider)
+			elseif key == "Dropdown" then
+				module = safeRequire(script.Parent.Parent.Components.Dropdown)
+			elseif key == "MultiDropdown" then
+				module = safeRequire(script.Parent.Parent.Components.MultiDropdown)
+			elseif key == "ColorPicker" then
+				module = safeRequire(script.Parent.Parent.Components.ColorPicker)
+			elseif key == "Button" then
+				module = safeRequire(script.Parent.Parent.Components.Button)
+			elseif key == "Keybind" then
+				module = safeRequire(script.Parent.Parent.Components.Keybind)
+			end
+		end)
+		if module then
+			rawset(self, key, module)
 		end
-		rawset(self, key, module)
 		return module
 	end,
 })
@@ -613,7 +651,8 @@ function Hub:LoadConfig(name)
 		return
 	end
 
-	local Themes = require(script.Parent.Parent.Theme.Themes)
+	local okThemes, Themes = pcall(function() return require(script.Parent.Parent.Theme.Themes) end)
+	if not okThemes then Themes = {} end
 	if data.Theme and Themes[data.Theme] then
 		self:SetTheme(data.Theme)
 	end

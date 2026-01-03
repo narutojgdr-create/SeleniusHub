@@ -1,5 +1,12 @@
-local PT = require(script.Parent.pt)
-local EN = require(script.Parent.en)
+-- !!! ULTRA PROTEÇÃO !!!
+local function safeRequire(mod)
+	local ok, result = pcall(function() return require(mod) end)
+	if ok and result then return result end
+	return {}
+end
+
+local PT = safeRequire(script.Parent.pt)
+local EN = safeRequire(script.Parent.en)
 
 local Locales = {
 	pt = PT,

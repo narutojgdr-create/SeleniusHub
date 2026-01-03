@@ -1,4 +1,13 @@
-local TweenService = game:GetService("TweenService")
+-- !!! ULTRA PROTEÇÃO: SAFE GETSERVICE !!!
+local function safeGetService(name)
+	local ok, svc = pcall(function()
+		return game:GetService(name)
+	end)
+	if ok and svc then return svc end
+	return nil
+end
+
+local TweenService = safeGetService("TweenService")
 
 local InstanceUtil = {}
 

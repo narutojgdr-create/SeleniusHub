@@ -1,6 +1,17 @@
-local TweenService = game:GetService("TweenService")
+-- !!! ULTRA PROTEÇÃO !!!
+local function safeGetService(name)
+	local ok, svc = pcall(function() return game:GetService(name) end)
+	if ok and svc then return svc end
+	return nil
+end
+local function safeRequire(mod)
+	local ok, result = pcall(function() return require(mod) end)
+	if ok and result then return result end
+	return {}
+end
 
-local InstanceUtil = require(script.Parent.Parent.Utils.Instance)
+local TweenService = safeGetService("TweenService")
+local InstanceUtil = safeRequire(script.Parent.Parent.Utils.Instance)
 
 local Notifications = {}
 

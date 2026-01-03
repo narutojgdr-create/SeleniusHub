@@ -1,7 +1,16 @@
-local Defaults = require(script.Parent.Defaults)
-local Assets = require(script.Parent.Parent.Utils.Assets)
+-- !!! ULTRA PROTEÇÃO !!!
+local function safeRequire(mod)
+	local ok, result = pcall(function() return require(mod) end)
+	if ok and result then return result end
+	return {}
+end
 
-Assets.EnsureFolders()
+local Defaults = safeRequire(script.Parent.Defaults)
+local Assets = safeRequire(script.Parent.Parent.Utils.Assets)
+
+if Assets.EnsureFolders then
+	pcall(Assets.EnsureFolders)
+end
 
 local IconPaths = {
 	Combat = Defaults.IMAGE_FOLDER .. "/combat.png",

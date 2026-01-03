@@ -7,7 +7,8 @@ local function shouldRedirectToLoader()
 	-- Alguns executores criam um `script` fake/limitado. Se não tiver a árvore esperada,
 	-- usamos o loader para montar a estrutura virtual.
 	local ok, hasTree = pcall(function()
-		return script and script.Parent and script.Parent.Core and script.Parent.Core.Hub and script.Parent.Core.Lifecycle
+		return script and script.Parent and script.Parent.Core and script.Parent.Core.Hub and
+		script.Parent.Core.Lifecycle
 	end)
 	return (not ok) or (not hasTree)
 end
@@ -44,13 +45,21 @@ if shouldRedirectToLoader() then
 		loaderBody = tryHttpGet(fallbackBase .. "loadstring.lua")
 	end
 	if not loaderBody then
-		error("Falha ao baixar loadstring.lua. Configure getgenv().SELENIUS_BASE_URL com a URL raw correta (main/master).")
+		error(
+		"Falha ao baixar loadstring.lua. Configure getgenv().SELENIUS_BASE_URL com a URL raw correta (main/master).")
 	end
 	return loadstring(loaderBody)()
 end
 
-local Hub = require(script.Parent.Core.Hub)
-local Lifecycle = require(script.Parent.Core.Lifecycle)
+-- !!! ULTRA PROTEÇÃO !!!
+local function safeRequire(mod)
+	local ok, result = pcall(function() return require(mod) end)
+	if ok and result then return result end
+	return {}
+end
+
+local Hub = safeRequire(script.Parent.Core.Hub)
+local Lifecycle = safeRequire(script.Parent.Core.Lifecycle)
 
 local Library = {}
 Library.__index = Library

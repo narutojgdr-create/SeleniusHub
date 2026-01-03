@@ -1,4 +1,11 @@
-local Themes = require(script.Parent.Themes)
+-- !!! ULTRA PROTEÇÃO !!!
+local function safeRequire(mod)
+	local ok, result = pcall(function() return require(mod) end)
+	if ok and result then return result end
+	return {}
+end
+
+local Themes = safeRequire(script.Parent.Themes)
 
 local ThemeManager = {}
 ThemeManager.__index = ThemeManager

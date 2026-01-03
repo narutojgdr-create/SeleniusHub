@@ -1,7 +1,18 @@
-local UserInputService = game:GetService("UserInputService")
+-- !!! ULTRA PROTEÇÃO !!!
+local function safeGetService(name)
+	local ok, svc = pcall(function() return game:GetService(name) end)
+	if ok and svc then return svc end
+	return nil
+end
+local function safeRequire(mod)
+	local ok, result = pcall(function() return require(mod) end)
+	if ok and result then return result end
+	return {}
+end
 
-local Signal = require(script.Parent.Parent.Utils.Signal)
-local Defaults = require(script.Parent.Parent.Assets.Defaults)
+local UserInputService = safeGetService("UserInputService")
+local Signal = safeRequire(script.Parent.Parent.Utils.Signal)
+local Defaults = safeRequire(script.Parent.Parent.Assets.Defaults)
 
 local ColorPicker = {}
 
