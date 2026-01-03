@@ -173,15 +173,69 @@ end
 
 function Hub:_ReportError(context, err)
 	local msg = tostring(err)
-	if not self._ErrorOnce[msg] then
+	local ctx = tostring(context)
+
+	self._ErrorState = self._ErrorState or {}
+	local st = self._ErrorState[msg]
+	if not st then
+		st = { count = 0, firstAt = 0, lastLogAt = 0, lastCopyAt = 0 }
+		self._ErrorState[msg] = st
+	end
+
+	st.count = (st.count or 0) + 1
+	local now = (type(os) == "table" and type(os.clock) == "function" and os.clock()) or 0
+	if st.firstAt == 0 then
+		st.firstAt = now
+	end
+
+	local firstTime = (self._ErrorOnce[msg] ~= true)
+	if firstTime then
 		self._ErrorOnce[msg] = true
 		pcall(function()
 			if self.ShowWarning then
-				self:ShowWarning("Erro interno (" .. tostring(context) .. "). Veja o console.", "warn")
+				self:ShowWarning("Erro interno (" .. ctx .. "). Copiado pra área de transferência.", "warn")
 			end
 		end)
 	end
-	Logger.Error("[SeleniusHub] " .. tostring(context) .. ": " .. msg)
+
+	-- Rate-limit de log pra não spammar o executor.
+	local shouldLog = firstTime or (now - (st.lastLogAt or 0) >= 2)
+	if shouldLog then
+		st.lastLogAt = now
+		Logger.Error("[SeleniusHub] " ..
+		ctx .. ": " .. msg .. (st.count > 1 and (" (x" .. tostring(st.count) .. ")") or ""))
+	end
+
+	-- Copia automaticamente pro clipboard (se disponível) pra você me mandar.
+	pcall(function()
+		local gv = getGlobalEnv()
+		if gv and rawget(gv, "SELENIUS_COPY_ERRORS") == false then
+			return
+		end
+		local canCopy = (type(typeof) == "function" and typeof(setclipboard) == "function") or
+		(type(setclipboard) == "function")
+		if not canCopy then
+			return
+		end
+		if (not firstTime) and (now - (st.lastCopyAt or 0) < 3) then
+			return
+		end
+		st.lastCopyAt = now
+
+		local payload = (
+			"[SeleniusHub Error]\n"
+			.. "Contexto: " .. ctx .. "\n"
+			.. "Count: " .. tostring(st.count) .. "\n\n"
+			.. msg
+		)
+		-- Evita travar/crashar o executor com strings gigantes.
+		local maxLen = 15000
+		if #payload > maxLen then
+			payload = payload:sub(1, maxLen) .. "\n... (truncado)"
+		end
+		gv.SELENIUS_LAST_ERROR = payload
+		setclipboard(payload)
+	end)
 end
 
 function Hub:FinishInit()
@@ -411,8 +465,20 @@ function Hub:StartLogicLoops()
 end
 
 function Hub:AddConnection(signal, callback)
-	local conn = Safe.Connect(signal, callback, function(err)
+	local conn
+	conn = Safe.Connect(signal, callback, function(err)
 		self:_ReportError("event", err)
+		-- Por padrão, desconecta ao primeiro erro para evitar spam/crash em loops.
+		pcall(function()
+			local gv = getGlobalEnv()
+			local keep = gv and rawget(gv, "SELENIUS_KEEP_CONNECTION_ON_ERROR")
+			if keep == true then
+				return
+			end
+			if conn and type(conn.Disconnect) == "function" then
+				conn:Disconnect()
+			end
+		end)
 	end)
 	if conn then
 		table.insert(self.Connections, conn)
