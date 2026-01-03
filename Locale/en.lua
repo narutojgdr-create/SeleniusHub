@@ -50,4 +50,55 @@ return {
 
 	sub_combat_aim = "Aim",
 	sub_combat_dashboard = "Dashboard",
+
+	-- SubTabs / Sections
+	sub_settings_general = "General",
+	sub_settings_config = "Config",
+	sub_settings_about = "About",
+	section_settings_general = "General",
+	section_settings_about = "About",
+
+	section_combat_aim = "Aim",
+	section_combat_dashboard = "Dashboard",
+
+	sub_visuals_esp = "ESP",
+	sub_visuals_ui = "UI",
+	sub_visuals_colors = "Colors",
+	section_visuals_esp = "ESP",
+	section_visuals_ui = "UI",
+	section_visuals_colors = "Colors",
+
+	sub_player_movement = "Movement",
+	sub_player_utility = "Utility",
+	sub_player_safety = "Safety",
+	section_player_movement = "Movement",
+	section_player_utility = "Utility",
+	section_player_safety = "Safety",
+
+	-- Combat (placeholders)
+	combat_aim_enabled = "Enable Aim",
+	combat_aim_fov = "FOV",
+	combat_aim_smooth = "Smooth",
+	combat_aim_mode = "Mode",
+	combat_dash_enabled = "Enable Dashboard",
+	combat_dash_widgets = "Widgets",
+	combat_dash_compact = "Compact",
+
+	-- Visuals (placeholders)
+	visual_esp_enabled = "Enable ESP",
+	visual_esp_boxes = "Boxes",
+	visual_esp_names = "Names",
+	visual_esp_distance = "Distance",
+	visual_ui_blur = "Blur",
+	visual_ui_particles = "Particles",
+	visual_color_accent = "Accent Color",
+	visual_color_enemy = "Enemy Color",
+
+	-- Player (placeholders)
+	player_sprint = "Sprint",
+	player_speed = "Speed",
+	player_jump = "Jump",
+	player_autorejoin = "Auto Rejoin",
+	player_panic = "Panic Key",
+	player_safe_mode = "Safe Mode",
 }

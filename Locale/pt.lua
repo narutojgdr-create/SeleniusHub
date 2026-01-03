@@ -50,4 +50,55 @@ return {
 
 	sub_combat_aim = "Aim",
 	sub_combat_dashboard = "Dashboard",
+
+	-- SubAbas / Seções
+	sub_settings_general = "Geral",
+	sub_settings_config = "Config",
+	sub_settings_about = "Sobre",
+	section_settings_general = "Geral",
+	section_settings_about = "Sobre",
+
+	section_combat_aim = "Aim",
+	section_combat_dashboard = "Dashboard",
+
+	sub_visuals_esp = "ESP",
+	sub_visuals_ui = "Interface",
+	sub_visuals_colors = "Cores",
+	section_visuals_esp = "ESP",
+	section_visuals_ui = "Interface",
+	section_visuals_colors = "Cores",
+
+	sub_player_movement = "Movement",
+	sub_player_utility = "Utility",
+	sub_player_safety = "Safety",
+	section_player_movement = "Movement",
+	section_player_utility = "Utility",
+	section_player_safety = "Safety",
+
+	-- Combat (placeholders)
+	combat_aim_enabled = "Ativar Aim",
+	combat_aim_fov = "FOV",
+	combat_aim_smooth = "Smooth",
+	combat_aim_mode = "Modo",
+	combat_dash_enabled = "Ativar Dashboard",
+	combat_dash_widgets = "Widgets",
+	combat_dash_compact = "Compacto",
+
+	-- Visuals (placeholders)
+	visual_esp_enabled = "Ativar ESP",
+	visual_esp_boxes = "Boxes",
+	visual_esp_names = "Nomes",
+	visual_esp_distance = "Distância",
+	visual_ui_blur = "Blur",
+	visual_ui_particles = "Particles",
+	visual_color_accent = "Cor do Accent",
+	visual_color_enemy = "Cor do Inimigo",
+
+	-- Player (placeholders)
+	player_sprint = "Sprint",
+	player_speed = "Velocidade",
+	player_jump = "Pulo",
+	player_autorejoin = "Auto Rejoin",
+	player_panic = "Panic Key",
+	player_safe_mode = "Safe Mode",
 }
