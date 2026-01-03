@@ -148,13 +148,22 @@ end
 local function getSourceFor(path)
 	path = normalizePath(path)
 
+	-- IMPORTANTE:
+	-- Muitos executores/usuários acabam deixando SELENIUS_LOCAL_ROOT setado e
+	-- isso faz carregar arquivos LOCAIS desatualizados (mesmo após update no GitHub).
+	-- Por padrão, só usamos local se SELENIUS_PREFER_LOCAL == true.
+	local preferLocal = (rawget(_getgenv(), "SELENIUS_PREFER_LOCAL") == true)
 	local localRoot = normalizePath(rawget(_getgenv(), "SELENIUS_LOCAL_ROOT") or "")
-	if localRoot ~= "" then
+	if preferLocal and localRoot ~= "" then
 		local localPath = (localRoot .. "/" .. path)
 		local content = tryReadFile(localPath)
 		if content then
 			return content
 		end
+	elseif (not preferLocal) and localRoot ~= "" then
+		pcall(function()
+			warn("[SeleniusHub] SELENIUS_LOCAL_ROOT ignorado (use SELENIUS_PREFER_LOCAL=true para habilitar).")
+		end)
 	end
 
 	local userBase = rawget(_getgenv(), "SELENIUS_BASE_URL")

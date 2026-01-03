@@ -8,7 +8,7 @@ local function shouldRedirectToLoader()
 	-- usamos o loader para montar a estrutura virtual.
 	local ok, hasTree = pcall(function()
 		return script and script.Parent and script.Parent.Core and script.Parent.Core.Hub and
-		script.Parent.Core.Lifecycle
+			script.Parent.Core.Lifecycle
 	end)
 	return (not ok) or (not hasTree)
 end
@@ -18,6 +18,13 @@ if shouldRedirectToLoader() then
 		return _G
 	end
 	local gv = _getgenv()
+	if type(rawget(gv, "SELENIUS_CACHE_BUSTER")) ~= "string" then
+		local ok, buster = pcall(function()
+			local t = (type(tick) == "function" and tick()) or (os and os.clock and os.clock()) or 0
+			return tostring(math.floor(t * 1000)) .. "-" .. tostring(math.random(100000, 999999))
+		end)
+		rawset(gv, "SELENIUS_CACHE_BUSTER", ok and buster or tostring(math.random(100000000, 999999999)))
+	end
 	local base = rawget(gv, "SELENIUS_BASE_URL")
 	if type(base) ~= "string" or base == "" then
 		-- Default (pode ser sobrescrito via getgenv().SELENIUS_BASE_URL)
@@ -39,14 +46,17 @@ if shouldRedirectToLoader() then
 
 	-- Se o usuário não definiu SELENIUS_BASE_URL, tentamos um fallback para 'master'
 	-- porque alguns repositórios usam esse branch como padrão.
-	local loaderBody = tryHttpGet(base .. "loadstring.lua")
+	local buster = rawget(gv, "SELENIUS_CACHE_BUSTER")
+	local loaderUrl = base .. "loadstring.lua" .. (buster and ("?v=" .. tostring(buster)) or "")
+	local loaderBody = tryHttpGet(loaderUrl)
 	if (not loaderBody) and (base:find("/main/", 1, true) ~= nil) and (type(rawget(gv, "SELENIUS_BASE_URL")) ~= "string") then
 		local fallbackBase = base:gsub("/main/$", "/master/")
-		loaderBody = tryHttpGet(fallbackBase .. "loadstring.lua")
+		local fallbackUrl = fallbackBase .. "loadstring.lua" .. (buster and ("?v=" .. tostring(buster)) or "")
+		loaderBody = tryHttpGet(fallbackUrl)
 	end
 	if not loaderBody then
 		error(
-		"Falha ao baixar loadstring.lua. Configure getgenv().SELENIUS_BASE_URL com a URL raw correta (main/master).")
+			"Falha ao baixar loadstring.lua. Configure getgenv().SELENIUS_BASE_URL com a URL raw correta (main/master).")
 	end
 	return loadstring(loaderBody)()
 end
