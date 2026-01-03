@@ -66,6 +66,7 @@ local MANIFEST = {
 	"Components/Toggle.lua",
 	"Core/Config.lua",
 	"Core/Hub.lua",
+	"Core/Safe.lua",
 	"Core/Lifecycle.lua",
 	"Core/Option.lua",
 	"Core/Permissions.lua",
@@ -282,7 +283,8 @@ local function setFunctionEnv(fn, env)
 		setfenv(fn, env)
 		return
 	end
-	local okDebug = type(debug) == "table" and type(debug.getupvalue) == "function" and type(debug.setupvalue) == "function"
+	local okDebug = type(debug) == "table" and type(debug.getupvalue) == "function" and
+		type(debug.setupvalue) == "function"
 	if okDebug then
 		local i = 1
 		while true do
@@ -313,7 +315,8 @@ local function customRequire(mod)
 
 	local chunkName = "=" .. path
 	-- Wrapper para não depender de setfenv/debug (muitos executores bloqueiam)
-	local wrapped = "return function(__script, __require)\nlocal script = __script\nlocal require = __require\n" .. source .. "\nend"
+	local wrapped = "return function(__script, __require)\nlocal script = __script\nlocal require = __require\n" ..
+		source .. "\nend"
 	local factory, err = loadstring(wrapped, chunkName)
 	if not factory then
 		error("Falha ao compilar módulo (wrapper): " .. path .. "\n" .. tostring(err))
@@ -364,7 +367,8 @@ end
 -- Se o Hub já estiver ativo, não recria (evita abrir/loading duplicado quando o loadstring roda 2x).
 do
 	local existing = gvGet("SeleniusHubInstance") or rawget(_G, "SeleniusHubInstance")
-	if existing ~= nil then
+	local forceReload = (gvGet("SELENIUS_ALWAYS_UPDATE") == true) or (gvGet("SELENIUS_FORCE_RELOAD") == true)
+	if existing ~= nil and not forceReload then
 		local okVisible = pcall(function()
 			if type(existing.SetVisible) == "function" then
 				existing:SetVisible(true, true)
@@ -547,8 +551,8 @@ end)
 lib.Lifecycle.CreateKeySystem(hub)
 
 -- Reload compatível com o monólito
-	rawset(_G, "SeleniusHubReload", function()
-		local boot2 = showBootstrapNotice("Inicializando Selenius...")
+rawset(_G, "SeleniusHubReload", function()
+	local boot2 = showBootstrapNotice("Inicializando Selenius...")
 	pcall(function()
 		_task.wait(0.05)
 	end)

@@ -2,6 +2,7 @@ return {
 	tab_Combat = "Combat",
 	tab_Visuals = "Visuals",
 	tab_Player = "Player",
+	tab_World = "World",
 	tab_Settings = "Settings",
 	tab_Home = "Home",
 	section_home = "Info",
@@ -74,6 +75,22 @@ return {
 	section_player_movement = "Movement",
 	section_player_utility = "Utility",
 	section_player_safety = "Safety",
+
+	-- World
+	sub_world_general = "General",
+	sub_world_teleport = "Teleport",
+	sub_world_server = "Server",
+	section_world_general = "General",
+	section_world_teleport = "Teleport",
+	section_world_server = "Server",
+	world_enabled = "Enable World",
+	world_target = "Target",
+	world_range = "Range",
+	world_tp_preset = "Destination",
+	world_tp_go = "Teleport",
+	world_tp_key = "TP Key",
+	world_rejoin = "Rejoin",
+	world_serverhop = "Server Hop",
 
 	-- Combat (placeholders)
 	combat_aim_enabled = "Enable Aim",

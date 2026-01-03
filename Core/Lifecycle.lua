@@ -1,6 +1,8 @@
 local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
+local Safe = require(script.Parent.Safe)
+
 local Assets = require(script.Parent.Parent.Utils.Assets)
 local InstanceUtil = require(script.Parent.Parent.Utils.Instance)
 local Acrylic = require(script.Parent.Parent.Theme.Acrylic)
@@ -320,8 +322,8 @@ function Lifecycle.CreateKeySystem(hub)
 		showBtn.Text = showKey and "OCULTAR" or "MOSTRAR"
 	end
 
-	keyBox:GetPropertyChangedSignal("Text"):Connect(refreshKeyMask)
-	showBtn.MouseButton1Click:Connect(function()
+	Safe.Connect(keyBox:GetPropertyChangedSignal("Text"), refreshKeyMask)
+	Safe.Connect(showBtn.MouseButton1Click, function()
 		showKey = not showKey
 		refreshKeyMask()
 	end)
@@ -431,7 +433,7 @@ function Lifecycle.CreateKeySystem(hub)
 		end
 	end
 
-	discordBtn.MouseButton1Click:Connect(function()
+	Safe.Connect(discordBtn.MouseButton1Click, function()
 		if typeof(setclipboard) == "function" then
 			setclipboard(DISCORD_INVITE_URL)
 		end
@@ -480,24 +482,25 @@ function Lifecycle.CreateKeySystem(hub)
 	helpBody.TextXAlignment = Enum.TextXAlignment.Left
 	helpBody.TextYAlignment = Enum.TextYAlignment.Top
 	helpBody.TextWrapped = true
-	helpBody.Text = "1) Clique em GET KEY\n2) Abra o link e complete o processo\n3) Copie a key gerada\n4) Cole aqui e clique CHECK KEY"
+	helpBody.Text =
+	"1) Clique em GET KEY\n2) Abra o link e complete o processo\n3) Copie a key gerada\n4) Cole aqui e clique CHECK KEY"
 	helpBody.LayoutOrder = 2
 	helpBody.Parent = helpCard
 
 	-- Animação mais fluida (remake: base maior + leve zoom)
 	InstanceUtil.Tween(mainScale, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1.1 })
 
-	enterBtn.MouseEnter:Connect(function()
+	Safe.Connect(enterBtn.MouseEnter, function()
 		TweenService:Create(enterBtn, hoverTweenInfo, { BackgroundColor3 = Theme.ButtonHover }):Play()
 	end)
-	enterBtn.MouseLeave:Connect(function()
+	Safe.Connect(enterBtn.MouseLeave, function()
 		TweenService:Create(enterBtn, hoverTweenInfo, { BackgroundColor3 = Theme.Button }):Play()
 	end)
 
-	getBtn.MouseEnter:Connect(function()
+	Safe.Connect(getBtn.MouseEnter, function()
 		TweenService:Create(getBtn, hoverTweenInfo, { BackgroundColor3 = Theme.ButtonHover }):Play()
 	end)
-	getBtn.MouseLeave:Connect(function()
+	Safe.Connect(getBtn.MouseLeave, function()
 		TweenService:Create(getBtn, hoverTweenInfo, { BackgroundColor3 = Theme.Button }):Play()
 	end)
 
@@ -564,17 +567,22 @@ function Lifecycle.CreateKeySystem(hub)
 			okScale.Scale = 0.96
 			okScale.Parent = successOverlay
 
-			TweenService:Create(okScale, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+			TweenService:Create(okScale, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+				{ Scale = 1 }):Play()
 			TweenService:Create(okTitle, fadeTweenInfo, { TextTransparency = 0 }):Play()
 			TweenService:Create(okSub, fadeTweenInfo, { TextTransparency = 0 }):Play()
 			task.wait(0.55)
-			TweenService:Create(okScale, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Scale = 0.98 }):Play()
-			TweenService:Create(okTitle, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { TextTransparency = 1 }):Play()
-			TweenService:Create(okSub, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { TextTransparency = 1 }):Play()
+			TweenService:Create(okScale, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+				{ Scale = 0.98 }):Play()
+			TweenService:Create(okTitle, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+				{ TextTransparency = 1 }):Play()
+			TweenService:Create(okSub, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+			{ TextTransparency = 1 }):Play()
 			task.wait(0.2)
 			content.Visible = false
 
-			local closeTween = InstanceUtil.Tween(mainScale, TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+			local closeTween = InstanceUtil.Tween(mainScale,
+				TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
 				Scale = 0,
 			})
 			closeTween.Completed:Wait()
@@ -623,14 +631,14 @@ function Lifecycle.CreateKeySystem(hub)
 		end
 	end
 
-	enterBtn.MouseButton1Click:Connect(submitKey)
-	keyBox.FocusLost:Connect(function(enterPressed)
+	Safe.Connect(enterBtn.MouseButton1Click, submitKey)
+	Safe.Connect(keyBox.FocusLost, function(enterPressed)
 		if enterPressed then
 			submitKey()
 		end
 	end)
 
-	getBtn.MouseButton1Click:Connect(function()
+	Safe.Connect(getBtn.MouseButton1Click, function()
 		if typeof(setclipboard) == "function" then
 			setclipboard("https://linkvertise.com/example-key")
 		end

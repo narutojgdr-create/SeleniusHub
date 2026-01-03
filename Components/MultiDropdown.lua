@@ -106,7 +106,7 @@ function MultiDropdown.Create(ctx, parent, position, localeKey, options, default
 	UpdateText(true)
 
 	local open = false
-	btn.MouseButton1Click:Connect(function()
+	ctx.addConnection(btn.MouseButton1Click, function()
 		open = not open
 		listFrame.Visible = true
 		ctx.instanceUtil.Tween(listFrame, DropdownTween, { Size = UDim2.new(1, 0, 0, open and (#options * 26 + 6) or 0) })
@@ -155,7 +155,7 @@ function MultiDropdown.Create(ctx, parent, position, localeKey, options, default
 			ZIndex = z + 7,
 		})
 
-		optBtn.MouseButton1Click:Connect(function()
+		ctx.addConnection(optBtn.MouseButton1Click, function()
 			Theme = ctx.themeManager:GetTheme()
 			selected[opt] = not selected[opt]
 			optLabel.TextColor3 = selected[opt] and Theme.Accent or Theme.AccentDark

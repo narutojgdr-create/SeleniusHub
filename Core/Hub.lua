@@ -27,6 +27,8 @@ local Notifications = require(script.Parent.Parent.UI.Notifications)
 local Registry = require(script.Parent.Registry)
 local State = require(script.Parent.State)
 local TabClass = require(script.Parent.Tab)
+local Safe = require(script.Parent.Safe)
+local Logger = require(script.Parent.Parent.Utils.Logger)
 
 local Components = setmetatable({}, {
 	__index = function(self, key)
@@ -56,13 +58,27 @@ local Components = setmetatable({}, {
 local Hub = {}
 Hub.__index = Hub
 
+local function getGlobalEnv()
+	local ok, gv = pcall(function()
+		if type(getgenv) == "function" then
+			return getgenv()
+		end
+		return nil
+	end)
+	if ok and type(gv) == "table" then
+		return gv
+	end
+	return _G
+end
+
 -- Version identifier
 Hub.Version = "Stable"
 
 function Hub.new()
 	-- [V2.0] Single Instance Protection
-	if getgenv().SeleniusHubInstance then
-		local old = getgenv().SeleniusHubInstance
+	local gv = getGlobalEnv()
+	if gv and gv.SeleniusHubInstance then
+		local old = gv.SeleniusHubInstance
 		if old and old.ShowWarning then
 			task.spawn(function()
 				old:ShowWarning("Hub already opened!", "warn")
@@ -75,7 +91,7 @@ function Hub.new()
 	end
 
 	local self = setmetatable({}, Hub)
-	getgenv().SeleniusHubInstance = self
+	gv.SeleniusHubInstance = self
 
 	self.Connections = {}
 	self.Pages = {}
@@ -120,6 +136,7 @@ function Hub.new()
 	self.Components = Components
 	self._DidFinishInit = false
 	self._SidebarSubItemStyleCallbacks = {}
+	self._ErrorOnce = {}
 
 	Assets.EnsureFolders()
 	self:LoadConfig("default")
@@ -135,6 +152,7 @@ function Hub.new()
 	self:AddPage("Combat", "tab_Combat", "Combat")
 	self:AddPage("Visuals", "tab_Visuals", "Visuals")
 	self:AddPage("Player", "tab_Player", "Player")
+	self:AddPage("World", "tab_World", "Home")
 	self:AddPage("Settings", "tab_Settings", "Settings")
 	self:SwitchPage("Home")
 
@@ -151,6 +169,19 @@ function Hub.new()
 	end
 
 	return self
+end
+
+function Hub:_ReportError(context, err)
+	local msg = tostring(err)
+	if not self._ErrorOnce[msg] then
+		self._ErrorOnce[msg] = true
+		pcall(function()
+			if self.ShowWarning then
+				self:ShowWarning("Erro interno (" .. tostring(context) .. "). Veja o console.", "warn")
+			end
+		end)
+	end
+	Logger.Error("[SeleniusHub] " .. tostring(context) .. ": " .. msg)
 end
 
 function Hub:FinishInit()
@@ -182,33 +213,38 @@ function Hub:_ComponentContext()
 end
 
 function Hub:LoadTabs()
-	local combat = self.Pages.Combat
-	if combat then
-		local tab = TabClass.new(self, "Combat", combat)
-		self.TabInstances.Combat = tab
-		require(script.Parent.Parent.Tabs.Combat.init)(tab)
+	local function safeInit(tabId, page, moduleScript)
+		if not page then
+			return
+		end
+		local tab = TabClass.new(self, tabId, page)
+		self.TabInstances[tabId] = tab
+
+		local okReq, initOrErr = Safe.XCall(function()
+			return require(moduleScript)
+		end)
+		if not okReq then
+			self:_ReportError(tabId .. ":require", initOrErr)
+			return
+		end
+		if type(initOrErr) ~= "function" then
+			self:_ReportError(tabId .. ":init", "init.lua não retornou uma função")
+			return
+		end
+
+		local okRun, runErr = Safe.XCall(function()
+			initOrErr(tab)
+		end)
+		if not okRun then
+			self:_ReportError(tabId .. ":run", runErr)
+		end
 	end
 
-	local visuals = self.Pages.Visuals
-	if visuals then
-		local tab = TabClass.new(self, "Visuals", visuals)
-		self.TabInstances.Visuals = tab
-		require(script.Parent.Parent.Tabs.Visual.init)(tab)
-	end
-
-	local player = self.Pages.Player
-	if player then
-		local tab = TabClass.new(self, "Player", player)
-		self.TabInstances.Player = tab
-		require(script.Parent.Parent.Tabs.Player.init)(tab)
-	end
-
-	local settings = self.Pages.Settings
-	if settings then
-		local tab = TabClass.new(self, "Settings", settings)
-		self.TabInstances.Settings = tab
-		require(script.Parent.Parent.Tabs.Settings.init)(tab)
-	end
+	safeInit("Combat", self.Pages.Combat, script.Parent.Parent.Tabs.Combat.init)
+	safeInit("Visuals", self.Pages.Visuals, script.Parent.Parent.Tabs.Visual.init)
+	safeInit("Player", self.Pages.Player, script.Parent.Parent.Tabs.Player.init)
+	safeInit("World", self.Pages.World, script.Parent.Parent.Tabs.World.init)
+	safeInit("Settings", self.Pages.Settings, script.Parent.Parent.Tabs.Settings.init)
 end
 
 function Hub:_SetTabExpanded(id, expanded)
@@ -375,8 +411,12 @@ function Hub:StartLogicLoops()
 end
 
 function Hub:AddConnection(signal, callback)
-	local conn = signal:Connect(callback)
-	table.insert(self.Connections, conn)
+	local conn = Safe.Connect(signal, callback, function(err)
+		self:_ReportError("event", err)
+	end)
+	if conn then
+		table.insert(self.Connections, conn)
+	end
 	return conn
 end
 
@@ -400,7 +440,8 @@ function Hub:SetLanguage(lang)
 	self.LocaleManager:SetLanguage(lang)
 
 	if self.LanguageDropdown and self.LanguageDropdown.currentLabel then
-		self.LanguageDropdown.currentLabel.Text = (self.Locale == "pt") and self:GetText("lang_pt") or self:GetText("lang_en")
+		self.LanguageDropdown.currentLabel.Text = (self.Locale == "pt") and self:GetText("lang_pt") or
+			self:GetText("lang_en")
 		if self.LanguageDropdown.optionButtons then
 			for i, btn in ipairs(self.LanguageDropdown.optionButtons) do
 				if i == 1 then
@@ -553,7 +594,8 @@ function Hub:ShowConfirmation(text, onConfirm)
 		return
 	end
 
-	local panelTransparency = tonumber(Theme.PanelTransparency or Theme.SurfaceTransparency or Theme.AcrylicTransparency) or 0
+	local panelTransparency = tonumber(Theme.PanelTransparency or Theme.SurfaceTransparency or Theme.AcrylicTransparency) or
+		0
 	local controlTransparency = tonumber(Theme.ControlTransparency) or panelTransparency
 
 	local overlay = Instance.new("Frame")
@@ -633,13 +675,13 @@ function Hub:ShowConfirmation(text, onConfirm)
 		end
 	end
 
-	yesBtn.MouseButton1Click:Connect(function()
+	self:AddConnection(yesBtn.MouseButton1Click, function()
 		Close()
 		if onConfirm then
 			onConfirm()
 		end
 	end)
-	noBtn.MouseButton1Click:Connect(function()
+	self:AddConnection(noBtn.MouseButton1Click, function()
 		Close()
 	end)
 end
@@ -800,7 +842,8 @@ function Hub:CreateUI()
 
 	-- Migração simples: se o tamanho salvo for "baixo" demais, usa a altura padrão nova.
 	-- (Ajuda a aplicar o pedido de "mais altura" mesmo com config antiga.)
-	local preferredH = (self.DefaultSize and self.DefaultSize.Y and self.DefaultSize.Y.Offset) or UI.MainFrame.Size.Y.Offset
+	local preferredH = (self.DefaultSize and self.DefaultSize.Y and self.DefaultSize.Y.Offset) or
+		UI.MainFrame.Size.Y.Offset
 	if UI.MainFrame.Size.Y.Offset < preferredH then
 		UI.MainFrame.Size = UDim2.new(0, UI.MainFrame.Size.X.Offset, 0, preferredH)
 		self.SavedSize = UI.MainFrame.Size
@@ -808,7 +851,8 @@ function Hub:CreateUI()
 	end
 
 	-- Migração simples: aplica também a largura mínima preferida (configs antigas podem deixar estreito).
-	local preferredW = (self.DefaultSize and self.DefaultSize.X and self.DefaultSize.X.Offset) or UI.MainFrame.Size.X.Offset
+	local preferredW = (self.DefaultSize and self.DefaultSize.X and self.DefaultSize.X.Offset) or
+		UI.MainFrame.Size.X.Offset
 	if UI.MainFrame.Size.X.Offset < preferredW then
 		UI.MainFrame.Size = UDim2.new(0, preferredW, 0, UI.MainFrame.Size.Y.Offset)
 		self.SavedSize = UI.MainFrame.Size
@@ -1183,10 +1227,12 @@ function Hub:SetVisible(visible, animated)
 			frame.Size = UDim2.new(size.X.Scale, size.X.Offset, 0, 0)
 			frame.Position = UDim2.new(pos.X.Scale, pos.X.Offset, pos.Y.Scale, pos.Y.Offset + size.Y.Offset / 2)
 			frame.ClipsDescendants = true
-			InstanceUtil.Tween(frame, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-				Size = size,
-				Position = pos,
-			}).Completed:Connect(function()
+			local tween = InstanceUtil.Tween(frame, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+				{
+					Size = size,
+					Position = pos,
+				})
+			self:AddConnection(tween.Completed, function()
 				self.VisibilityAnimating = false
 				frame.ClipsDescendants = false
 			end)
@@ -1212,10 +1258,12 @@ function Hub:SetVisible(visible, animated)
 			self.VisibilityAnimating = true
 			local endPos = UDim2.new(pos.X.Scale, pos.X.Offset, pos.Y.Scale, pos.Y.Offset + size.Y.Offset / 2)
 			frame.ClipsDescendants = true
-			InstanceUtil.Tween(frame, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
-				Size = UDim2.new(size.X.Scale, size.X.Offset, 0, 0),
-				Position = endPos,
-			}).Completed:Connect(function()
+			local tween = InstanceUtil.Tween(frame, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
+				{
+					Size = UDim2.new(size.X.Scale, size.X.Offset, 0, 0),
+					Position = endPos,
+				})
+			self:AddConnection(tween.Completed, function()
 				frame.Visible = false
 				frame.Size = size
 				frame.Position = pos
@@ -1282,15 +1330,18 @@ function Hub:SetupMobileSupport()
 		InstanceUtil.AddCorner(mobileBtn, 12)
 
 		local dragging, dragStart, startPos
-		mobileBtn.InputBegan:Connect(function(input)
+		self:AddConnection(mobileBtn.InputBegan, function(input)
 			if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 				dragging = true
 				dragStart = input.Position
 				startPos = mobileBtn.Position
-
-				input.Changed:Connect(function()
+				local conn
+				conn = self:AddConnection(input.Changed, function()
 					if input.UserInputState == Enum.UserInputState.End then
 						dragging = false
+						if conn then
+							conn:Disconnect()
+						end
 						if (input.Position - dragStart).Magnitude < 10 then
 							self:SetVisible(not self:IsVisible(), true)
 						end
@@ -1299,10 +1350,11 @@ function Hub:SetupMobileSupport()
 			end
 		end)
 
-		mobileBtn.InputChanged:Connect(function(input)
+		self:AddConnection(mobileBtn.InputChanged, function(input)
 			if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
 				local delta = input.Position - dragStart
-				mobileBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+				mobileBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale,
+					startPos.Y.Offset + delta.Y)
 			end
 		end)
 	end
@@ -1336,10 +1388,14 @@ function Hub:SetupSmoothDrag()
 			dragStart = input.Position
 			startPos = frame.Position
 			setLift(true)
-			input.Changed:Connect(function()
+			local conn
+			conn = self:AddConnection(input.Changed, function()
 				if input.UserInputState == Enum.UserInputState.End then
 					dragging = false
 					setLift(false)
+					if conn then
+						conn:Disconnect()
+					end
 				end
 			end)
 		end
@@ -1356,7 +1412,8 @@ function Hub:SetupSmoothDrag()
 			local delta = dragInput.Position - dragStart
 			local targetX = startPos.X.Offset + delta.X
 			local targetY = startPos.Y.Offset + delta.Y
-			local a = 1 - math.exp(-(dt or 1 / 60) * 22)
+			local dtSafe = dt or (1 / 60)
+			local a = 1 - math.exp(-(dtSafe * 22))
 			a = math.clamp(a, 0, 1)
 			frame.Position = UDim2.new(
 				startPos.X.Scale,
@@ -1385,10 +1442,12 @@ function Hub:SetupResizing()
 			dragStart = input.Position
 			startSize = frame.Size
 			local conn
-			conn = input.Changed:Connect(function()
+			conn = self:AddConnection(input.Changed, function()
 				if input.UserInputState == Enum.UserInputState.End then
 					resizing = false
-					conn:Disconnect()
+					if conn then
+						conn:Disconnect()
+					end
 				end
 			end)
 		end
@@ -1449,7 +1508,8 @@ function Hub:SetupButtons()
 
 			InstanceUtil.Tween(frame, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 				Size = targetSize,
-				Position = UDim2.new(frame.Position.X.Scale, frame.Position.X.Offset, frame.Position.Y.Scale, finalYOffset),
+				Position = UDim2.new(frame.Position.X.Scale, frame.Position.X.Offset, frame.Position.Y.Scale,
+					finalYOffset),
 			})
 
 			task.delay(0.1, function()
@@ -1486,8 +1546,9 @@ function Hub:Destroy()
 	self.Connections = {}
 
 	pcall(function()
-		if type(getgenv) == "function" and getgenv().SeleniusHubInstance == self then
-			getgenv().SeleniusHubInstance = nil
+		local gv = getGlobalEnv()
+		if gv and gv.SeleniusHubInstance == self then
+			gv.SeleniusHubInstance = nil
 		end
 	end)
 	pcall(function()

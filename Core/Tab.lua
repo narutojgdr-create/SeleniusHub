@@ -232,9 +232,13 @@ end
 function Tab:AddToggle(def)
 	local option = Option.new(def)
 	option.Type = "Toggle"
-	local widget = self.Hub.Components.Toggle.Create(self.Hub:_ComponentContext(), self:_GetActivePage(), option.Position, option.LocaleKey, option.Default, option.Size)
+	local widget = self.Hub.Components.Toggle.Create(self.Hub:_ComponentContext(), self:_GetActivePage(), option
+		.Position, option.LocaleKey, option.Default, option.Size)
 	self.Hub:AddConnection(widget.Changed, function(value)
 		self.Hub.Registry:Set(option.Id, value)
+		if type(option.Callback) == "function" then
+			pcall(option.Callback, value)
+		end
 		local label = self.Hub:GetText(option.LocaleKey)
 		local status = value and self.Hub:GetText("msg_on") or self.Hub:GetText("msg_off")
 		self.Hub:ShowWarning(label .. ": " .. status, "info")
@@ -247,9 +251,13 @@ end
 function Tab:AddCheckbox(def)
 	local option = Option.new(def)
 	option.Type = "Checkbox"
-	local widget = self.Hub.Components.Checkbox.Create(self.Hub:_ComponentContext(), self:_GetActivePage(), option.Position, option.LocaleKey, option.Default)
+	local widget = self.Hub.Components.Checkbox.Create(self.Hub:_ComponentContext(), self:_GetActivePage(),
+		option.Position, option.LocaleKey, option.Default)
 	self.Hub:AddConnection(widget.Changed, function(value)
 		self.Hub.Registry:Set(option.Id, value)
+		if type(option.Callback) == "function" then
+			pcall(option.Callback, value)
+		end
 		local label = self.Hub:GetText(option.LocaleKey)
 		local status = value and self.Hub:GetText("msg_on") or self.Hub:GetText("msg_off")
 		self.Hub:ShowWarning(label .. ": " .. status, "info")
@@ -274,6 +282,9 @@ function Tab:AddSlider(def)
 	)
 	self.Hub:AddConnection(widget.Changed, function(value)
 		self.Hub.Registry:Set(option.Id, value)
+		if type(option.Callback) == "function" then
+			pcall(option.Callback, value)
+		end
 	end)
 	self.Hub.Registry:Register(option, widget)
 	return widget
@@ -282,16 +293,29 @@ end
 function Tab:AddDropdown(def)
 	local option = Option.new(def)
 	option.Type = "Dropdown"
+	local options = option.Options
+	if type(option.OptionsKeys) == "table" then
+		options = {}
+		for i, k in ipairs(option.OptionsKeys) do
+			options[i] = self.Hub:GetText(k)
+		end
+	end
 	local widget = self.Hub.Components.Dropdown.Create(
 		self.Hub:_ComponentContext(),
 		self:_GetActivePage(),
 		option.Position,
 		option.LocaleKey,
-		option.Options,
+		options,
 		option.DefaultIndex
 	)
+	if type(option.OptionsKeys) == "table" and self.Hub and type(self.Hub.RegisterLocalizedOptions) == "function" then
+		self.Hub:RegisterLocalizedOptions(widget, option.OptionsKeys)
+	end
 	self.Hub:AddConnection(widget.Changed, function(text, idx)
 		self.Hub.Registry:Set(option.Id, text, idx)
+		if type(option.Callback) == "function" then
+			pcall(option.Callback, text, idx)
+		end
 	end)
 	self.Hub.Registry:Register(option, widget)
 	return widget
@@ -310,6 +334,9 @@ function Tab:AddMultiDropdown(def)
 	)
 	self.Hub:AddConnection(widget.Changed, function(list)
 		self.Hub.Registry:Set(option.Id, list)
+		if type(option.Callback) == "function" then
+			pcall(option.Callback, list)
+		end
 	end)
 	self.Hub.Registry:Register(option, widget)
 	return widget
@@ -327,6 +354,9 @@ function Tab:AddColorPicker(def)
 	)
 	self.Hub:AddConnection(widget.Changed, function(color)
 		self.Hub.Registry:Set(option.Id, color)
+		if type(option.Callback) == "function" then
+			pcall(option.Callback, color)
+		end
 	end)
 	self.Hub.Registry:Register(option, widget)
 	return widget
@@ -335,9 +365,13 @@ end
 function Tab:AddButton(def)
 	local option = Option.new(def)
 	option.Type = "Button"
-	local widget = self.Hub.Components.Button.Create(self.Hub:_ComponentContext(), self:_GetActivePage(), option.Position, option.LocaleKey)
+	local widget = self.Hub.Components.Button.Create(self.Hub:_ComponentContext(), self:_GetActivePage(), option
+		.Position, option.LocaleKey)
 	self.Hub:AddConnection(widget.Clicked, function()
 		self.Hub.Registry:Set(option.Id)
+		if type(option.Callback) == "function" then
+			pcall(option.Callback)
+		end
 	end)
 	self.Hub.Registry:Register(option, widget)
 	return widget
@@ -355,6 +389,9 @@ function Tab:AddKeybind(def)
 	)
 	self.Hub:AddConnection(widget.Changed, function(keyCode)
 		self.Hub.Registry:Set(option.Id, keyCode)
+		if type(option.Callback) == "function" then
+			pcall(option.Callback, keyCode)
+		end
 	end)
 	self.Hub.Registry:Register(option, widget)
 	return widget

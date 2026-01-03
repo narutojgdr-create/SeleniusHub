@@ -128,10 +128,12 @@ function Dropdown.Create(ctx, parent, position, localeKey, options, defaultIndex
 		arrow.Text = "▲"
 	end
 
-	local function SelectOption(idx)
+	local function SelectOption(idx, silent)
 		selectedIndex = idx
 		currentLabel.Text = options[idx] or ""
-		changed:Fire(currentLabel.Text, idx)
+		if not silent then
+			changed:Fire(currentLabel.Text, idx)
+		end
 		CloseDropdown()
 	end
 
@@ -156,15 +158,17 @@ function Dropdown.Create(ctx, parent, position, localeKey, options, defaultIndex
 				ZIndex = z + 6,
 			})
 			ctx.instanceUtil.AddCorner(optBtn, 4)
-			optBtn.MouseEnter:Connect(function()
+			ctx.addConnection(optBtn.MouseEnter, function()
 				Theme = ctx.themeManager:GetTheme()
-				ctx.instanceUtil.Tween(optBtn, AnimConfig, { BackgroundColor3 = Theme.ButtonHover, TextColor3 = Theme.TextPrimary })
+				ctx.instanceUtil.Tween(optBtn, AnimConfig,
+					{ BackgroundColor3 = Theme.ButtonHover, TextColor3 = Theme.TextPrimary })
 			end)
-			optBtn.MouseLeave:Connect(function()
+			ctx.addConnection(optBtn.MouseLeave, function()
 				Theme = ctx.themeManager:GetTheme()
-				ctx.instanceUtil.Tween(optBtn, AnimConfig, { BackgroundColor3 = Theme.Button, TextColor3 = Theme.AccentDark })
+				ctx.instanceUtil.Tween(optBtn, AnimConfig,
+					{ BackgroundColor3 = Theme.Button, TextColor3 = Theme.AccentDark })
 			end)
-			optBtn.MouseButton1Click:Connect(function()
+			ctx.addConnection(optBtn.MouseButton1Click, function()
 				SelectOption(i)
 			end)
 			dropdownObj.optionButtons[i] = optBtn
@@ -172,8 +176,29 @@ function Dropdown.Create(ctx, parent, position, localeKey, options, defaultIndex
 
 		if selectedIndex > #options then
 			selectedIndex = 1
-			currentLabel.Text = options[1] or ""
 		end
+		currentLabel.Text = options[selectedIndex] or ""
+	end
+
+	function dropdownObj:GetIndex()
+		return selectedIndex
+	end
+
+	function dropdownObj:SetIndex(idx, silent)
+		idx = tonumber(idx) or 1
+		idx = math.floor(idx)
+		if idx < 1 then
+			idx = 1
+		end
+		if #options == 0 then
+			selectedIndex = 1
+			currentLabel.Text = ""
+			return
+		end
+		if idx > #options then
+			idx = #options
+		end
+		SelectOption(idx, silent == true)
 	end
 
 	dropdownObj:UpdateOptions(options)
@@ -204,6 +229,8 @@ function Dropdown.Create(ctx, parent, position, localeKey, options, defaultIndex
 		Frame = frame,
 		Changed = changed,
 		UpdateOptions = function(newOptions) dropdownObj:UpdateOptions(newOptions) end,
+		GetIndex = function() return dropdownObj:GetIndex() end,
+		SetIndex = function(idx, silent) dropdownObj:SetIndex(idx, silent) end,
 		currentLabel = currentLabel,
 		optionButtons = dropdownObj.optionButtons,
 	}

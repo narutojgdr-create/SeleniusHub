@@ -62,20 +62,33 @@ function Assets.SafeIsFile(path)
 end
 
 function Assets.EnsureFolders()
-	if not isfolder(Defaults.CONFIG_FOLDER) then
-		makefolder(Defaults.CONFIG_FOLDER)
+	-- Alguns executores não suportam FS (isfolder/makefolder).
+	-- Nesses casos, apenas não criamos pastas (sem crash).
+	if type(isfolder) ~= "function" or type(makefolder) ~= "function" then
+		return false
 	end
-	if not isfolder(Defaults.CONFIGS_DIR) then
-		makefolder(Defaults.CONFIGS_DIR)
-	end
-	if not isfolder(Defaults.IMAGE_FOLDER) then
-		makefolder(Defaults.IMAGE_FOLDER)
-	end
+
+	pcall(function()
+		if not isfolder(Defaults.CONFIG_FOLDER) then
+			makefolder(Defaults.CONFIG_FOLDER)
+		end
+	end)
+	pcall(function()
+		if not isfolder(Defaults.CONFIGS_DIR) then
+			makefolder(Defaults.CONFIGS_DIR)
+		end
+	end)
+	pcall(function()
+		if not isfolder(Defaults.IMAGE_FOLDER) then
+			makefolder(Defaults.IMAGE_FOLDER)
+		end
+	end)
+	return true
 end
 
 function Assets.GetConfigList()
 	local files = {}
-	if isfolder(Defaults.CONFIGS_DIR) then
+	if type(isfolder) == "function" and isfolder(Defaults.CONFIGS_DIR) and type(listfiles) == "function" then
 		local success, result = pcall(function()
 			return listfiles(Defaults.CONFIGS_DIR)
 		end)

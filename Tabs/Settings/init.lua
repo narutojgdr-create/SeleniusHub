@@ -58,7 +58,7 @@ return function(Tab)
 		Id = "ui_language",
 		LocaleKey = "label_language",
 		Position = P(110),
-		Options = { Hub:GetText("lang_pt"), Hub:GetText("lang_en") },
+		OptionsKeys = { "lang_pt", "lang_en" },
 		DefaultIndex = (Hub.Locale == "en") and 2 or 1,
 		Callback = function(_text, idx)
 			if idx == 2 then
