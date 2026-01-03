@@ -8,9 +8,35 @@ end
 local Option = safeRequire(script.Parent.Option)
 local Defaults = safeRequire(script.Parent.Parent.Assets.Defaults)
 local InstanceUtil = safeRequire(script.Parent.Parent.Utils.Instance)
+local ComponentRefs = {
+	Toggle = script.Parent.Parent.Components.Toggle,
+	Checkbox = script.Parent.Parent.Components.Checkbox,
+	Slider = script.Parent.Parent.Components.Slider,
+	Dropdown = script.Parent.Parent.Components.Dropdown,
+	MultiDropdown = script.Parent.Parent.Components.MultiDropdown,
+	ColorPicker = script.Parent.Parent.Components.ColorPicker,
+	Button = script.Parent.Parent.Components.Button,
+	Keybind = script.Parent.Parent.Components.Keybind,
+}
 
 local Tab = {}
 Tab.__index = Tab
+
+local function getComponent(self, key)
+	self.Hub.Components = self.Hub.Components or {}
+	if self.Hub.Components[key] then
+		return self.Hub.Components[key]
+	end
+	local ref = ComponentRefs[key]
+	if not ref then
+		return nil
+	end
+	local mod = safeRequire(ref)
+	if mod then
+		self.Hub.Components[key] = mod
+	end
+	return mod
+end
 
 function Tab.new(hub, id, page)
 	local self = setmetatable({}, Tab)
@@ -32,8 +58,12 @@ end
 function Tab:AddToggle(def)
 	local option = Option.new(def)
 	option.Type = "Toggle"
-	local widget = self.Hub.Components.Toggle.Create(self.Hub:_ComponentContext(), self:_GetActivePage(), option
-		.Position, option.LocaleKey, option.Default, option.Size)
+	local component = getComponent(self, "Toggle")
+	if not component or not component.Create then
+		return nil
+	end
+	local widget = component.Create(self.Hub:_ComponentContext(), self:_GetActivePage(), option.Position,
+		option.LocaleKey, option.Default, option.Size)
 	self.Hub:AddConnection(widget.Changed, function(value)
 		self.Hub.Registry:Set(option.Id, value)
 		if type(option.Callback) == "function" then
@@ -51,8 +81,12 @@ end
 function Tab:AddCheckbox(def)
 	local option = Option.new(def)
 	option.Type = "Checkbox"
-	local widget = self.Hub.Components.Checkbox.Create(self.Hub:_ComponentContext(), self:_GetActivePage(),
-		option.Position, option.LocaleKey, option.Default)
+	local component = getComponent(self, "Checkbox")
+	if not component or not component.Create then
+		return nil
+	end
+	local widget = component.Create(self.Hub:_ComponentContext(), self:_GetActivePage(), option.Position,
+		option.LocaleKey, option.Default)
 	self.Hub:AddConnection(widget.Changed, function(value)
 		self.Hub.Registry:Set(option.Id, value)
 		if type(option.Callback) == "function" then
@@ -70,7 +104,11 @@ end
 function Tab:AddSlider(def)
 	local option = Option.new(def)
 	option.Type = "Slider"
-	local widget = self.Hub.Components.Slider.Create(
+	local component = getComponent(self, "Slider")
+	if not component or not component.Create then
+		return nil
+	end
+	local widget = component.Create(
 		self.Hub:_ComponentContext(),
 		self:_GetActivePage(),
 		option.Position,
@@ -100,7 +138,11 @@ function Tab:AddDropdown(def)
 			options[i] = self.Hub:GetText(k)
 		end
 	end
-	local widget = self.Hub.Components.Dropdown.Create(
+	local component = getComponent(self, "Dropdown")
+	if not component or not component.Create then
+		return nil
+	end
+	local widget = component.Create(
 		self.Hub:_ComponentContext(),
 		self:_GetActivePage(),
 		option.Position,
@@ -124,7 +166,11 @@ end
 function Tab:AddMultiDropdown(def)
 	local option = Option.new(def)
 	option.Type = "MultiDropdown"
-	local widget = self.Hub.Components.MultiDropdown.Create(
+	local component = getComponent(self, "MultiDropdown")
+	if not component or not component.Create then
+		return nil
+	end
+	local widget = component.Create(
 		self.Hub:_ComponentContext(),
 		self:_GetActivePage(),
 		option.Position,
@@ -145,7 +191,11 @@ end
 function Tab:AddColorPicker(def)
 	local option = Option.new(def)
 	option.Type = "ColorPicker"
-	local widget = self.Hub.Components.ColorPicker.Create(
+	local component = getComponent(self, "ColorPicker")
+	if not component or not component.Create then
+		return nil
+	end
+	local widget = component.Create(
 		self.Hub:_ComponentContext(),
 		self:_GetActivePage(),
 		option.Position,
@@ -165,8 +215,12 @@ end
 function Tab:AddButton(def)
 	local option = Option.new(def)
 	option.Type = "Button"
-	local widget = self.Hub.Components.Button.Create(self.Hub:_ComponentContext(), self:_GetActivePage(), option
-		.Position, option.LocaleKey)
+	local component = getComponent(self, "Button")
+	if not component or not component.Create then
+		return nil
+	end
+	local widget = component.Create(self.Hub:_ComponentContext(), self:_GetActivePage(), option.Position,
+		option.LocaleKey)
 	self.Hub:AddConnection(widget.Clicked, function()
 		self.Hub.Registry:Set(option.Id)
 		if type(option.Callback) == "function" then
@@ -180,7 +234,11 @@ end
 function Tab:AddKeybind(def)
 	local option = Option.new(def)
 	option.Type = "Keybind"
-	local widget = self.Hub.Components.Keybind.Create(
+	local component = getComponent(self, "Keybind")
+	if not component or not component.Create then
+		return nil
+	end
+	local widget = component.Create(
 		self.Hub:_ComponentContext(),
 		self:_GetActivePage(),
 		option.Position,
