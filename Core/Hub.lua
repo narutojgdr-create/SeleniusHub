@@ -1,7 +1,20 @@
-		if old and old.UI and old.UI.MainFrame then
-			old.UI.MainFrame.Visible = true
-		end
-		return old
+		-- NÃO reutiliza instância antiga.
+		-- Reusar mantém UI/código antigo na memória (ex: sub-abas continuam e pode rodar Tab.lua velho).
+		pcall(function()
+			if type(old.Destroy) == "function" then
+				old:Destroy()
+			end
+		end)
+		pcall(function()
+			if old and old.UI and old.UI.ScreenGui then
+				old.UI.ScreenGui:Destroy()
+			end
+		end)
+		pcall(function()
+			if gv and gv.SeleniusHubInstance == old then
+				gv.SeleniusHubInstance = nil
+			end
+		end)
 	end
 
 	local self = setmetatable({}, Hub)
