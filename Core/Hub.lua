@@ -319,11 +319,15 @@ function Hub:RegisterSidebarSubTab(tabId, subId, localeKey)
 		Dot = dot,
 	}
 
-	self.ThemeManager:AddCallback(function()
-		self:_UpdateSidebarSubItemStyles(tabId)
-	end)
+	-- Registra 1 callback de tema por "pasta" (evita acumular callbacks por subitem).
+	if not tabRec._SidebarThemeHooked then
+		tabRec._SidebarThemeHooked = true
+		self.ThemeManager:AddCallback(function()
+			self:_UpdateSidebarSubItemStyles(tabId)
+		end)
+	end
 
-	-- Se for o primeiro item, deixa o toggle aparecer e começa fechado.
+	-- Se for o primeiro item, deixa o toggle aparecer.
 	if tabRec.Toggle then
 		tabRec.Toggle.Visible = true
 	end
@@ -892,7 +896,7 @@ function Hub:CreateTabButton(id, localeKey, iconKey)
 		Size = UDim2.new(0, 20, 0, 20),
 		Position = UDim2.new(1, -26, 0.5, -10),
 		AutoButtonColor = false,
-		Visible = true,
+		Visible = false,
 		Parent = btn,
 	})
 
@@ -908,6 +912,7 @@ function Hub:CreateTabButton(id, localeKey, iconKey)
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
 		Visible = false,
+		ClipsDescendants = true,
 		Parent = container,
 	})
 	local childrenLayout = InstanceUtil.Create("UIListLayout", {
@@ -974,6 +979,7 @@ function Hub:CreateTabButton(id, localeKey, iconKey)
 		ChildrenHolder = childrenHolder,
 		Expanded = false,
 		SubItems = {},
+		_SidebarThemeHooked = false,
 	}
 end
 
